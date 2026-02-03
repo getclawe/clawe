@@ -1,6 +1,13 @@
-FROM node:22-alpine
+FROM node:22-slim
 
-RUN apk add --no-cache wget ca-certificates
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    ca-certificates \
+    git \
+    cmake \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g openclaw@latest
 

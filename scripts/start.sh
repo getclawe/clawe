@@ -21,9 +21,6 @@ if [ ! -f .env ]; then
     fi
 
     echo "==> Generated OPENCLAW_TOKEN: ${TOKEN:0:8}..."
-    echo ""
-    echo "NOTE: You still need to set NEXT_PUBLIC_CONVEX_URL in .env"
-    echo ""
 fi
 
 echo "==> Starting Clawe (production mode)..."

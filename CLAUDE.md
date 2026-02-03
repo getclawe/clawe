@@ -52,9 +52,12 @@ Core models: `agents`, `tasks`, `messages` (see `convex/schema.ts`)
 
 ## Environment Variables
 
-- `NEXT_PUBLIC_CONVEX_URL`: Convex deployment URL (required for web)
+- `OPENCLAW_TOKEN`: Authentication token for OpenClaw (required)
+- `OPENCLAW_URL`: OpenClaw gateway URL (set in `.env.development` / `.env.production`)
 - `NODE_ENV`: local (`development`) vs deployed (`production`) — controls dev tooling
 - `ENVIRONMENT`: deployment target (`dev` / `prod`) — controls feature flags
+
+Note: Convex URL is configured at runtime via the `/setup/convex` onboarding page.
 
 ## Code Style
 
@@ -150,6 +153,6 @@ pnpm test:coverage  # Coverage report
 
 ## Design
 
-- Accent: `yellow-600` (light), `amber-400` (dark)
+- Accent: `pink-600` (light), `pink-400` (dark)
 - Clean, minimal, dashboard aesthetic for agent monitoring
 - Mobile-first responsive

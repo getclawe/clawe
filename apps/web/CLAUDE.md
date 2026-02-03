@@ -69,7 +69,10 @@ import type { Agent, Task, Message } from "@clawe/shared";
 
 **Environment variables:**
 
-- `NEXT_PUBLIC_CONVEX_URL` → Convex deployment URL
+- `OPENCLAW_URL` → OpenClaw gateway URL
+- `OPENCLAW_TOKEN` → OpenClaw authentication token (from root `.env`)
+
+Note: Convex URL is configured at runtime via `/setup/convex`.
 
 ## Adding Routes
 
@@ -92,6 +95,7 @@ import type { Agent, Task, Message } from "@clawe/shared";
 - **Use hooks for side effects, not components** - never create components that return `null` just to run an effect; use a custom hook instead
 - **Convex data** - no manual cache invalidation needed, data syncs automatically
 - **React Query cache** - use `invalidateQueries` after mutations for API calls
+- **Use React Query + axios** - for API calls, use `useQuery`/`useMutation` with `axios`; place API functions in `lib/api/`
 - **Button loading states** - replace icon with `<Spinner />` from `@clawe/ui/components/spinner`, update text (e.g., "Creating..."), and disable
 - **Conditional classNames** - always use `cn()` for merging classes: `cn(baseStyles, { "conditional-class": condition })`
 - **Verify library APIs are current** - check official docs for deprecated/legacy patterns before implementing
@@ -152,8 +156,8 @@ import type { Agent, Task, Message } from "@clawe/shared";
 ## Active Nav Styling
 
 ```
-Light: text-yellow-600, hover bg-yellow-600/5
-Dark:  text-amber-400, hover bg-amber-400/5
+Light: text-pink-600, hover bg-pink-600/5
+Dark:  text-pink-400, hover bg-pink-400/5
 ```
 
 ## Testing

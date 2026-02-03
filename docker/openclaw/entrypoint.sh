@@ -19,7 +19,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
         --mode local \
         --auth-choice skip \
         --gateway-port "$PORT" \
-        --gateway-bind loopback \
+        --gateway-bind lan \
         --gateway-auth token \
         --gateway-token "$TOKEN" \
         --workspace /data/workspace \

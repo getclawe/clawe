@@ -39,24 +39,16 @@ export async function saveTelegramBotToken(botToken: string) {
 
 export async function saveAnthropicApiKey(apiKey: string) {
   return patchConfig({
-    models: {
-      providers: {
-        anthropic: {
-          apiKey,
-        },
-      },
+    env: {
+      ANTHROPIC_API_KEY: apiKey,
     },
   });
 }
 
 export async function saveOpenAIApiKey(apiKey: string) {
   return patchConfig({
-    models: {
-      providers: {
-        openai: {
-          apiKey,
-        },
-      },
+    env: {
+      OPENAI_API_KEY: apiKey,
     },
   });
 }

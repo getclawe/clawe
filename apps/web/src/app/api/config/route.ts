@@ -3,14 +3,27 @@ import { z } from "zod";
 import { readConfig, writeConfig } from "@/lib/config/server";
 import type { ConfigResponse } from "@/lib/config/types";
 
+const isDev = process.env.ENVIRONMENT === "dev";
+
+const isValidConvexUrl = (hostname: string): boolean => {
+  // Allow Convex cloud URLs
+  if (hostname.endsWith(".convex.cloud")) return true;
+  // Allow local development URLs only in dev environment
+  if (isDev && (hostname === "localhost" || hostname === "127.0.0.1"))
+    return true;
+  return false;
+};
+
 const configSchema = z.object({
   convexUrl: z.string().superRefine((val, ctx) => {
     try {
       const url = new URL(val);
-      if (!url.hostname.endsWith(".convex.cloud")) {
+      if (!isValidConvexUrl(url.hostname)) {
         ctx.addIssue({
           code: "custom",
-          message: "Must be a .convex.cloud URL",
+          message: isDev
+            ? "Must be a Convex URL (.convex.cloud or localhost)"
+            : "Must be a .convex.cloud URL",
         });
       }
     } catch {

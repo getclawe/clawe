@@ -14,7 +14,7 @@ import {
 import { cn } from "@clawe/ui/lib/utils";
 
 export const sidebarMenuButtonActiveStyles =
-  "font-normal data-[active=true]:bg-transparent data-[active=true]:font-normal data-[active=true]:text-yellow-600 data-[active=true]:hover:bg-yellow-600/5 dark:data-[active=true]:bg-transparent dark:data-[active=true]:text-yellow-400 dark:data-[active=true]:hover:bg-yellow-400/5";
+  "font-normal data-[active=true]:bg-transparent data-[active=true]:font-normal data-[active=true]:text-pink-600 data-[active=true]:hover:bg-pink-600/5 dark:data-[active=true]:bg-transparent dark:data-[active=true]:text-pink-400 dark:data-[active=true]:hover:bg-pink-400/5";
 
 export interface NavItem {
   title: string;
