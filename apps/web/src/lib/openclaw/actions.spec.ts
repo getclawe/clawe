@@ -38,12 +38,8 @@ describe("OpenClaw Actions", () => {
       await saveAnthropicApiKey("sk-ant-test-key");
 
       expect(patchConfig).toHaveBeenCalledWith({
-        models: {
-          providers: {
-            anthropic: {
-              apiKey: "sk-ant-test-key",
-            },
-          },
+        env: {
+          ANTHROPIC_API_KEY: "sk-ant-test-key",
         },
       });
     });
@@ -59,12 +55,8 @@ describe("OpenClaw Actions", () => {
       await saveOpenAIApiKey("sk-test-key");
 
       expect(patchConfig).toHaveBeenCalledWith({
-        models: {
-          providers: {
-            openai: {
-              apiKey: "sk-test-key",
-            },
-          },
+        env: {
+          OPENAI_API_KEY: "sk-test-key",
         },
       });
     });
@@ -121,7 +113,7 @@ describe("OpenClaw Actions", () => {
     it("returns health status", async () => {
       vi.mocked(checkHealth).mockResolvedValueOnce({
         ok: true,
-        result: { status: "ok", channels: { telegram: { connected: true } } },
+        result: { config: { channels: {} }, hash: "abc123" },
       });
 
       const result = await checkOpenClawHealth();

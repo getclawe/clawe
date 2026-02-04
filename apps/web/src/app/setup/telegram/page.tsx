@@ -70,118 +70,125 @@ export default function TelegramPage() {
   // Success state
   if (mutation.isSuccess) {
     return (
-      <div className="flex flex-col">
-        {/* Progress indicator */}
-        <div className="mb-12">
-          <Progress
-            value={(CURRENT_STEP / TOTAL_STEPS) * 100}
-            className="h-1 w-64"
-            indicatorClassName="bg-brand"
-          />
+      <div className="flex flex-1 flex-col">
+        {/* Content - constrained width */}
+        <div className="max-w-xl flex-1">
+          {/* Progress indicator */}
+          <div className="mb-8 sm:mb-12">
+            <Progress
+              value={(CURRENT_STEP / TOTAL_STEPS) * 100}
+              className="h-1 w-full max-w-sm"
+              indicatorClassName="bg-brand"
+            />
+          </div>
+
+          {/* Success content */}
+          <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+            <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+          </div>
+
+          <h1 className="mb-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+            Telegram Connected
+          </h1>
+          <p className="text-muted-foreground">
+            Your bot <span className="font-medium">@{botUsername}</span> is
+            ready to receive messages.
+          </p>
         </div>
 
-        {/* Success content */}
-        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-          <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+        {/* CTA - full width on mobile, right-aligned on larger screens */}
+        <div className="flex justify-center pt-6 sm:justify-end sm:pt-8">
+          <Button
+            variant="brand"
+            className="w-full sm:w-auto"
+            onClick={handleContinue}
+          >
+            Continue
+          </Button>
         </div>
-
-        <h1 className="mb-3 text-3xl font-semibold tracking-tight">
-          Telegram Connected
-        </h1>
-        <p className="text-muted-foreground mb-8">
-          Your bot <span className="font-medium">@{botUsername}</span> is ready
-          to receive messages.
-        </p>
-
-        <Button
-          size="lg"
-          variant="brand"
-          className="w-full sm:w-auto"
-          onClick={handleContinue}
-        >
-          Continue
-        </Button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col">
-      {/* Progress indicator */}
-      <div className="mb-12">
-        <Progress
-          value={(CURRENT_STEP / TOTAL_STEPS) * 100}
-          className="h-1 w-64"
-          indicatorClassName="bg-brand"
-        />
+    <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+      {/* Content - constrained width */}
+      <div className="max-w-xl flex-1">
+        {/* Progress indicator */}
+        <div className="mb-8 sm:mb-12">
+          <Progress
+            value={(CURRENT_STEP / TOTAL_STEPS) * 100}
+            className="h-1 w-full max-w-sm"
+            indicatorClassName="bg-brand"
+          />
+        </div>
+
+        {/* Header */}
+        <h1 className="mb-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+          Connect Telegram
+        </h1>
+        <p className="text-muted-foreground mb-8">
+          Enter your Telegram bot token to start receiving messages.
+        </p>
+
+        {/* Form fields */}
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="bot-token">Bot Token</Label>
+            <Input
+              id="bot-token"
+              type="password"
+              placeholder="123456789:ABCDefGHijKLmnOPqrSTuvWxyZ"
+              value={botToken}
+              onChange={(e) => setBotToken(e.target.value)}
+            />
+            <p className="text-muted-foreground text-sm">
+              Get your token from{" "}
+              <a
+                href="https://t.me/BotFather"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                @BotFather
+              </a>{" "}
+              on Telegram
+            </p>
+          </div>
+
+          {mutation.error && (
+            <p className="text-destructive text-sm">{mutation.error.message}</p>
+          )}
+        </div>
       </div>
 
-      {/* Header */}
-      <h1 className="mb-3 text-3xl font-semibold tracking-tight">
-        Connect Telegram
-      </h1>
-      <p className="text-muted-foreground mb-8">
-        Enter your Telegram bot token to start receiving messages.
-      </p>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="bot-token">Bot Token</Label>
-          <Input
-            id="bot-token"
-            type="password"
-            placeholder="123456789:ABCDefGHijKLmnOPqrSTuvWxyZ"
-            value={botToken}
-            onChange={(e) => setBotToken(e.target.value)}
-          />
-          <p className="text-muted-foreground text-sm">
-            Get your token from{" "}
-            <a
-              href="https://t.me/BotFather"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-            >
-              @BotFather
-            </a>{" "}
-            on Telegram
-          </p>
-        </div>
-
-        {mutation.error && (
-          <p className="text-destructive text-sm">{mutation.error.message}</p>
-        )}
-
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Button
-            type="submit"
-            size="lg"
-            variant="brand"
-            className="w-full sm:w-auto"
-            disabled={!botToken || mutation.isPending}
-          >
-            {mutation.isPending ? (
-              <>
-                <Spinner />
-                Connecting...
-              </>
-            ) : (
-              "Connect"
-            )}
-          </Button>
-          <Button
-            type="button"
-            size="lg"
-            variant="ghost"
-            className="w-full sm:w-auto"
-            onClick={handleSkip}
-            disabled={mutation.isPending}
-          >
-            Skip for now
-          </Button>
-        </div>
-      </form>
-    </div>
+      {/* CTA - stacked on mobile, row right-aligned on larger screens */}
+      <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end sm:pt-8">
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full sm:w-auto"
+          onClick={handleSkip}
+          disabled={mutation.isPending}
+        >
+          Skip for now
+        </Button>
+        <Button
+          type="submit"
+          variant="brand"
+          className="w-full sm:w-auto"
+          disabled={!botToken || mutation.isPending}
+        >
+          {mutation.isPending ? (
+            <>
+              <Spinner />
+              Connecting...
+            </>
+          ) : (
+            "Connect"
+          )}
+        </Button>
+      </div>
+    </form>
   );
 }

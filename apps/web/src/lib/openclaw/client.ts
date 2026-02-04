@@ -1,3 +1,4 @@
+import axios from "axios";
 import type {
   ToolResult,
   ConfigGetResult,
@@ -10,42 +11,58 @@ import type {
 const OPENCLAW_URL = process.env.OPENCLAW_URL || "http://localhost:18789";
 const OPENCLAW_TOKEN = process.env.OPENCLAW_TOKEN || "";
 
+const openclawClient = axios.create({
+  baseURL: OPENCLAW_URL,
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${OPENCLAW_TOKEN}`,
+  },
+});
+
 async function invokeTool<T>(
   tool: string,
   action?: string,
   args?: Record<string, unknown>,
 ): Promise<ToolResult<T>> {
-  const response = await fetch(`${OPENCLAW_URL}/tools/invoke`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${OPENCLAW_TOKEN}`,
-    },
-    body: JSON.stringify({ tool, action, args }),
-  });
-
-  if (!response.ok) {
+  try {
+    const { data } = await openclawClient.post("/tools/invoke", {
+      tool,
+      action,
+      args,
+    });
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        ok: false,
+        error: {
+          type: "http_error",
+          message: `HTTP ${error.response.status}: ${error.response.statusText}`,
+        },
+      };
+    }
     return {
       ok: false,
       error: {
-        type: "http_error",
-        message: `HTTP ${response.status}: ${response.statusText}`,
+        type: "network_error",
+        message: "Network error",
       },
     };
   }
-
-  return response.json();
 }
 
-// Health check
+// Health check - uses /tools/invoke with gateway config.get to verify connectivity
 export async function checkHealth(): Promise<ToolResult<GatewayHealthResult>> {
   try {
-    const response = await fetch(`${OPENCLAW_URL}/health`, {
-      headers: { Authorization: `Bearer ${OPENCLAW_TOKEN}` },
+    const { data } = await openclawClient.post("/tools/invoke", {
+      tool: "gateway",
+      action: "config.get",
     });
-    if (response.ok) {
-      return { ok: true, result: await response.json() };
+
+    if (data.ok) {
+      return { ok: true, result: data.result };
     }
+
     return {
       ok: false,
       error: { type: "unhealthy", message: "Gateway unhealthy" },
@@ -78,10 +95,9 @@ export async function probeTelegramToken(
   botToken: string,
 ): Promise<TelegramProbeResult> {
   try {
-    const response = await fetch(
+    const { data } = await axios.get(
       `https://api.telegram.org/bot${botToken}/getMe`,
     );
-    const data = await response.json();
 
     if (data.ok && data.result) {
       return {

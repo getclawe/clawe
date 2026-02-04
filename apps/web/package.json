@@ -5,14 +5,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3000",
-    "debug": "next dev --port 3000",
+    "debug": "next dev --inspect --port 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint --max-warnings 0",
     "lint:fix": "eslint --fix --max-warnings 0",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,css,json}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,md,css,json}\"",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@clawe/backend": "workspace:*",

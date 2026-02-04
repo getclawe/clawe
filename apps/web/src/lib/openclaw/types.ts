@@ -29,8 +29,9 @@ export type ChannelStatus = {
 };
 
 export type GatewayHealthResult = {
-  status: "ok" | "degraded" | "error";
-  channels: Record<string, ChannelStatus>;
+  /** Config data returned from gateway config.get - indicates gateway is responsive */
+  config?: Record<string, unknown>;
+  hash?: string;
 };
 
 export type TelegramProbeResult = {

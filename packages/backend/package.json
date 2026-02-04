@@ -15,6 +15,7 @@
   },
   "scripts": {
     "dev": "convex dev",
+    "debug": "convex dev",
     "deploy": "convex deploy",
     "check-types": "tsc --noEmit"
   },

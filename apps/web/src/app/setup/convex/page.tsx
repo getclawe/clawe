@@ -35,55 +35,60 @@ export default function ConvexSetupPage() {
     (mutation.data && !mutation.data.ok ? mutation.data.error : null);
 
   return (
-    <div className="flex flex-col">
-      {/* Progress indicator */}
-      <div className="mb-12">
-        <Progress
-          value={(CURRENT_STEP / TOTAL_STEPS) * 100}
-          className="h-1 w-64"
-          indicatorClassName="bg-brand"
-        />
-      </div>
-
-      {/* Header */}
-      <h1 className="mb-3 text-3xl font-semibold tracking-tight">
-        Connect to Convex
-      </h1>
-      <p className="text-muted-foreground mb-8">
-        Enter your Convex deployment URL to store your data.
-      </p>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="convex-url">Deployment URL</Label>
-          <Input
-            id="convex-url"
-            type="url"
-            placeholder="https://your-project.convex.cloud"
-            value={convexUrl}
-            onChange={(e) => setConvexUrl(e.target.value)}
-            required
+    <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+      {/* Content - constrained width */}
+      <div className="max-w-xl flex-1">
+        {/* Progress indicator */}
+        <div className="mb-8 sm:mb-12">
+          <Progress
+            value={(CURRENT_STEP / TOTAL_STEPS) * 100}
+            className="h-1 w-full max-w-sm"
+            indicatorClassName="bg-brand"
           />
-          <p className="text-muted-foreground text-sm">
-            Find this in your{" "}
-            <a
-              href="https://dashboard.convex.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-            >
-              Convex dashboard
-            </a>{" "}
-            under Settings → URL & Deploy Key
-          </p>
         </div>
 
-        {error && <p className="text-destructive text-sm">{error}</p>}
+        {/* Header */}
+        <h1 className="mb-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+          Connect to Convex
+        </h1>
+        <p className="text-muted-foreground mb-6 sm:mb-8">
+          Enter your Convex deployment URL to store your data.
+        </p>
 
+        {/* Form fields */}
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="convex-url">Deployment URL</Label>
+            <Input
+              id="convex-url"
+              type="url"
+              placeholder="https://your-project.convex.cloud"
+              value={convexUrl}
+              onChange={(e) => setConvexUrl(e.target.value)}
+              required
+            />
+            <p className="text-muted-foreground text-sm">
+              Find this in your{" "}
+              <a
+                href="https://dashboard.convex.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Convex dashboard
+              </a>{" "}
+              under Settings → URL & Deploy Key
+            </p>
+          </div>
+
+          {error && <p className="text-destructive text-sm">{error}</p>}
+        </div>
+      </div>
+
+      {/* CTA - full width on mobile, right-aligned on larger screens */}
+      <div className="flex justify-center pt-6 sm:justify-end sm:pt-8">
         <Button
           type="submit"
-          size="lg"
           variant="brand"
           className="w-full sm:w-auto"
           disabled={!convexUrl || mutation.isPending}
@@ -97,7 +102,7 @@ export default function ConvexSetupPage() {
             "Continue"
           )}
         </Button>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }
