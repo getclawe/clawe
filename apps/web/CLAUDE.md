@@ -75,10 +75,10 @@ Or infer from query results (preferred when using the data directly).
 
 **Environment variables:**
 
+- `NEXT_PUBLIC_CONVEX_URL` → Convex deployment URL (required)
+- `ANTHROPIC_API_KEY` → Anthropic API key (passed to OpenClaw container)
 - `OPENCLAW_URL` → OpenClaw gateway URL
 - `OPENCLAW_TOKEN` → OpenClaw authentication token (from root `.env`)
-
-Note: Convex URL is configured at runtime via `/setup/convex`.
 
 ## Adding Routes
 

@@ -3,7 +3,6 @@
 import {
   checkHealth,
   getConfig,
-  patchConfig,
   saveTelegramBotToken as saveTelegramBotTokenClient,
   probeTelegramToken,
 } from "./client";
@@ -33,22 +32,6 @@ export async function saveTelegramBotToken(botToken: string) {
     };
   }
   return saveTelegramBotTokenClient(botToken);
-}
-
-export async function saveAnthropicApiKey(apiKey: string) {
-  return patchConfig({
-    env: {
-      ANTHROPIC_API_KEY: apiKey,
-    },
-  });
-}
-
-export async function saveOpenAIApiKey(apiKey: string) {
-  return patchConfig({
-    env: {
-      OPENAI_API_KEY: apiKey,
-    },
-  });
 }
 
 export async function approvePairingCode(

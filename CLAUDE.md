@@ -53,12 +53,12 @@ Core models: `agents`, `tasks`, `messages` (see `packages/backend/convex/schema.
 
 ## Environment Variables
 
+- `NEXT_PUBLIC_CONVEX_URL`: Convex deployment URL (required)
+- `ANTHROPIC_API_KEY`: Anthropic API key for AI operations (required, passed to OpenClaw)
 - `OPENCLAW_TOKEN`: Authentication token for OpenClaw (required)
 - `OPENCLAW_URL`: OpenClaw gateway URL (set in `.env.development` / `.env.production`)
 - `NODE_ENV`: local (`development`) vs deployed (`production`) — controls dev tooling
 - `ENVIRONMENT`: deployment target (`dev` / `prod`) — controls feature flags
-
-Note: Convex URL is configured at runtime via the `/setup/convex` onboarding page.
 
 ## Code Style
 

@@ -4,20 +4,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("./client", () => ({
   checkHealth: vi.fn(),
   getConfig: vi.fn(),
-  patchConfig: vi.fn(),
   saveTelegramBotToken: vi.fn(),
   probeTelegramToken: vi.fn(),
 }));
 
 import {
-  saveAnthropicApiKey,
-  saveOpenAIApiKey,
   saveTelegramBotToken,
   validateTelegramToken,
   checkOpenClawHealth,
 } from "./actions";
 import {
-  patchConfig,
   checkHealth,
   saveTelegramBotToken as saveTelegramBotTokenClient,
   probeTelegramToken,
@@ -26,40 +22,6 @@ import {
 describe("OpenClaw Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe("saveAnthropicApiKey", () => {
-    it("patches config with Anthropic API key", async () => {
-      vi.mocked(patchConfig).mockResolvedValueOnce({
-        ok: true,
-        result: { success: true, hash: "abc" },
-      });
-
-      await saveAnthropicApiKey("sk-ant-test-key");
-
-      expect(patchConfig).toHaveBeenCalledWith({
-        env: {
-          ANTHROPIC_API_KEY: "sk-ant-test-key",
-        },
-      });
-    });
-  });
-
-  describe("saveOpenAIApiKey", () => {
-    it("patches config with OpenAI API key", async () => {
-      vi.mocked(patchConfig).mockResolvedValueOnce({
-        ok: true,
-        result: { success: true, hash: "abc" },
-      });
-
-      await saveOpenAIApiKey("sk-test-key");
-
-      expect(patchConfig).toHaveBeenCalledWith({
-        env: {
-          OPENAI_API_KEY: "sk-test-key",
-        },
-      });
-    });
   });
 
   describe("validateTelegramToken", () => {

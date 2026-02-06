@@ -23,11 +23,6 @@ const statusConfig = {
     dot: "bg-red-500",
     ping: "bg-red-400",
   },
-  fixing: {
-    label: "Connecting",
-    dot: "bg-yellow-500",
-    ping: "bg-yellow-400",
-  },
   idle: {
     label: "Idle",
     dot: "bg-gray-400",
@@ -48,7 +43,7 @@ export const AgencyStatus = ({ className }: AgencyStatusProps) => {
       ? "Agent service is online and ready"
       : "Unable to connect to agent service";
 
-  const shouldAnimate = isLoading || status === "active" || status === "fixing";
+  const shouldAnimate = isLoading || status === "active";
 
   return (
     <Tooltip>
@@ -56,7 +51,7 @@ export const AgencyStatus = ({ className }: AgencyStatusProps) => {
         <div
           className={cn(
             "flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 dark:border-zinc-700 dark:bg-zinc-800/50",
-            className
+            className,
           )}
         >
           <div className="relative flex items-center">
@@ -64,14 +59,14 @@ export const AgencyStatus = ({ className }: AgencyStatusProps) => {
               <span
                 className={cn(
                   "absolute inline-flex h-2 w-2 animate-ping rounded-full opacity-75",
-                  config.ping
+                  config.ping,
                 )}
               />
             )}
             <span
               className={cn(
                 "relative inline-flex h-2 w-2 rounded-full",
-                config.dot
+                config.dot,
               )}
             />
           </div>

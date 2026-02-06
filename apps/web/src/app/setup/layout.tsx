@@ -1,33 +1,27 @@
 "use client";
 
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AgencyStatus } from "@/components/agency-status";
 import { useRedirectIfOnboarded } from "@/hooks/use-onboarding-guard";
 import { SetupUserMenu } from "./_components/setup-user-menu";
 
-// Wrapper that only calls the hook when Convex is available
+// Redirects to /board if onboarding is already complete
 const OnboardingGuard = () => {
   useRedirectIfOnboarded();
   return null;
 };
 
 export default function SetupLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-
-  // /setup/convex doesn't have ConvexProvider, so skip the guard there
-  const hasConvex = pathname !== "/setup/convex";
-
   return (
     <div className="relative flex min-h-svh">
-      {/* Guard - only active when Convex is available */}
-      {hasConvex && <OnboardingGuard />}
+      {/* Guard - redirects if already onboarded */}
+      <OnboardingGuard />
 
       {/* User menu and status - top right (on illustration side) */}
       <div className="absolute top-4 right-4 z-10 hidden items-center gap-3 lg:flex">
-        <AgencyStatus size="sm" />
+        <AgencyStatus />
         <SetupUserMenu />
       </div>
 
@@ -38,7 +32,7 @@ export default function SetupLayout({ children }: { children: ReactNode }) {
           <span className="text-xl font-semibold">Clawe</span>
           {/* User menu and status on mobile */}
           <div className="flex items-center gap-3 lg:hidden">
-            <AgencyStatus size="sm" />
+            <AgencyStatus />
             <SetupUserMenu />
           </div>
         </div>

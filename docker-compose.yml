@@ -7,11 +7,9 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL}
       - OPENCLAW_URL=http://openclaw:18789
       - OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
-      - CLAWE_DATA_DIR=/data/clawe
-    volumes:
-      - clawe-data:/data/clawe
     depends_on:
       openclaw:
         condition: service_healthy
@@ -24,6 +22,8 @@ services:
     environment:
       - OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
       - OPENCLAW_PORT=18789
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
     volumes:
       - openclaw-data:/data
     healthcheck:
@@ -34,7 +34,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  clawe-data:
-    driver: local
   openclaw-data:
     driver: local
