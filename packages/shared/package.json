@@ -5,11 +5,12 @@
   "type": "module",
   "exports": {
     "./openclaw": {
-      "types": "./src/openclaw/index.ts",
-      "default": "./src/openclaw/index.ts"
+      "types": "./dist/openclaw/index.d.ts",
+      "default": "./dist/openclaw/index.js"
     }
   },
   "scripts": {
+    "build": "tsc",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix --max-warnings 0",
     "check-types": "tsc --noEmit",

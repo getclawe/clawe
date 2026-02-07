@@ -19,10 +19,23 @@ COPY docker/openclaw/templates/ /opt/clawe/templates/
 COPY docker/openclaw/scripts/ /opt/clawe/scripts/
 RUN chmod +x /opt/clawe/scripts/*.sh
 
-# Copy and install CLI (pre-built)
-COPY packages/cli/ /opt/clawe/cli/
+# Setup CLI directory
+RUN mkdir -p /opt/clawe/cli/node_modules/@clawe/backend/convex
+
+# Copy CLI (pre-built with pnpm build)
+COPY packages/cli/package.json /opt/clawe/cli/package.json
+COPY packages/cli/bin/ /opt/clawe/cli/bin/
+COPY packages/cli/dist/ /opt/clawe/cli/dist/
+
+# Copy backend types for CLI
+COPY packages/backend/package.json /opt/clawe/cli/node_modules/@clawe/backend/package.json
 COPY packages/backend/convex/_generated/ /opt/clawe/cli/node_modules/@clawe/backend/convex/_generated/
-RUN cd /opt/clawe/cli && npm install --omit=dev 2>/dev/null || true
+COPY packages/backend/convex/*.ts /opt/clawe/cli/node_modules/@clawe/backend/convex/
+
+# Install CLI dependencies (only convex)
+RUN cd /opt/clawe/cli && npm install convex --omit=dev
+
+# Make CLI available globally
 RUN ln -sf /opt/clawe/cli/bin/clawe.js /usr/local/bin/clawe
 RUN chmod +x /opt/clawe/cli/bin/clawe.js
 

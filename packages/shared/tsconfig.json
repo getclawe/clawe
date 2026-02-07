@@ -3,8 +3,11 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "noEmit": true
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }
