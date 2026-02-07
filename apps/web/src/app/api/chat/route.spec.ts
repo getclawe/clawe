@@ -3,13 +3,14 @@ import { NextRequest } from "next/server";
 import { POST } from "./route";
 
 // Mock the gateway client
-vi.mock("@/lib/openclaw/gateway-client", () => ({
+vi.mock("@clawe/shared/openclaw", () => ({
   createGatewayClient: vi.fn(() => ({
     connect: vi.fn().mockResolvedValue({ type: "hello-ok", protocol: 3 }),
     request: vi.fn().mockResolvedValue({}),
     close: vi.fn(),
     isConnected: vi.fn().mockReturnValue(true),
   })),
+  GatewayClient: vi.fn(),
 }));
 
 describe("POST /api/chat", () => {

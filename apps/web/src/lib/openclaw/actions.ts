@@ -5,8 +5,8 @@ import {
   getConfig,
   saveTelegramBotToken as saveTelegramBotTokenClient,
   probeTelegramToken,
-} from "./client";
-import { approveChannelPairingCode } from "./pairing";
+} from "@clawe/shared/openclaw";
+import { approveChannelPairingCode } from "@clawe/shared/openclaw";
 
 export async function checkOpenClawHealth() {
   return checkHealth();

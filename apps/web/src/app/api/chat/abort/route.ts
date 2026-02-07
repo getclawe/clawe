@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createGatewayClient } from "@/lib/openclaw/gateway-client";
+import { createGatewayClient } from "@clawe/shared/openclaw";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

@@ -26,6 +26,9 @@ importers:
       '@clawe/backend':
         specifier: workspace:*
         version: link:../../packages/backend
+      '@clawe/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@clawe/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -193,6 +196,37 @@ importers:
       typescript-eslint:
         specifier: ^8.50.0
         version: 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
+
+  packages/shared:
+    dependencies:
+      axios:
+        specifier: ^1.13.4
+        version: 1.13.4
+      ws:
+        specifier: ^8.19.0
+        version: 8.19.0
+    devDependencies:
+      '@clawe/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@clawe/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.1(jiti@2.6.1)
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@22.15.3)(jiti@2.6.1)(jsdom@28.0.0)(lightningcss@1.30.2)
 
   packages/typescript-config: {}
 
@@ -2253,6 +2287,7 @@ packages:
   acorn@8.15.0:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
     engines: {node: '>=0.4.0'}
+    hasBin: true
 
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
@@ -4020,6 +4055,7 @@ packages:
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
+    hasBin: true
 
   why-is-node-running@2.3.0:
     resolution: {integrity: sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==}

@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@clawe/backend": "workspace:*",
+    "@clawe/shared": "workspace:*",
     "@clawe/ui": "workspace:*",
     "@tanstack/react-query": "^5.75.5",
     "@tiptap/core": "^3.15.3",

@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock the client module
-vi.mock("./client", () => ({
+// Mock the shared package
+vi.mock("@clawe/shared/openclaw", () => ({
   checkHealth: vi.fn(),
   getConfig: vi.fn(),
   saveTelegramBotToken: vi.fn(),
   probeTelegramToken: vi.fn(),
+  approveChannelPairingCode: vi.fn(),
 }));
 
 import {
@@ -17,7 +18,7 @@ import {
   checkHealth,
   saveTelegramBotToken as saveTelegramBotTokenClient,
   probeTelegramToken,
-} from "./client";
+} from "@clawe/shared/openclaw";
 
 describe("OpenClaw Actions", () => {
   beforeEach(() => {

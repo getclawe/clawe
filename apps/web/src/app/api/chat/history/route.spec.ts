@@ -7,7 +7,7 @@ const mockRequest = vi.fn();
 const mockConnect = vi.fn();
 const mockClose = vi.fn();
 
-vi.mock("@/lib/openclaw/gateway-client", () => ({
+vi.mock("@clawe/shared/openclaw", () => ({
   createGatewayClient: vi.fn(() => ({
     connect: mockConnect,
     request: mockRequest,

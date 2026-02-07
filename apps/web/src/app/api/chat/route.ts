@@ -1,13 +1,10 @@
 import { NextRequest } from "next/server";
-import {
-  GatewayClient,
-  createGatewayClient,
-} from "@/lib/openclaw/gateway-client";
+import { GatewayClient, createGatewayClient } from "@clawe/shared/openclaw";
 import type {
   ChatEvent,
   ChatSendParams,
   ChatAttachment,
-} from "@/lib/openclaw/gateway-types";
+} from "@clawe/shared/openclaw";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

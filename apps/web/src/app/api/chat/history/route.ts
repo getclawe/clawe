@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createGatewayClient } from "@/lib/openclaw/gateway-client";
-import type { ChatHistoryResponse } from "@/lib/openclaw/gateway-types";
+import { createGatewayClient } from "@clawe/shared/openclaw";
+import type { ChatHistoryResponse } from "@clawe/shared/openclaw";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
