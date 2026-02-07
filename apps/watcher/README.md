@@ -1,12 +1,16 @@
 # @clawe/watcher
 
-Notification watcher for Clawe multi-agent coordination.
+Coordination watcher for Clawe multi-agent system.
 
 ## What It Does
 
-The watcher continuously polls Convex for undelivered notifications and delivers them to agent sessions via OpenClaw's `sessions_send` API.
+1. **On startup:** Registers all agents in Convex (upsert)
+2. **On startup:** Ensures heartbeat crons are configured for all agents
+3. **Continuously:** Polls Convex for undelivered notifications and delivers them
 
-This enables near-instant notification delivery without agents having to wait for their heartbeat.
+This enables:
+- Automatic agent heartbeat scheduling (no manual cron setup needed)
+- Near-instant notification delivery without waiting for heartbeats
 
 ## Environment Variables
 
@@ -19,7 +23,7 @@ This enables near-instant notification delivery without agents having to wait fo
 ## Running
 
 ```bash
-# Development (with hot reload)
+# Development
 pnpm dev
 
 # Production
@@ -27,31 +31,38 @@ pnpm build
 pnpm start
 ```
 
-## How It Works
+## Agent Heartbeats
 
-1. Every 2 seconds, the watcher:
-   - Fetches all registered agents from Convex
-   - For each agent, queries for undelivered notifications
-   - Attempts to deliver each notification via `sessions_send`
-   - If successful, marks the notification as delivered
+The watcher configures these heartbeat schedules on startup:
 
-2. If an agent is "asleep" (between heartbeats), the delivery fails gracefully and the notification remains queued for the next attempt.
+| Agent | Schedule | Description |
+|-------|----------|-------------|
+| Clawe 🦞 | `0 * * * *` | Every hour at :00 |
+| Inky ✍️ | `3,18,33,48 * * * *` | Every 15 min |
+| Pixel 🎨 | `7,22,37,52 * * * *` | Every 15 min |
+| Scout 🔍 | `11,26,41,56 * * * *` | Every 15 min |
+
+Schedules are staggered to avoid rate limits.
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    WATCHER                                │
+│                    WATCHER                               │
 │                                                          │
-│   ┌─────────────┐        ┌─────────────────────────┐   │
-│   │ Poll Loop   │───────>│ convex.query(           │   │
-│   │ (every 2s)  │        │   notifications.        │   │
-│   └──────┬──────┘        │   getUndelivered)       │   │
-│          │               └─────────────────────────┘   │
-│          │                                              │
-│          │               ┌─────────────────────────┐   │
-│          └──────────────>│ openclaw.sessionsSend() │   │
-│                          └─────────────────────────┘   │
+│   ┌─────────────┐                                        │
+│   │ On Startup  │──> Check/create heartbeat crons        │
+│   └─────────────┘    via OpenClaw cron API               │
+│                                                          │
+│   ┌─────────────┐        ┌─────────────────────────┐    │
+│   │ Poll Loop   │───────>│ convex.query(           │    │
+│   │ (every 2s)  │        │   notifications.        │    │
+│   └──────┬──────┘        │   getUndelivered)       │    │
+│          │               └─────────────────────────┘    │
+│          │                                               │
+│          │               ┌─────────────────────────┐    │
+│          └──────────────>│ openclaw.sessionsSend() │    │
+│                          └─────────────────────────┘    │
 └─────────────────────────────────────────────────────────┘
             │                           │
             ▼                           ▼

@@ -166,3 +166,42 @@ export async function sessionsSend(
     timeoutSeconds: timeoutSeconds ?? 10,
   });
 }
+
+// Cron job types
+export interface CronJob {
+  id: string;
+  name: string;
+  agentId: string;
+  enabled: boolean;
+  schedule: { kind: string; expr: string };
+  sessionTarget: string;
+  payload: { kind: string; message: string; model?: string; timeoutSeconds?: number };
+}
+
+export interface CronListResult {
+  jobs: CronJob[];
+}
+
+export interface CronAddJob {
+  name: string;
+  agentId: string;
+  enabled?: boolean;
+  schedule: { kind: "cron"; expr: string };
+  sessionTarget: "isolated" | "main";
+  payload: {
+    kind: "agentTurn";
+    message: string;
+    model?: string;
+    timeoutSeconds?: number;
+  };
+}
+
+// Cron - List jobs
+export async function cronList(): Promise<ToolResult<CronListResult>> {
+  return invokeTool("cron", undefined, { action: "list" });
+}
+
+// Cron - Add job
+export async function cronAdd(job: CronAddJob): Promise<ToolResult<{ id: string }>> {
+  return invokeTool("cron", undefined, { action: "add", job });
+}

@@ -1,8 +1,8 @@
 /**
  * Clawe Notification Watcher
  *
- * Polls Convex for undelivered notifications and delivers them to agent sessions
- * via OpenClaw's sessions_send API.
+ * 1. On startup: ensures heartbeat crons are configured for all agents
+ * 2. Continuously: polls Convex for undelivered notifications and delivers them
  *
  * Environment variables:
  *   CONVEX_URL        - Convex deployment URL
@@ -12,13 +12,98 @@
 
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@clawe/backend";
-import { sessionsSend } from "@clawe/shared/openclaw";
+import { sessionsSend, cronList, cronAdd, type CronAddJob } from "@clawe/shared/openclaw";
 import { validateEnv, config, POLL_INTERVAL_MS } from "./config.js";
 
 // Validate environment on startup
 validateEnv();
 
 const convex = new ConvexHttpClient(config.convexUrl);
+
+// Agent configuration
+const AGENTS = [
+  { id: "main", name: "Clawe", emoji: "🦞", role: "Squad Lead", cron: "0 * * * *" },
+  { id: "inky", name: "Inky", emoji: "✍️", role: "Writer", cron: "3,18,33,48 * * * *" },
+  { id: "pixel", name: "Pixel", emoji: "🎨", role: "Designer", cron: "7,22,37,52 * * * *" },
+  { id: "scout", name: "Scout", emoji: "🔍", role: "SEO", cron: "11,26,41,56 * * * *" },
+];
+
+const HEARTBEAT_MESSAGE =
+  "Read HEARTBEAT.md and follow it strictly. Check for notifications with 'clawe check'. If nothing needs attention, reply HEARTBEAT_OK.";
+
+/**
+ * Register all agents in Convex (upsert - creates or updates)
+ */
+async function registerAgents(): Promise<void> {
+  console.log("[watcher] Registering agents in Convex...");
+
+  for (const agent of AGENTS) {
+    const sessionKey = `agent:${agent.id}:main`;
+
+    try {
+      await convex.mutation(api.agents.upsert, {
+        name: agent.name,
+        role: agent.role,
+        sessionKey,
+        emoji: agent.emoji,
+      });
+      console.log(`[watcher] ✓ ${agent.name} ${agent.emoji} registered (${sessionKey})`);
+    } catch (err) {
+      console.error(`[watcher] Failed to register ${agent.name}:`, err instanceof Error ? err.message : err);
+    }
+  }
+
+  console.log("[watcher] Agent registration complete.\n");
+}
+
+/**
+ * Setup heartbeat crons for all agents (if not already configured)
+ */
+async function setupCrons(): Promise<void> {
+  console.log("[watcher] Checking heartbeat crons...");
+
+  const result = await cronList();
+  if (!result.ok) {
+    console.error("[watcher] Failed to list crons:", result.error?.message);
+    return;
+  }
+
+  const existingNames = new Set(result.result.jobs.map((j) => j.name));
+
+  for (const agent of AGENTS) {
+    const cronName = `${agent.id}-heartbeat`;
+
+    if (existingNames.has(cronName)) {
+      console.log(`[watcher] ✓ ${agent.name} ${agent.emoji} heartbeat exists`);
+      continue;
+    }
+
+    console.log(`[watcher] Adding ${agent.name} ${agent.emoji} heartbeat...`);
+
+    const job: CronAddJob = {
+      name: cronName,
+      agentId: agent.id,
+      enabled: true,
+      schedule: { kind: "cron", expr: agent.cron },
+      sessionTarget: "isolated",
+      payload: {
+        kind: "agentTurn",
+        message: HEARTBEAT_MESSAGE,
+        model: "anthropic/claude-sonnet-4-20250514",
+        timeoutSeconds: 600,
+      },
+    };
+
+    const addResult = await cronAdd(job);
+    if (addResult.ok) {
+      console.log(`[watcher] ✓ ${agent.name} ${agent.emoji} heartbeat: ${agent.cron}`);
+    } else {
+      console.error(`[watcher] Failed to add ${cronName}:`, addResult.error?.message);
+    }
+  }
+
+  console.log("[watcher] Cron setup complete.\n");
+}
 
 /**
  * Format a notification for delivery to an agent
@@ -121,11 +206,18 @@ async function deliveryLoop(): Promise<void> {
  * Main entry point
  */
 async function main(): Promise<void> {
-  console.log("[watcher] 🦞 Clawe Notification Watcher starting...");
+  console.log("[watcher] 🦞 Clawe Watcher starting...");
   console.log(`[watcher] Convex: ${config.convexUrl}`);
   console.log(`[watcher] OpenClaw: ${config.openclawUrl}`);
-  console.log(`[watcher] Poll interval: ${POLL_INTERVAL_MS}ms`);
-  console.log("[watcher] Starting delivery loop...\n");
+  console.log(`[watcher] Poll interval: ${POLL_INTERVAL_MS}ms\n`);
+
+  // Register agents in Convex
+  await registerAgents();
+
+  // Setup crons on startup
+  await setupCrons();
+
+  console.log("[watcher] Starting notification delivery loop...\n");
 
   // Main loop
   while (true) {
