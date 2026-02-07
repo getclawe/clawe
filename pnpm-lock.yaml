@@ -45,6 +45,9 @@ importers:
       typescript:
         specifier: 5.9.2
         version: 5.9.2
+      vitest:
+        specifier: ^4.0.0
+        version: 4.0.18(@types/node@22.15.3)(jiti@2.6.1)(jsdom@28.0.0)(lightningcss@1.30.2)(tsx@4.21.0)
 
   apps/web:
     dependencies:
@@ -201,6 +204,9 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.9.2
+      vitest:
+        specifier: ^4.0.0
+        version: 4.0.18(@types/node@22.15.3)(jiti@2.6.1)(jsdom@28.0.0)(lightningcss@1.30.2)(tsx@4.21.0)
 
   packages/eslint-config:
     devDependencies:

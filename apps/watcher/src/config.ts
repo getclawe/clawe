@@ -2,13 +2,6 @@
 
 export const POLL_INTERVAL_MS = 2000; // Check every 2 seconds
 
-// Agent session keys - these are the session keys used by agents
-// The watcher delivers notifications to these sessions
-export const AGENT_SESSIONS: Record<string, string> = {
-  // Agent ID -> Session Key
-  // These get populated from Convex agent records
-};
-
 // Environment validation
 export function validateEnv(): void {
   const required = ["CONVEX_URL", "OPENCLAW_URL", "OPENCLAW_TOKEN"];

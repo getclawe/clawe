@@ -20,9 +20,10 @@ export const list = query({
     let tasks;
 
     if (args.status) {
+      const status = args.status;
       tasks = await ctx.db
         .query("tasks")
-        .withIndex("by_status", (q) => q.eq("status", args.status!))
+        .withIndex("by_status", (q) => q.eq("status", status))
         .order("desc")
         .collect();
     } else {
@@ -44,11 +45,17 @@ export const list = query({
           ? await Promise.all(task.assigneeIds.map((id) => ctx.db.get(id)))
           : [];
 
+        const validAssignees = assignees.filter(
+          (a): a is NonNullable<typeof a> => a !== null,
+        );
+
         return {
           ...task,
-          assignees: assignees
-            .filter(Boolean)
-            .map((a) => ({ _id: a!._id, name: a!.name, emoji: a!.emoji })),
+          assignees: validAssignees.map((a) => ({
+            _id: a._id,
+            name: a.name,
+            emoji: a.emoji,
+          })),
         };
       }),
     );
@@ -147,11 +154,17 @@ export const get = query({
       );
     }
 
+    const validAssignees = assignees.filter(
+      (a): a is NonNullable<typeof a> => a !== null,
+    );
+
     return {
       ...task,
-      assignees: assignees
-        .filter(Boolean)
-        .map((a) => ({ _id: a!._id, name: a!.name, emoji: a!.emoji })),
+      assignees: validAssignees.map((a) => ({
+        _id: a._id,
+        name: a.name,
+        emoji: a.emoji,
+      })),
       creator: creator
         ? { _id: creator._id, name: creator.name, emoji: creator.emoji }
         : null,
@@ -184,11 +197,10 @@ export const create = mutation({
     // Find assignee if provided
     let assigneeIds: Id<"agents">[] = [];
     if (args.assigneeSessionKey) {
+      const sessionKey = args.assigneeSessionKey;
       const assignee = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) =>
-          q.eq("sessionKey", args.assigneeSessionKey!),
-        )
+        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
         .first();
       if (assignee) {
         assigneeIds = [assignee._id];
@@ -199,11 +211,10 @@ export const create = mutation({
     let createdBy = undefined;
     let creatorAgent = null;
     if (args.createdBySessionKey) {
+      const sessionKey = args.createdBySessionKey;
       creatorAgent = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) =>
-          q.eq("sessionKey", args.createdBySessionKey!),
-        )
+        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
         .first();
       if (creatorAgent) {
         createdBy = creatorAgent._id;
@@ -231,8 +242,8 @@ export const create = mutation({
     });
 
     // Send notification to assignee
-    if (assigneeIds.length > 0) {
-      const firstAssigneeId = assigneeIds[0]!;
+    const firstAssigneeId = assigneeIds[0];
+    if (firstAssigneeId) {
       const assignee = await ctx.db.get(firstAssigneeId);
       if (assignee) {
         await ctx.db.insert("notifications", {
@@ -275,11 +286,10 @@ export const updateStatus = mutation({
     let agentId = undefined;
     let agentName = "System";
     if (args.bySessionKey) {
+      const sessionKey = args.bySessionKey;
       const agent = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) =>
-          q.eq("sessionKey", args.bySessionKey!),
-        )
+        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
         .first();
       if (agent) {
         agentId = agent._id;
@@ -350,11 +360,10 @@ export const assign = mutation({
     // Find assigner
     let assignerId = undefined;
     if (args.bySessionKey) {
+      const sessionKey = args.bySessionKey;
       const assigner = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) =>
-          q.eq("sessionKey", args.bySessionKey!),
-        )
+        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
         .first();
       if (assigner) {
         assignerId = assigner._id;
@@ -407,11 +416,10 @@ export const addComment = mutation({
     let authorName = args.humanAuthor ?? "Unknown";
 
     if (args.bySessionKey) {
+      const sessionKey = args.bySessionKey;
       const agent = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) =>
-          q.eq("sessionKey", args.bySessionKey!),
-        )
+        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
         .first();
       if (agent) {
         fromAgentId = agent._id;
@@ -459,11 +467,10 @@ export const addSubtask = mutation({
     // Find assignee if provided
     let assigneeId = undefined;
     if (args.assigneeSessionKey) {
+      const sessionKey = args.assigneeSessionKey;
       const assignee = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) =>
-          q.eq("sessionKey", args.assigneeSessionKey!),
-        )
+        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
         .first();
       if (assignee) {
         assigneeId = assignee._id;
@@ -506,14 +513,20 @@ export const updateSubtask = mutation({
     }
 
     const subtasks = [...task.subtasks];
-    const currentSubtask = subtasks[args.subtaskIndex]!;
-    subtasks[args.subtaskIndex] = {
+    const currentSubtask = subtasks[args.subtaskIndex];
+    // We already checked this exists above, but TypeScript needs reassurance
+    if (!currentSubtask) {
+      throw new Error("Subtask not found");
+    }
+
+    const updatedSubtask = {
       title: currentSubtask.title,
       description: currentSubtask.description,
       assigneeId: currentSubtask.assigneeId,
       done: args.done,
       doneAt: args.done ? now : undefined,
     };
+    subtasks[args.subtaskIndex] = updatedSubtask;
 
     await ctx.db.patch(args.taskId, {
       subtasks,
@@ -525,11 +538,10 @@ export const updateSubtask = mutation({
       let agentId = undefined;
       let agentName = "System";
       if (args.bySessionKey) {
+        const sessionKey = args.bySessionKey;
         const agent = await ctx.db
           .query("agents")
-          .withIndex("by_sessionKey", (q) =>
-            q.eq("sessionKey", args.bySessionKey!),
-          )
+          .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
           .first();
         if (agent) {
           agentId = agent._id;
@@ -537,12 +549,11 @@ export const updateSubtask = mutation({
         }
       }
 
-      const completedSubtask = subtasks[args.subtaskIndex]!;
       await ctx.db.insert("activities", {
         type: "subtask_completed",
         agentId,
         taskId: args.taskId,
-        message: `${agentName} completed "${completedSubtask.title}" on "${task.title}"`,
+        message: `${agentName} completed "${updatedSubtask.title}" on "${task.title}"`,
         createdAt: now,
       });
     }

@@ -119,11 +119,10 @@ export const create = mutation({
 
     let fromAgentId = undefined;
     if (args.fromSessionKey) {
+      const sessionKey = args.fromSessionKey;
       const agent = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) =>
-          q.eq("sessionKey", args.fromSessionKey!),
-        )
+        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
         .first();
       if (agent) {
         fromAgentId = agent._id;

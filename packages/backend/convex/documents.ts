@@ -18,9 +18,10 @@ export const list = query({
     const limit = args.limit ?? 100;
 
     if (args.type) {
+      const type = args.type;
       return await ctx.db
         .query("documents")
-        .withIndex("by_type", (q) => q.eq("type", args.type!))
+        .withIndex("by_type", (q) => q.eq("type", type))
         .order("desc")
         .take(limit);
     }

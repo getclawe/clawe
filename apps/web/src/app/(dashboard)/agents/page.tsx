@@ -15,11 +15,20 @@ import {
 } from "@clawe/ui/components/card";
 import { Badge } from "@clawe/ui/components/badge";
 
-const statusColors = {
+type AgentStatus = "idle" | "active" | "blocked";
+
+const statusColors: Record<AgentStatus, string> = {
   idle: "bg-gray-500",
   active: "bg-green-500",
   blocked: "bg-red-500",
-} as const;
+};
+
+function getStatusColor(status: string): string {
+  if (status === "idle" || status === "active" || status === "blocked") {
+    return statusColors[status];
+  }
+  return statusColors.idle;
+}
 
 const AgentsPage = () => {
   const agents = useQuery(api.agents.squad);
@@ -60,7 +69,7 @@ const AgentsPage = () => {
                         className="flex items-center gap-1.5"
                       >
                         <span
-                          className={`h-2 w-2 rounded-full ${statusColors[agent.status as keyof typeof statusColors] || statusColors.idle}`}
+                          className={`h-2 w-2 rounded-full ${getStatusColor(agent.status)}`}
                         />
                         {agent.status || "idle"}
                       </Badge>

@@ -35,6 +35,17 @@ function mapTask(task: {
   assignees?: { name: string; emoji?: string }[];
   subtasks?: { title: string; description?: string; done: boolean }[];
 }): KanbanTask {
+  const subtasks: KanbanTask[] =
+    task.subtasks
+      ?.filter((st) => !st.done) // Only show incomplete subtasks
+      .map((st, i) => ({
+        id: `${task._id}-${i}`,
+        title: st.title,
+        description: st.description,
+        priority: "medium",
+        subtasks: [],
+      })) || [];
+
   return {
     id: task._id,
     title: task.title,
@@ -43,36 +54,34 @@ function mapTask(task: {
     assignee: task.assignees?.[0]
       ? `${task.assignees[0].emoji || ""} ${task.assignees[0].name}`.trim()
       : undefined,
-    subtasks:
-      task.subtasks
-        ?.filter((st) => !st.done) // Only show incomplete subtasks
-        .map((st, i) => ({
-          id: `${task._id}-${i}`,
-          title: st.title,
-          description: st.description,
-          priority: "medium" as const,
-          subtasks: [],
-        })) || [],
+    subtasks,
   };
+}
+
+type TaskStatus = "inbox" | "assigned" | "in_progress" | "review" | "done";
+
+function isValidStatus(status: string): status is TaskStatus {
+  return ["inbox", "assigned", "in_progress", "review", "done"].includes(
+    status,
+  );
 }
 
 const BoardPage = () => {
   const tasks = useQuery(api.tasks.list, {});
 
   // Group tasks by status
-  const groupedTasks = {
-    inbox: [] as KanbanTask[],
-    assigned: [] as KanbanTask[],
-    in_progress: [] as KanbanTask[],
-    review: [] as KanbanTask[],
-    done: [] as KanbanTask[],
+  const groupedTasks: Record<TaskStatus, KanbanTask[]> = {
+    inbox: [],
+    assigned: [],
+    in_progress: [],
+    review: [],
+    done: [],
   };
 
   if (tasks) {
     for (const task of tasks) {
-      const status = task.status as keyof typeof groupedTasks;
-      if (groupedTasks[status]) {
-        groupedTasks[status].push(mapTask(task));
+      if (isValidStatus(task.status)) {
+        groupedTasks[task.status].push(mapTask(task));
       }
     }
   }
