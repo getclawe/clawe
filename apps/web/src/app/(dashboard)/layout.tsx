@@ -14,8 +14,9 @@ type DashboardLayoutProps = {
   header: React.ReactNode;
 };
 
-// Routes that handle their own scrolling (e.g., kanban board)
-const isFullHeightRoute = (path: string) => path === "/board";
+// Routes that handle their own scrolling (e.g., kanban board, chat)
+const isFullHeightRoute = (path: string) =>
+  path === "/board" || path === "/chat";
 
 const DashboardLayout = ({ children, header }: DashboardLayoutProps) => {
   const pathname = usePathname();
@@ -53,7 +54,7 @@ const DashboardLayout = ({ children, header }: DashboardLayoutProps) => {
             {header}
           </header>
           {fullHeight ? (
-            <main className="flex min-h-0 flex-1 flex-col p-6">{children}</main>
+            <main className="flex min-h-0 flex-1 flex-col">{children}</main>
           ) : (
             <ScrollArea className="h-full min-h-0 flex-1">
               <main className="p-6">{children}</main>

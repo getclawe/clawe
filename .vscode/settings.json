@@ -3,5 +3,7 @@
     {
       "mode": "auto"
     }
-  ]
+  ],
+  "git.detectSubmodules": false,
+  "git.autoRepositoryDetection": "openEditors"
 }
