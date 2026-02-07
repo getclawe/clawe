@@ -7,7 +7,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_CONVEX_URL=${NEXT_PUBLIC_CONVEX_URL}
+      - NEXT_PUBLIC_CONVEX_URL=${CONVEX_URL}
       - OPENCLAW_URL=http://openclaw:18789
       - OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
     depends_on:
@@ -17,13 +17,14 @@ services:
 
   openclaw:
     build:
-      context: ./docker/openclaw
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/openclaw/Dockerfile
     environment:
       - OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
       - OPENCLAW_PORT=18789
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - CONVEX_URL=${CONVEX_URL}
     volumes:
       - openclaw-data:/data
     healthcheck:
@@ -31,6 +32,19 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    restart: unless-stopped
+
+  watcher:
+    build:
+      context: .
+      dockerfile: apps/watcher/Dockerfile
+    environment:
+      - CONVEX_URL=${CONVEX_URL}
+      - OPENCLAW_URL=http://openclaw:18789
+      - OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
+    depends_on:
+      openclaw:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

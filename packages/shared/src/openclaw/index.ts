@@ -7,7 +7,11 @@ export {
   patchConfig,
   listSessions,
   sendMessage,
+  sessionsSend,
+  cronList,
+  cronAdd,
 } from "./client";
+export type { CronJob, CronListResult, CronAddJob } from "./client";
 
 // Gateway Client
 export { GatewayClient, createGatewayClient } from "./gateway-client";

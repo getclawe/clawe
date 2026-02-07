@@ -1,0 +1,101 @@
+{
+  "env": {
+    "CONVEX_URL": "${CONVEX_URL}"
+  },
+  "auth": {
+    "profiles": {
+      "anthropic:default": {
+        "provider": "anthropic",
+        "mode": "token"
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "/data/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "default": true,
+        "name": "Clawe",
+        "workspace": "/data/workspace",
+        "identity": {
+          "name": "Clawe",
+          "emoji": "🦞"
+        }
+      },
+      {
+        "id": "inky",
+        "name": "Inky",
+        "workspace": "/data/workspace-inky",
+        "model": "anthropic/claude-sonnet-4-20250514",
+        "identity": {
+          "name": "Inky",
+          "emoji": "✍️"
+        }
+      },
+      {
+        "id": "pixel",
+        "name": "Pixel",
+        "workspace": "/data/workspace-pixel",
+        "model": "anthropic/claude-sonnet-4-20250514",
+        "identity": {
+          "name": "Pixel",
+          "emoji": "🎨"
+        }
+      },
+      {
+        "id": "scout",
+        "name": "Scout",
+        "workspace": "/data/workspace-scout",
+        "model": "anthropic/claude-sonnet-4-20250514",
+        "identity": {
+          "name": "Scout",
+          "emoji": "🔍"
+        }
+      }
+    ]
+  },
+  "tools": {
+    "agentToAgent": {
+      "enabled": true,
+      "allow": [
+        "main",
+        "inky",
+        "pixel",
+        "scout"
+      ]
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "session-memory": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "gateway": {
+    "port": ${OPENCLAW_PORT},
+    "mode": "local",
+    "bind": "lan",
+    "auth": {
+      "mode": "token",
+      "token": "${OPENCLAW_TOKEN}"
+    }
+  }
+}

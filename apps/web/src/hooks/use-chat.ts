@@ -187,6 +187,7 @@ export function useChat({
   const abortControllerRef = useRef<AbortController | null>(null);
   const currentRunIdRef = useRef<string | null>(null);
   const streamingTextRef = useRef<string>("");
+  const activeStreamIdRef = useRef<string | null>(null);
 
   const loadHistory = useCallback(async () => {
     setStatus("loading");
@@ -218,7 +219,17 @@ export function useChat({
   }, [sessionKey, onError]);
 
   const handleSSEEvent = useCallback(
-    (eventType: string, data: unknown, assistantMessageId: string) => {
+    (
+      eventType: string,
+      data: unknown,
+      assistantMessageId: string,
+      streamId: string,
+    ) => {
+      // Ignore events from stale streams
+      if (activeStreamIdRef.current !== streamId) {
+        return;
+      }
+
       const eventData = data as Record<string, unknown>;
 
       switch (eventType) {
@@ -285,24 +296,29 @@ export function useChat({
             ? filterDisplayableContent(rawContent)
             : [];
 
-          const finalContent =
-            filteredContent.length > 0
-              ? filteredContent
-              : [{ type: "text" as const, text: streamingTextRef.current }];
+          setMessages((prev) => {
+            // Get the current text from the message being finalized
+            const currentMsg = prev.find((m) => m.id === assistantMessageId);
+            const currentText =
+              currentMsg?.content.find((c) => c.type === "text")?.text || "";
 
-          setMessages((prev) =>
-            prev.map((msg) =>
+            const finalContent =
+              filteredContent.length > 0
+                ? filteredContent
+                : [{ type: "text" as const, text: currentText }];
+
+            return prev.map((msg) =>
               msg.id === assistantMessageId
                 ? { ...msg, content: finalContent, isStreaming: false }
                 : msg,
-            ),
-          );
+            );
+          });
 
           setStatus("idle");
           onFinish?.({
             id: assistantMessageId,
             role: "assistant",
-            content: finalContent,
+            content: filteredContent,
             timestamp: Date.now(),
           });
           break;
@@ -350,6 +366,20 @@ export function useChat({
       if (!trimmedText && (!attachments || attachments.length === 0)) {
         return;
       }
+
+      // Abort any existing stream before starting a new one
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      activeStreamIdRef.current = null;
+
+      // Mark any existing streaming messages as not streaming
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.isStreaming ? { ...msg, isStreaming: false } : msg,
+        ),
+      );
 
       const userContent: MessageContent[] = [];
       if (trimmedText) {
@@ -421,6 +451,9 @@ export function useChat({
         let buffer = "";
 
         const assistantMessageId = generateMessageId();
+        const streamId = assistantMessageId; // Use same ID to track the stream
+        activeStreamIdRef.current = streamId;
+
         const assistantMessage: ChatMessage = {
           id: assistantMessageId,
           role: "assistant",
@@ -437,6 +470,11 @@ export function useChat({
           const { done, value } = await reader.read();
           if (done) break;
 
+          // Check if this stream is still active
+          if (activeStreamIdRef.current !== streamId) {
+            break;
+          }
+
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
           buffer = lines.pop() || "";
@@ -448,7 +486,7 @@ export function useChat({
             } else if (line.startsWith("data: ") && eventType) {
               try {
                 const data = JSON.parse(line.slice(6));
-                handleSSEEvent(eventType, data, assistantMessageId);
+                handleSSEEvent(eventType, data, assistantMessageId, streamId);
               } catch {
                 // Ignore parse errors
               }
@@ -476,6 +514,14 @@ export function useChat({
 
   const abort = useCallback(async () => {
     abortControllerRef.current?.abort();
+    activeStreamIdRef.current = null;
+
+    // Mark any streaming messages as not streaming
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.isStreaming ? { ...msg, isStreaming: false } : msg,
+      ),
+    );
 
     try {
       await fetch("/api/chat/abort", {

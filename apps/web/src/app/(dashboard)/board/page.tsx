@@ -1,5 +1,7 @@
 "use client";
 
+import { useQuery } from "convex/react";
+import { api } from "@clawe/backend";
 import {
   PageHeader,
   PageHeaderRow,
@@ -11,163 +13,128 @@ import {
   type KanbanColumnDef,
 } from "@/components/kanban";
 
-// Mock data for demonstration
-const mockTasks: KanbanTask[] = [
-  {
-    id: "1",
-    title: "How to Embed a Live ER Diagram Using ChartDB (Quick Guide)",
-    description:
-      "Write a comprehensive guide on embedding ER diagrams also have some more data please please",
-    priority: "high",
-    assignee: "Friday",
-    subtasks: [
-      {
-        id: "1-1",
-        title: "Research ChartDB documentation",
-        priority: "medium",
-        description: "Look for embedding options and examples",
-        subtasks: [],
-      },
-      {
-        id: "1-2",
-        title: "Create code examples",
-        priority: "medium",
-        subtasks: [],
-      },
-      {
-        id: "1-3",
-        title: "Research ChartDB documentation",
-        priority: "medium",
-        description: "Look for embedding options and examples",
-        subtasks: [],
-      },
-      {
-        id: "1-4",
-        title: "Create code examples",
-        priority: "medium",
-        subtasks: [],
-      },
-      {
-        id: "1-5",
-        title: "Research ChartDB documentation",
-        priority: "medium",
-        description: "Look for embedding options and examples",
-        subtasks: [],
-      },
-      {
-        id: "1-6",
-        title: "Create code examples",
-        priority: "medium",
-        subtasks: [],
-      },
-    ],
-  },
-  {
-    id: "2",
-    title: "Find Competitor Backlinks",
-    description: "Analyze competitor backlink profiles using azimutt.app",
-    priority: "high",
-    assignee: "Monday",
-    subtasks: [],
-  },
-  {
-    id: "3",
-    title: "Check the Internal Linking Suggestions",
-    priority: "medium",
-    subtasks: [],
-  },
-  {
-    id: "4",
-    title: "Guest post for differ.blog",
-    description: "Write and submit guest post",
-    priority: "low",
-    subtasks: [],
-  },
-  {
-    id: "5",
-    title: "Video Creation Intro walkthrough",
-    priority: "medium",
-    subtasks: [],
-  },
-  {
-    id: "6",
-    title: "Create f5 bot keywords",
-    priority: "low",
-    subtasks: [],
-  },
-  {
-    id: "7",
-    title: "Write Content on How to generate ERD from SQL",
-    description: "Detailed tutorial with examples",
-    priority: "high",
-    assignee: "Friday",
-    subtasks: [
-      {
-        id: "7-1",
-        title: "Outline the article structure",
-        priority: "high",
-        subtasks: [],
-      },
-      {
-        id: "7-2",
-        title: "Create SQL examples",
-        priority: "medium",
-        subtasks: [],
-      },
-      {
-        id: "7-3",
-        title: "Add screenshots",
-        priority: "low",
-        subtasks: [],
-      },
-    ],
-  },
-];
+// Map priority from Convex to Kanban format
+function mapPriority(priority?: string): "low" | "medium" | "high" {
+  switch (priority) {
+    case "urgent":
+    case "high":
+      return "high";
+    case "low":
+      return "low";
+    default:
+      return "medium";
+  }
+}
 
-// Split tasks by status (for demo, we'll distribute them)
-const todoTasks = mockTasks.slice(0, 3);
-const inProgressTasks = mockTasks.slice(3, 4);
-const inReviewTasks = mockTasks.slice(4, 5);
-const doneTasks = mockTasks.slice(5);
+// Map Convex task to Kanban task format
+function mapTask(task: {
+  _id: string;
+  title: string;
+  description?: string;
+  priority?: string;
+  assignees?: { name: string; emoji?: string }[];
+  subtasks?: { title: string; description?: string; done: boolean }[];
+}): KanbanTask {
+  const subtasks: KanbanTask[] =
+    task.subtasks
+      ?.filter((st) => !st.done) // Only show incomplete subtasks
+      .map((st, i) => ({
+        id: `${task._id}-${i}`,
+        title: st.title,
+        description: st.description,
+        priority: "medium",
+        subtasks: [],
+      })) || [];
 
-const columns: KanbanColumnDef[] = [
-  {
-    id: "pending",
-    title: "To Do",
-    variant: "todo",
-    tasks: todoTasks,
-  },
-  {
-    id: "in_progress",
-    title: "In Progress",
-    variant: "in-progress",
-    tasks: inProgressTasks,
-  },
-  {
-    id: "in_review",
-    title: "In Review",
-    variant: "in-review",
-    tasks: inReviewTasks,
-  },
-  {
-    id: "completed",
-    title: "Done",
-    variant: "done",
-    tasks: doneTasks,
-  },
-];
+  return {
+    id: task._id,
+    title: task.title,
+    description: task.description,
+    priority: mapPriority(task.priority),
+    assignee: task.assignees?.[0]
+      ? `${task.assignees[0].emoji || ""} ${task.assignees[0].name}`.trim()
+      : undefined,
+    subtasks,
+  };
+}
+
+type TaskStatus = "inbox" | "assigned" | "in_progress" | "review" | "done";
+
+function isValidStatus(status: string): status is TaskStatus {
+  return ["inbox", "assigned", "in_progress", "review", "done"].includes(
+    status,
+  );
+}
 
 const BoardPage = () => {
+  const tasks = useQuery(api.tasks.list, {});
+
+  // Group tasks by status
+  const groupedTasks: Record<TaskStatus, KanbanTask[]> = {
+    inbox: [],
+    assigned: [],
+    in_progress: [],
+    review: [],
+    done: [],
+  };
+
+  if (tasks) {
+    for (const task of tasks) {
+      if (isValidStatus(task.status)) {
+        groupedTasks[task.status].push(mapTask(task));
+      }
+    }
+  }
+
+  const columns: KanbanColumnDef[] = [
+    {
+      id: "inbox",
+      title: "Inbox",
+      variant: "todo",
+      tasks: groupedTasks.inbox,
+    },
+    {
+      id: "assigned",
+      title: "Assigned",
+      variant: "todo",
+      tasks: groupedTasks.assigned,
+    },
+    {
+      id: "in_progress",
+      title: "In Progress",
+      variant: "in-progress",
+      tasks: groupedTasks.in_progress,
+    },
+    {
+      id: "review",
+      title: "Review",
+      variant: "in-review",
+      tasks: groupedTasks.review,
+    },
+    {
+      id: "done",
+      title: "Done",
+      variant: "done",
+      tasks: groupedTasks.done,
+    },
+  ];
+
   return (
     <>
       <PageHeader>
         <PageHeaderRow>
-          <PageHeaderTitle>Kanban Board</PageHeaderTitle>
+          <PageHeaderTitle>Board</PageHeaderTitle>
         </PageHeaderRow>
       </PageHeader>
 
       <div className="min-h-0 flex-1">
-        <KanbanBoard columns={columns} className="h-full" />
+        {!tasks ? (
+          <div className="text-muted-foreground flex items-center justify-center p-8">
+            Loading...
+          </div>
+        ) : (
+          <KanbanBoard columns={columns} className="h-full" />
+        )}
       </div>
     </>
   );

@@ -7,16 +7,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     make \
     g++ \
+    gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g openclaw@latest
 
 RUN mkdir -p /data/config /data/workspace
 
+# Copy templates and scripts
+COPY docker/openclaw/templates/ /opt/clawe/templates/
+COPY docker/openclaw/scripts/ /opt/clawe/scripts/
+RUN chmod +x /opt/clawe/scripts/*.sh
+
+# Copy bundled CLI (single file with all deps included)
+COPY packages/cli/dist/clawe.js /usr/local/bin/clawe
+RUN chmod +x /usr/local/bin/clawe
+
 ENV OPENCLAW_STATE_DIR=/data/config
 ENV OPENCLAW_PORT=18789
 
-COPY entrypoint.sh /entrypoint.sh
+COPY docker/openclaw/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 HEALTHCHECK --interval=5s --timeout=3s --retries=10 \

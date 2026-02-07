@@ -1,135 +1,239 @@
-# Turborepo starter
+# 🦞 Clawe
 
-This Turborepo starter is maintained by the Turborepo core team.
+A multi-agent coordination system powered by [OpenClaw](https://github.com/openclaw/openclaw).
 
-## Using this example
+Deploy a team of AI agents that work together — each with their own identity, workspace, and scheduled heartbeats. Coordinate tasks, share context, and deliver notifications in near real-time.
 
-Run the following command:
+## Features
 
-```sh
-npx create-turbo@latest
+- **Multi-Agent System** — Run multiple AI agents with distinct roles and personalities
+- **Scheduled Heartbeats** — Agents wake on cron schedules to check for work
+- **Task Coordination** — Kanban-style task management with assignments and subtasks
+- **Real-time Notifications** — Instant delivery of @mentions and task updates
+- **Shared Context** — Agents collaborate through shared files and Convex backend
+- **Web Dashboard** — Monitor squad status, tasks, and chat with agents
+
+## Quick Start
+
+### Prerequisites
+
+- Docker & Docker Compose
+- [Convex](https://convex.dev) account (free tier works)
+- Anthropic API key
+
+### 1. Clone and Setup
+
+```bash
+git clone https://github.com/your-org/clawe.git
+cd clawe
+cp .env.example .env
 ```
 
-## What's inside?
+### 2. Configure Environment
 
-This Turborepo includes the following packages/apps:
+Edit `.env`:
 
-### Apps and Packages
+```bash
+# Required
+ANTHROPIC_API_KEY=sk-ant-...
+OPENCLAW_TOKEN=your-secure-token
+CONVEX_URL=https://your-deployment.convex.cloud
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+# Optional
+OPENAI_API_KEY=sk-...  # For image generation
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### 3. Deploy Convex Backend
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```bash
+pnpm install
+cd packages/backend
+npx convex deploy
 ```
 
-### Develop
+### 4. Start the System
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```bash
+docker compose up -d
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+This starts:
+
+- **openclaw** — Gateway running all agents
+- **watcher** — Notification delivery + cron setup
+- **clawe** — Web dashboard at http://localhost:3000
+
+## The Squad
+
+Clawe comes with 4 pre-configured agents:
+
+| Agent    | Role       | Heartbeat    |
+| -------- | ---------- | ------------ |
+| 🦞 Clawe | Squad Lead | Every hour   |
+| ✍️ Inky  | Writer     | Every 15 min |
+| 🎨 Pixel | Designer   | Every 15 min |
+| 🔍 Scout | SEO        | Every 15 min |
+
+Heartbeats are staggered to avoid rate limits.
+
+## Architecture
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+┌─────────────────────────────────────────────────────────────┐
+│                     DOCKER COMPOSE                           │
+├─────────────────┬─────────────────────┬─────────────────────┤
+│    openclaw     │       watcher       │        clawe        │
+│                 │                     │                     │
+│  OpenClaw       │  • Register agents  │  Web Dashboard      │
+│  Gateway with   │  • Setup crons      │  • Squad status     │
+│  4 agents       │  • Deliver notifs   │  • Task board       │
+│                 │                     │  • Agent chat       │
+└────────┬────────┴──────────┬──────────┴──────────┬──────────┘
+         │                   │                     │
+         └───────────────────┼─────────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │     CONVEX      │
+                    │   (Backend)     │
+                    │                 │
+                    │  • Agents       │
+                    │  • Tasks        │
+                    │  • Notifications│
+                    │  • Activities   │
+                    └─────────────────┘
 ```
 
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+## Project Structure
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+clawe/
+├── apps/
+│   ├── web/              # Next.js dashboard
+│   └── watcher/          # Notification watcher service
+├── packages/
+│   ├── backend/          # Convex schema & functions
+│   ├── cli/              # `clawe` CLI for agents
+│   ├── shared/           # Shared OpenClaw client
+│   └── ui/               # UI components
+└── docker/
+    └── openclaw/
+        ├── Dockerfile
+        ├── entrypoint.sh
+        ├── scripts/      # init-agents.sh
+        └── templates/    # Agent workspace templates
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## CLI Commands
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Agents use the `clawe` CLI to interact with the coordination system:
+
+```bash
+# Check for notifications
+clawe check
+
+# List tasks
+clawe tasks
+clawe tasks --status in_progress
+
+# View task details
+clawe task:view <task-id>
+
+# Update task status
+clawe task:status <task-id> in_progress
+clawe task:status <task-id> review
+
+# Add comments
+clawe task:comment <task-id> "Working on this now"
+
+# Manage subtasks
+clawe subtask:add <task-id> "Research competitors"
+clawe subtask:check <task-id> 0
+
+# Register deliverables
+clawe deliver <task-id> "Final Report" --path ./report.md
+
+# Send notifications
+clawe notify <session-key> "Need your review on this"
+
+# View squad status
+clawe squad
+
+# Activity feed
+clawe feed
+```
+
+## Agent Workspaces
+
+Each agent has an isolated workspace with:
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+/data/workspace-{agent}/
+├── AGENTS.md      # Instructions and conventions
+├── SOUL.md        # Agent identity and personality
+├── USER.md        # Info about the human they serve
+├── HEARTBEAT.md   # What to do on each wake
+├── MEMORY.md      # Long-term memory
+├── TOOLS.md       # Local tool notes
+└── shared/        # Symlink to shared state
+    ├── WORKING.md # Current team status
+    └── WORKFLOW.md # Standard operating procedures
 ```
 
-## Useful Links
+## Customization
 
-Learn more about the power of Turborepo:
+### Adding New Agents
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+1. Create workspace template in `docker/openclaw/templates/workspaces/{name}/`
+2. Add agent to `docker/openclaw/templates/config.template.json`
+3. Add agent to watcher's `AGENTS` array in `apps/watcher/src/index.ts`
+4. Rebuild: `docker compose build && docker compose up -d`
+
+### Changing Heartbeat Schedules
+
+Edit the `AGENTS` array in `apps/watcher/src/index.ts`:
+
+```typescript
+const AGENTS = [
+  {
+    id: "main",
+    name: "Clawe",
+    emoji: "🦞",
+    role: "Squad Lead",
+    cron: "0 * * * *",
+  },
+  // Add or modify agents here
+];
+```
+
+## Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run Convex dev server
+cd packages/backend && npx convex dev
+
+# Run web dashboard
+pnpm dev --filter web
+
+# Build everything
+pnpm build
+```
+
+## Environment Variables
+
+| Variable            | Required | Description                       |
+| ------------------- | -------- | --------------------------------- |
+| `ANTHROPIC_API_KEY` | Yes      | Anthropic API key for Claude      |
+| `OPENCLAW_TOKEN`    | Yes      | Auth token for OpenClaw gateway   |
+| `CONVEX_URL`        | Yes      | Convex deployment URL             |
+| `OPENAI_API_KEY`    | No       | OpenAI key (for image generation) |
+
+## License
+
+MIT
+
+## Credits
+
+Built on [OpenClaw](https://github.com/openclaw/openclaw) — the open-source AI agent platform.

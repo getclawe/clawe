@@ -1,0 +1,29 @@
+{
+  "name": "@clawe/cli",
+  "version": "0.1.0",
+  "description": "CLI for Clawe multi-agent coordination",
+  "type": "module",
+  "bin": {
+    "clawe": "./dist/clawe.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@clawe/backend": "workspace:*",
+    "convex": "^1.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}

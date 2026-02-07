@@ -11,6 +11,10 @@
     "./server": {
       "types": "./convex/_generated/server.d.ts",
       "default": "./convex/_generated/server.js"
+    },
+    "./dataModel": {
+      "types": "./convex/_generated/dataModel.d.ts",
+      "default": "./convex/_generated/dataModel.js"
     }
   },
   "scripts": {

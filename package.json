@@ -4,8 +4,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:docker": "docker compose up --build openclaw",
-    "build:docker": "docker compose build --no-cache openclaw",
+    "dev:docker": "pnpm --filter @clawe/cli build && docker compose up --build openclaw",
+    "build:docker": "pnpm --filter @clawe/cli build && docker compose build --no-cache openclaw",
     "debug": "turbo run debug",
     "dev:web": "turbo run dev --filter=web",
     "convex:dev": "turbo run dev --filter=@clawe/backend",
