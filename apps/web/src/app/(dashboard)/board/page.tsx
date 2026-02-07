@@ -120,7 +120,7 @@ const BoardPage = () => {
 
       <div className="min-h-0 flex-1">
         {!tasks ? (
-          <div className="flex items-center justify-center p-8 text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-center p-8">
             Loading...
           </div>
         ) : (

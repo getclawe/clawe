@@ -9,14 +9,14 @@ export const list = query({
         v.literal("deliverable"),
         v.literal("research"),
         v.literal("reference"),
-        v.literal("note")
-      )
+        v.literal("note"),
+      ),
     ),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 100;
-    
+
     if (args.type) {
       return await ctx.db
         .query("documents")
@@ -24,11 +24,8 @@ export const list = query({
         .order("desc")
         .take(limit);
     }
-    
-    return await ctx.db
-      .query("documents")
-      .order("desc")
-      .take(limit);
+
+    return await ctx.db.query("documents").order("desc").take(limit);
   },
 });
 
@@ -40,7 +37,7 @@ export const getForTask = query({
       .query("documents")
       .withIndex("by_task", (q) => q.eq("taskId", args.taskId))
       .collect();
-    
+
     // Enrich with creator info
     return Promise.all(
       documents.map(async (doc) => {
@@ -51,7 +48,7 @@ export const getForTask = query({
             ? { _id: creator._id, name: creator.name, emoji: creator.emoji }
             : null,
         };
-      })
+      }),
     );
   },
 });
@@ -74,24 +71,26 @@ export const create = mutation({
       v.literal("deliverable"),
       v.literal("research"),
       v.literal("reference"),
-      v.literal("note")
+      v.literal("note"),
     ),
     taskId: v.optional(v.id("tasks")),
     createdBySessionKey: v.string(),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     // Find the creator agent
     const agent = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.createdBySessionKey))
+      .withIndex("by_sessionKey", (q) =>
+        q.eq("sessionKey", args.createdBySessionKey),
+      )
       .first();
-    
+
     if (!agent) {
       throw new Error(`Agent not found: ${args.createdBySessionKey}`);
     }
-    
+
     const documentId = await ctx.db.insert("documents", {
       title: args.title,
       content: args.content,
@@ -102,7 +101,7 @@ export const create = mutation({
       createdAt: now,
       updatedAt: now,
     });
-    
+
     // Log activity
     await ctx.db.insert("activities", {
       type: "document_created",
@@ -111,7 +110,7 @@ export const create = mutation({
       message: `${agent.name} created ${args.type}: ${args.title}`,
       createdAt: now,
     });
-    
+
     return documentId;
   },
 });
@@ -126,16 +125,18 @@ export const registerDeliverable = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     const agent = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.createdBySessionKey))
+      .withIndex("by_sessionKey", (q) =>
+        q.eq("sessionKey", args.createdBySessionKey),
+      )
       .first();
-    
+
     if (!agent) {
       throw new Error(`Agent not found: ${args.createdBySessionKey}`);
     }
-    
+
     const documentId = await ctx.db.insert("documents", {
       title: args.title,
       path: args.path,
@@ -145,7 +146,7 @@ export const registerDeliverable = mutation({
       createdAt: now,
       updatedAt: now,
     });
-    
+
     // Log activity
     await ctx.db.insert("activities", {
       type: "document_created",
@@ -154,7 +155,7 @@ export const registerDeliverable = mutation({
       message: `${agent.name} registered deliverable: ${args.title}`,
       createdAt: now,
     });
-    
+
     return documentId;
   },
 });
@@ -170,9 +171,9 @@ export const update = mutation({
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
     const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([, value]) => value !== undefined)
+      Object.entries(updates).filter(([, value]) => value !== undefined),
     );
-    
+
     await ctx.db.patch(id, {
       ...filteredUpdates,
       updatedAt: Date.now(),

@@ -5,6 +5,7 @@ This file is for environment-specific notes — the stuff that's unique to your 
 ## What Goes Here
 
 Things like:
+
 - API endpoints and services
 - File locations and paths
 - Preferences and settings

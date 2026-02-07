@@ -12,7 +12,12 @@
 
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@clawe/backend";
-import { sessionsSend, cronList, cronAdd, type CronAddJob } from "@clawe/shared/openclaw";
+import {
+  sessionsSend,
+  cronList,
+  cronAdd,
+  type CronAddJob,
+} from "@clawe/shared/openclaw";
 import { validateEnv, config, POLL_INTERVAL_MS } from "./config.js";
 
 // Validate environment on startup
@@ -22,10 +27,34 @@ const convex = new ConvexHttpClient(config.convexUrl);
 
 // Agent configuration
 const AGENTS = [
-  { id: "main", name: "Clawe", emoji: "🦞", role: "Squad Lead", cron: "0 * * * *" },
-  { id: "inky", name: "Inky", emoji: "✍️", role: "Writer", cron: "3,18,33,48 * * * *" },
-  { id: "pixel", name: "Pixel", emoji: "🎨", role: "Designer", cron: "7,22,37,52 * * * *" },
-  { id: "scout", name: "Scout", emoji: "🔍", role: "SEO", cron: "11,26,41,56 * * * *" },
+  {
+    id: "main",
+    name: "Clawe",
+    emoji: "🦞",
+    role: "Squad Lead",
+    cron: "0 * * * *",
+  },
+  {
+    id: "inky",
+    name: "Inky",
+    emoji: "✍️",
+    role: "Writer",
+    cron: "3,18,33,48 * * * *",
+  },
+  {
+    id: "pixel",
+    name: "Pixel",
+    emoji: "🎨",
+    role: "Designer",
+    cron: "7,22,37,52 * * * *",
+  },
+  {
+    id: "scout",
+    name: "Scout",
+    emoji: "🔍",
+    role: "SEO",
+    cron: "11,26,41,56 * * * *",
+  },
 ];
 
 const HEARTBEAT_MESSAGE =
@@ -47,9 +76,14 @@ async function registerAgents(): Promise<void> {
         sessionKey,
         emoji: agent.emoji,
       });
-      console.log(`[watcher] ✓ ${agent.name} ${agent.emoji} registered (${sessionKey})`);
+      console.log(
+        `[watcher] ✓ ${agent.name} ${agent.emoji} registered (${sessionKey})`,
+      );
     } catch (err) {
-      console.error(`[watcher] Failed to register ${agent.name}:`, err instanceof Error ? err.message : err);
+      console.error(
+        `[watcher] Failed to register ${agent.name}:`,
+        err instanceof Error ? err.message : err,
+      );
     }
   }
 
@@ -96,9 +130,14 @@ async function setupCrons(): Promise<void> {
 
     const addResult = await cronAdd(job);
     if (addResult.ok) {
-      console.log(`[watcher] ✓ ${agent.name} ${agent.emoji} heartbeat: ${agent.cron}`);
+      console.log(
+        `[watcher] ✓ ${agent.name} ${agent.emoji} heartbeat: ${agent.cron}`,
+      );
     } else {
-      console.error(`[watcher] Failed to add ${cronName}:`, addResult.error?.message);
+      console.error(
+        `[watcher] Failed to add ${cronName}:`,
+        addResult.error?.message,
+      );
     }
   }
 
@@ -124,7 +163,9 @@ function formatNotification(notification: {
   parts.push(notification.content);
 
   if (notification.task) {
-    parts.push(`\n📋 Task: ${notification.task.title} (${notification.task.status})`);
+    parts.push(
+      `\n📋 Task: ${notification.task.title} (${notification.task.status})`,
+    );
   }
 
   return parts.join("\n");
@@ -151,7 +192,9 @@ async function deliverToAgent(sessionKey: string): Promise<void> {
       return;
     }
 
-    console.log(`[watcher] 📬 ${sessionKey} has ${notifications.length} pending notification(s)`);
+    console.log(
+      `[watcher] 📬 ${sessionKey} has ${notifications.length} pending notification(s)`,
+    );
 
     for (const notification of notifications) {
       try {
@@ -168,23 +211,26 @@ async function deliverToAgent(sessionKey: string): Promise<void> {
           });
 
           console.log(
-            `[watcher] ✅ Delivered to ${sessionKey}: ${notification.content.slice(0, 50)}...`
+            `[watcher] ✅ Delivered to ${sessionKey}: ${notification.content.slice(0, 50)}...`,
           );
         } else {
           // Agent might be asleep or session unavailable
           console.log(
-            `[watcher] 💤 ${sessionKey} unavailable: ${result.error?.message ?? "unknown error"}`
+            `[watcher] 💤 ${sessionKey} unavailable: ${result.error?.message ?? "unknown error"}`,
           );
         }
       } catch (err) {
         // Network error or agent asleep
         console.log(
-          `[watcher] 💤 ${sessionKey} error: ${err instanceof Error ? err.message : "unknown"}`
+          `[watcher] 💤 ${sessionKey} error: ${err instanceof Error ? err.message : "unknown"}`,
         );
       }
     }
   } catch (err) {
-    console.error(`[watcher] Error checking ${sessionKey}:`, err instanceof Error ? err.message : err);
+    console.error(
+      `[watcher] Error checking ${sessionKey}:`,
+      err instanceof Error ? err.message : err,
+    );
   }
 }
 
@@ -224,7 +270,10 @@ async function main(): Promise<void> {
     try {
       await deliveryLoop();
     } catch (err) {
-      console.error("[watcher] Loop error:", err instanceof Error ? err.message : err);
+      console.error(
+        "[watcher] Loop error:",
+        err instanceof Error ? err.message : err,
+      );
     }
 
     await sleep(POLL_INTERVAL_MS);

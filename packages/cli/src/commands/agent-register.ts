@@ -9,7 +9,7 @@ export async function agentRegister(
   name: string,
   role: string,
   sessionKey: string,
-  options: AgentRegisterOptions
+  options: AgentRegisterOptions,
 ): Promise<void> {
   const agentId = await client.mutation(api.agents.upsert, {
     name,

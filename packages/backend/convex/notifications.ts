@@ -10,42 +10,46 @@ export const getUndelivered = query({
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
-    
+
     if (!agent) {
       return [];
     }
-    
+
     // Get undelivered notifications
     const notifications = await ctx.db
       .query("notifications")
       .withIndex("by_target_undelivered", (q) =>
-        q.eq("targetAgentId", agent._id).eq("delivered", false)
+        q.eq("targetAgentId", agent._id).eq("delivered", false),
       )
       .collect();
-    
+
     // Enrich with source agent and task info
     return Promise.all(
       notifications.map(async (n) => {
         let sourceAgent = null;
         let task = null;
-        
+
         if (n.sourceAgentId) {
           sourceAgent = await ctx.db.get(n.sourceAgentId);
         }
         if (n.taskId) {
           task = await ctx.db.get(n.taskId);
         }
-        
+
         return {
           ...n,
           sourceAgent: sourceAgent
-            ? { _id: sourceAgent._id, name: sourceAgent.name, emoji: sourceAgent.emoji }
+            ? {
+                _id: sourceAgent._id,
+                name: sourceAgent.name,
+                emoji: sourceAgent.emoji,
+              }
             : null,
           task: task
             ? { _id: task._id, title: task.title, status: task.status }
             : null,
         };
-      })
+      }),
     );
   },
 });
@@ -61,20 +65,20 @@ export const getForAgent = query({
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
-    
+
     if (!agent) {
       return [];
     }
-    
+
     let query = ctx.db
       .query("notifications")
       .withIndex("by_target", (q) => q.eq("targetAgentId", agent._id))
       .order("desc");
-    
+
     const notifications = args.limit
       ? await query.take(args.limit)
       : await query.collect();
-    
+
     return notifications;
   },
 });
@@ -86,7 +90,7 @@ export const markDelivered = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     for (const id of args.notificationIds) {
       await ctx.db.patch(id, {
         delivered: true,
@@ -108,7 +112,7 @@ export const send = mutation({
       v.literal("message_received"),
       v.literal("review_requested"),
       v.literal("blocked"),
-      v.literal("custom")
+      v.literal("custom"),
     ),
     taskId: v.optional(v.id("tasks")),
     content: v.string(),
@@ -116,17 +120,17 @@ export const send = mutation({
   handler: async (ctx, args) => {
     const now = Date.now();
     const targetKey = args.targetSessionKey;
-    
+
     // Find target agent
     const targetAgent = await ctx.db
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", targetKey))
       .first();
-    
+
     if (!targetAgent) {
       throw new Error(`Target agent not found: ${args.targetSessionKey}`);
     }
-    
+
     // Find source agent if provided
     let sourceAgentId = undefined;
     if (args.sourceSessionKey) {
@@ -139,7 +143,7 @@ export const send = mutation({
         sourceAgentId = sourceAgent._id;
       }
     }
-    
+
     // Create notification
     const notificationId = await ctx.db.insert("notifications", {
       targetAgentId: targetAgent._id,
@@ -150,7 +154,7 @@ export const send = mutation({
       delivered: false,
       createdAt: now,
     });
-    
+
     // Log activity
     await ctx.db.insert("activities", {
       type: "notification_sent",
@@ -159,7 +163,7 @@ export const send = mutation({
       message: `Notification sent to ${targetAgent.name}: ${args.content.slice(0, 50)}...`,
       createdAt: now,
     });
-    
+
     return notificationId;
   },
 });
@@ -176,7 +180,7 @@ export const sendToMany = mutation({
       v.literal("message_received"),
       v.literal("review_requested"),
       v.literal("blocked"),
-      v.literal("custom")
+      v.literal("custom"),
     ),
     taskId: v.optional(v.id("tasks")),
     content: v.string(),
@@ -184,7 +188,7 @@ export const sendToMany = mutation({
   handler: async (ctx, args) => {
     const now = Date.now();
     const notificationIds: string[] = [];
-    
+
     // Find source agent if provided
     let sourceAgentId = undefined;
     if (args.sourceSessionKey) {
@@ -197,13 +201,13 @@ export const sendToMany = mutation({
         sourceAgentId = sourceAgent._id;
       }
     }
-    
+
     for (const targetSessionKey of args.targetSessionKeys) {
       const targetAgent = await ctx.db
         .query("agents")
         .withIndex("by_sessionKey", (q) => q.eq("sessionKey", targetSessionKey))
         .first();
-      
+
       if (targetAgent) {
         const id = await ctx.db.insert("notifications", {
           targetAgentId: targetAgent._id,
@@ -217,7 +221,7 @@ export const sendToMany = mutation({
         notificationIds.push(id);
       }
     }
-    
+
     return notificationIds;
   },
 });
@@ -230,18 +234,18 @@ export const clearAll = mutation({
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
-    
+
     if (!agent) {
       return 0;
     }
-    
+
     const notifications = await ctx.db
       .query("notifications")
       .withIndex("by_target_undelivered", (q) =>
-        q.eq("targetAgentId", agent._id).eq("delivered", false)
+        q.eq("targetAgentId", agent._id).eq("delivered", false),
       )
       .collect();
-    
+
     const now = Date.now();
     for (const n of notifications) {
       await ctx.db.patch(n._id, {
@@ -249,7 +253,7 @@ export const clearAll = mutation({
         deliveredAt: now,
       });
     }
-    
+
     return notifications.length;
   },
 });

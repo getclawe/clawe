@@ -27,6 +27,7 @@ You wake up fresh each session. These files are your continuity:
 ## Working on Tasks
 
 When assigned a task:
+
 1. Read the task details and subtasks carefully
 2. Update status to in_progress when starting
 3. Complete each subtask, marking them done
@@ -38,6 +39,7 @@ When assigned a task:
 ## Asset Management
 
 Store your created assets in organized folders:
+
 - `assets/diagrams/`
 - `assets/images/`
 - `assets/social/`

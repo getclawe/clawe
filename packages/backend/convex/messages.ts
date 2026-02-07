@@ -9,7 +9,7 @@ export const listForTask = query({
       .query("messages")
       .withIndex("by_task", (q) => q.eq("taskId", args.taskId))
       .collect();
-    
+
     // Enrich with author info
     return Promise.all(
       messages.map(async (m) => {
@@ -17,20 +17,25 @@ export const listForTask = query({
         if (m.fromAgentId) {
           const agent = await ctx.db.get(m.fromAgentId);
           author = agent
-            ? { _id: agent._id, name: agent.name, emoji: agent.emoji, isHuman: false }
+            ? {
+                _id: agent._id,
+                name: agent.name,
+                emoji: agent.emoji,
+                isHuman: false,
+              }
             : null;
         } else if (m.humanAuthor) {
           author = { name: m.humanAuthor, emoji: "👤", isHuman: true };
         }
         return { ...m, author };
-      })
+      }),
     );
   },
 });
 
 // List messages by agent
 export const listByAgent = query({
-  args: { 
+  args: {
     sessionKey: v.string(),
     limit: v.optional(v.number()),
   },
@@ -39,16 +44,16 @@ export const listByAgent = query({
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
-    
+
     if (!agent) {
       return [];
     }
-    
+
     let query = ctx.db
       .query("messages")
       .withIndex("by_agent", (q) => q.eq("fromAgentId", agent._id))
       .order("desc");
-    
+
     return args.limit ? await query.take(args.limit) : await query.collect();
   },
 });
@@ -58,19 +63,19 @@ export const recent = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 50;
-    
+
     const messages = await ctx.db
       .query("messages")
       .withIndex("by_created")
       .order("desc")
       .take(limit);
-    
+
     // Enrich with author and task info
     return Promise.all(
       messages.map(async (m) => {
         let author = null;
         let task = null;
-        
+
         if (m.fromAgentId) {
           const agent = await ctx.db.get(m.fromAgentId);
           author = agent
@@ -79,17 +84,17 @@ export const recent = query({
         } else if (m.humanAuthor) {
           author = { name: m.humanAuthor, emoji: "👤", isHuman: true };
         }
-        
+
         if (m.taskId) {
           task = await ctx.db.get(m.taskId);
         }
-        
+
         return {
           ...m,
           author,
           task: task ? { _id: task._id, title: task.title } : null,
         };
-      })
+      }),
     );
   },
 });
@@ -103,26 +108,28 @@ export const create = mutation({
       v.union(
         v.literal("comment"),
         v.literal("status_change"),
-        v.literal("system")
-      )
+        v.literal("system"),
+      ),
     ),
     fromSessionKey: v.optional(v.string()),
     humanAuthor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     let fromAgentId = undefined;
     if (args.fromSessionKey) {
       const agent = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.fromSessionKey!))
+        .withIndex("by_sessionKey", (q) =>
+          q.eq("sessionKey", args.fromSessionKey!),
+        )
         .first();
       if (agent) {
         fromAgentId = agent._id;
       }
     }
-    
+
     const messageId = await ctx.db.insert("messages", {
       taskId: args.taskId,
       fromAgentId,
@@ -131,12 +138,12 @@ export const create = mutation({
       content: args.content,
       createdAt: now,
     });
-    
+
     // Update task timestamp if linked to a task
     if (args.taskId) {
       await ctx.db.patch(args.taskId, { updatedAt: now });
     }
-    
+
     return messageId;
   },
 });

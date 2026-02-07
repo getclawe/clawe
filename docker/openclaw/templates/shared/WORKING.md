@@ -19,12 +19,12 @@ _What the squad is working on right now._
 
 ## The Squad
 
-| Agent | Role | Session Key |
-|-------|------|-------------|
-| Clawe 🦞 | Squad Lead | agent:main:main |
-| Inky ✍️ | Content Writer | agent:inky:main |
+| Agent    | Role             | Session Key      |
+| -------- | ---------------- | ---------------- |
+| Clawe 🦞 | Squad Lead       | agent:main:main  |
+| Inky ✍️  | Content Writer   | agent:inky:main  |
 | Pixel 🎨 | Graphic Designer | agent:pixel:main |
-| Scout 🔍 | SEO Specialist | agent:scout:main |
+| Scout 🔍 | SEO Specialist   | agent:scout:main |
 
 ---
 

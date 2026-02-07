@@ -4,4 +4,4 @@ _Context from Clawe about who we're helping._
 
 ---
 
-*Clawe will share relevant context as needed.*
+_Clawe will share relevant context as needed._

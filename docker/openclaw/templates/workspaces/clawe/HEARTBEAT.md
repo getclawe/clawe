@@ -11,6 +11,7 @@ When you wake up, do the following:
 ## If Notifications Found
 
 Process each notification:
+
 - Task assignments → review and delegate
 - Review requests → verify and approve/reject
 - Messages → respond if needed
@@ -18,6 +19,7 @@ Process each notification:
 ## If Tasks in Review
 
 When tasks are in "review" status:
+
 1. Run: `clawe task:view <taskId>` to see details
 2. Verify the deliverables exist
 3. Check subtasks are all complete
@@ -27,6 +29,7 @@ When tasks are in "review" status:
 ## If Work to Assign
 
 Create and assign tasks:
+
 ```bash
 clawe task:create "Task title" --assign agent:inky:main --by agent:main:main
 ```

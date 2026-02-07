@@ -58,6 +58,7 @@ docker compose up -d
 ```
 
 This starts:
+
 - **openclaw** — Gateway running all agents
 - **watcher** — Notification delivery + cron setup
 - **clawe** — Web dashboard at http://localhost:3000
@@ -66,12 +67,12 @@ This starts:
 
 Clawe comes with 4 pre-configured agents:
 
-| Agent | Role | Heartbeat |
-|-------|------|-----------|
-| 🦞 Clawe | Squad Lead | Every hour |
-| ✍️ Inky | Writer | Every 15 min |
-| 🎨 Pixel | Designer | Every 15 min |
-| 🔍 Scout | SEO | Every 15 min |
+| Agent    | Role       | Heartbeat    |
+| -------- | ---------- | ------------ |
+| 🦞 Clawe | Squad Lead | Every hour   |
+| ✍️ Inky  | Writer     | Every 15 min |
+| 🎨 Pixel | Designer   | Every 15 min |
+| 🔍 Scout | SEO        | Every 15 min |
 
 Heartbeats are staggered to avoid rate limits.
 
@@ -193,7 +194,13 @@ Edit the `AGENTS` array in `apps/watcher/src/index.ts`:
 
 ```typescript
 const AGENTS = [
-  { id: "main", name: "Clawe", emoji: "🦞", role: "Squad Lead", cron: "0 * * * *" },
+  {
+    id: "main",
+    name: "Clawe",
+    emoji: "🦞",
+    role: "Squad Lead",
+    cron: "0 * * * *",
+  },
   // Add or modify agents here
 ];
 ```
@@ -216,12 +223,12 @@ pnpm build
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | Yes | Anthropic API key for Claude |
-| `OPENCLAW_TOKEN` | Yes | Auth token for OpenClaw gateway |
-| `CONVEX_URL` | Yes | Convex deployment URL |
-| `OPENAI_API_KEY` | No | OpenAI key (for image generation) |
+| Variable            | Required | Description                       |
+| ------------------- | -------- | --------------------------------- |
+| `ANTHROPIC_API_KEY` | Yes      | Anthropic API key for Claude      |
+| `OPENCLAW_TOKEN`    | Yes      | Auth token for OpenClaw gateway   |
+| `CONVEX_URL`        | Yes      | Convex deployment URL             |
+| `OPENAI_API_KEY`    | No       | OpenAI key (for image generation) |
 
 ## License
 

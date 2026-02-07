@@ -9,7 +9,7 @@ interface TaskCommentOptions {
 export async function taskComment(
   taskId: string,
   message: string,
-  options: TaskCommentOptions
+  options: TaskCommentOptions,
 ): Promise<void> {
   await client.mutation(api.tasks.addComment, {
     taskId: taskId as Id<"tasks">,

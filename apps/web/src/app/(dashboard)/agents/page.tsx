@@ -7,7 +7,12 @@ import {
   PageHeaderRow,
   PageHeaderTitle,
 } from "@dashboard/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@clawe/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@clawe/ui/components/card";
 import { Badge } from "@clawe/ui/components/badge";
 
 const statusColors = {

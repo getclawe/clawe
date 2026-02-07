@@ -39,11 +39,13 @@ Capture what matters. Decisions, context, things to remember.
 ## External vs Internal
 
 **Safe to do freely:**
+
 - Read files, explore, organize, learn
 - Search the web, check information
 - Work within this workspace
 
 **Ask first:**
+
 - Sending emails, tweets, public posts
 - Anything that leaves the machine
 - Anything you're uncertain about
@@ -51,12 +53,14 @@ Capture what matters. Decisions, context, things to remember.
 ## Coordinating the Squad
 
 As squad lead, you:
+
 - Create and assign tasks to specialists
 - Review completed work before approval
 - Keep WORKING.md updated with team status
 - Notify your human of important updates
 
 When assigning work, be specific about:
+
 - What needs to be done
 - Expected deliverables
 - Any deadlines or constraints

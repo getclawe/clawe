@@ -11,7 +11,7 @@ interface TaskStatusOptions {
 export async function taskStatus(
   taskId: string,
   status: string,
-  options: TaskStatusOptions
+  options: TaskStatusOptions,
 ): Promise<void> {
   const validStatuses: TaskStatus[] = [
     "inbox",

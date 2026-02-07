@@ -23,7 +23,8 @@ function parseOptions(args: string[]): Record<string, string> {
   for (let i = 0; i < args.length; i++) {
     if (args[i].startsWith("--")) {
       const key = args[i].slice(2);
-      const value = args[i + 1] && !args[i + 1].startsWith("--") ? args[i + 1] : "true";
+      const value =
+        args[i + 1] && !args[i + 1].startsWith("--") ? args[i + 1] : "true";
       options[key] = value;
       if (value !== "true") i++;
     }
@@ -107,13 +108,20 @@ async function main(): Promise<void> {
       case "task:create": {
         const title = positionalArgs[0];
         if (!title) {
-          console.error("Usage: clawe task:create <title> [--assign <key>] [--by <key>]");
+          console.error(
+            "Usage: clawe task:create <title> [--assign <key>] [--by <key>]",
+          );
           process.exit(1);
         }
         await taskCreate(title, {
           assign: options.assign,
           by: options.by,
-          priority: options.priority as "low" | "normal" | "high" | "urgent" | undefined,
+          priority: options.priority as
+            | "low"
+            | "normal"
+            | "high"
+            | "urgent"
+            | undefined,
         });
         break;
       }
@@ -132,7 +140,9 @@ async function main(): Promise<void> {
         const taskId = positionalArgs[0];
         const status = positionalArgs[1];
         if (!taskId || !status) {
-          console.error("Usage: clawe task:status <taskId> <status> [--by <key>]");
+          console.error(
+            "Usage: clawe task:status <taskId> <status> [--by <key>]",
+          );
           process.exit(1);
         }
         await taskStatus(taskId, status, { by: options.by });
@@ -143,7 +153,9 @@ async function main(): Promise<void> {
         const taskId = positionalArgs[0];
         const message = positionalArgs[1];
         if (!taskId || !message) {
-          console.error("Usage: clawe task:comment <taskId> <message> [--by <key>]");
+          console.error(
+            "Usage: clawe task:comment <taskId> <message> [--by <key>]",
+          );
           process.exit(1);
         }
         await taskComment(taskId, message, { by: options.by });
@@ -154,7 +166,9 @@ async function main(): Promise<void> {
         const taskId = positionalArgs[0];
         const assignee = positionalArgs[1];
         if (!taskId || !assignee) {
-          console.error("Usage: clawe task:assign <taskId> <sessionKey> [--by <key>]");
+          console.error(
+            "Usage: clawe task:assign <taskId> <sessionKey> [--by <key>]",
+          );
           process.exit(1);
         }
         await taskAssign(taskId, assignee, { by: options.by });
@@ -165,7 +179,9 @@ async function main(): Promise<void> {
         const taskId = positionalArgs[0];
         const title = positionalArgs[1];
         if (!taskId || !title) {
-          console.error("Usage: clawe subtask:add <taskId> <title> [--assign <key>]");
+          console.error(
+            "Usage: clawe subtask:add <taskId> <title> [--assign <key>]",
+          );
           process.exit(1);
         }
         await subtaskAdd(taskId, title, {
@@ -179,7 +195,9 @@ async function main(): Promise<void> {
         const taskId = positionalArgs[0];
         const index = positionalArgs[1];
         if (!taskId || !index) {
-          console.error("Usage: clawe subtask:check <taskId> <index> [--by <key>]");
+          console.error(
+            "Usage: clawe subtask:check <taskId> <index> [--by <key>]",
+          );
           process.exit(1);
         }
         await subtaskCheck(taskId, index, { by: options.by });
@@ -190,7 +208,9 @@ async function main(): Promise<void> {
         const taskId = positionalArgs[0];
         const index = positionalArgs[1];
         if (!taskId || !index) {
-          console.error("Usage: clawe subtask:uncheck <taskId> <index> [--by <key>]");
+          console.error(
+            "Usage: clawe subtask:uncheck <taskId> <index> [--by <key>]",
+          );
           process.exit(1);
         }
         await subtaskUncheck(taskId, index, { by: options.by });
@@ -202,7 +222,9 @@ async function main(): Promise<void> {
         const path = positionalArgs[1];
         const title = positionalArgs[2];
         if (!taskId || !path || !title || !options.by) {
-          console.error("Usage: clawe deliver <taskId> <path> <title> --by <sessionKey>");
+          console.error(
+            "Usage: clawe deliver <taskId> <path> <title> --by <sessionKey>",
+          );
           process.exit(1);
         }
         await deliver(taskId, path, title, { by: options.by });
@@ -223,7 +245,9 @@ async function main(): Promise<void> {
         const target = positionalArgs[0];
         const message = positionalArgs[1];
         if (!target || !message) {
-          console.error("Usage: clawe notify <targetSessionKey> <message> [--from <key>]");
+          console.error(
+            "Usage: clawe notify <targetSessionKey> <message> [--from <key>]",
+          );
           process.exit(1);
         }
         await notify(target, message, { from: options.from });
@@ -236,7 +260,9 @@ async function main(): Promise<void> {
       }
 
       case "feed": {
-        await feed({ limit: options.limit ? parseInt(options.limit, 10) : undefined });
+        await feed({
+          limit: options.limit ? parseInt(options.limit, 10) : undefined,
+        });
         break;
       }
 
@@ -245,7 +271,9 @@ async function main(): Promise<void> {
         const role = positionalArgs[1];
         const sessionKey = positionalArgs[2];
         if (!name || !role || !sessionKey) {
-          console.error("Usage: clawe agent:register <name> <role> <sessionKey> [--emoji <e>]");
+          console.error(
+            "Usage: clawe agent:register <name> <role> <sessionKey> [--emoji <e>]",
+          );
           process.exit(1);
         }
         await agentRegister(name, role, sessionKey, { emoji: options.emoji });

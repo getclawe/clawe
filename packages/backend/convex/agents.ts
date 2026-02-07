@@ -5,9 +5,7 @@ import { mutation, query } from "./_generated/server";
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
-      .query("agents")
-      .collect();
+    return await ctx.db.query("agents").collect();
   },
 });
 
@@ -36,7 +34,7 @@ export const listByStatus = query({
     status: v.union(
       v.literal("idle"),
       v.literal("active"),
-      v.literal("blocked")
+      v.literal("blocked"),
     ),
   },
   handler: async (ctx, args) => {
@@ -52,7 +50,7 @@ export const squad = query({
   args: {},
   handler: async (ctx) => {
     const agents = await ctx.db.query("agents").collect();
-    
+
     return Promise.all(
       agents.map(async (agent) => {
         let currentTask = null;
@@ -62,10 +60,14 @@ export const squad = query({
         return {
           ...agent,
           currentTask: currentTask
-            ? { _id: currentTask._id, title: currentTask.title, status: currentTask.status }
+            ? {
+                _id: currentTask._id,
+                title: currentTask.title,
+                status: currentTask.status,
+              }
             : null,
         };
-      })
+      }),
     );
   },
 });
@@ -81,13 +83,13 @@ export const upsert = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     // Check if agent exists
     const existing = await ctx.db
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
-    
+
     if (existing) {
       // Update existing
       await ctx.db.patch(existing._id, {
@@ -145,7 +147,7 @@ export const updateStatus = mutation({
     status: v.union(
       v.literal("idle"),
       v.literal("active"),
-      v.literal("blocked")
+      v.literal("blocked"),
     ),
   },
   handler: async (ctx, args) => {
@@ -161,23 +163,23 @@ export const heartbeat = mutation({
   args: { sessionKey: v.string() },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     const agent = await ctx.db
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
-    
+
     if (!agent) {
       throw new Error(`Agent not found: ${args.sessionKey}`);
     }
-    
+
     await ctx.db.patch(agent._id, {
       lastHeartbeat: now,
       lastSeen: now,
       presenceStatus: "online",
       updatedAt: now,
     });
-    
+
     // Log heartbeat activity
     await ctx.db.insert("activities", {
       type: "agent_heartbeat",
@@ -185,7 +187,7 @@ export const heartbeat = mutation({
       message: `${agent.name} checked in`,
       createdAt: now,
     });
-    
+
     return agent._id;
   },
 });
@@ -201,11 +203,11 @@ export const setCurrentTask = mutation({
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
-    
+
     if (!agent) {
       throw new Error(`Agent not found: ${args.sessionKey}`);
     }
-    
+
     await ctx.db.patch(agent._id, {
       currentTaskId: args.taskId,
       status: args.taskId ? "active" : "idle",
@@ -225,11 +227,11 @@ export const setActivity = mutation({
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
-    
+
     if (!agent) {
       throw new Error(`Agent not found: ${args.sessionKey}`);
     }
-    
+
     await ctx.db.patch(agent._id, {
       currentActivity: args.activity,
       lastSeen: Date.now(),
@@ -250,7 +252,7 @@ export const update = mutation({
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
     const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([, value]) => value !== undefined)
+      Object.entries(updates).filter(([, value]) => value !== undefined),
     );
     await ctx.db.patch(id, {
       ...filteredUpdates,

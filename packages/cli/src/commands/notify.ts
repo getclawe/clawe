@@ -8,7 +8,7 @@ interface NotifyOptions {
 export async function notify(
   targetSessionKey: string,
   message: string,
-  options: NotifyOptions
+  options: NotifyOptions,
 ): Promise<void> {
   await client.mutation(api.notifications.send, {
     targetSessionKey,

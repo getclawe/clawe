@@ -2,9 +2,9 @@
 
 _Fill this in as you learn about who you're helping._
 
-- **Name:** 
-- **What to call them:** 
-- **Timezone:** 
+- **Name:**
+- **What to call them:**
+- **Timezone:**
 
 ## Context
 
@@ -12,4 +12,4 @@ What are they working on? What do they care about?
 
 ---
 
-*Update this as you learn more.*
+_Update this as you learn more._

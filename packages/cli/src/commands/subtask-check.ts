@@ -9,7 +9,7 @@ interface SubtaskCheckOptions {
 export async function subtaskCheck(
   taskId: string,
   index: string,
-  options: SubtaskCheckOptions
+  options: SubtaskCheckOptions,
 ): Promise<void> {
   await client.mutation(api.tasks.updateSubtask, {
     taskId: taskId as Id<"tasks">,
@@ -24,7 +24,7 @@ export async function subtaskCheck(
 export async function subtaskUncheck(
   taskId: string,
   index: string,
-  options: SubtaskCheckOptions
+  options: SubtaskCheckOptions,
 ): Promise<void> {
   await client.mutation(api.tasks.updateSubtask, {
     taskId: taskId as Id<"tasks">,

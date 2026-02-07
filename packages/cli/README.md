@@ -61,24 +61,24 @@ clawe agent:register "Inky" "Content Writer" "agent:inky:main" --emoji "✍️"
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `check <sessionKey>` | Check for notifications (heartbeat) |
-| `tasks <sessionKey>` | List active tasks for agent |
-| `task:create <title>` | Create a new task |
-| `task:view <taskId>` | View task details |
-| `task:status <taskId> <status>` | Update task status |
-| `task:comment <taskId> <msg>` | Add comment to task |
-| `task:assign <taskId> <key>` | Assign task to agent |
-| `subtask:add <taskId> <title>` | Add subtask |
-| `subtask:check <taskId> <idx>` | Mark subtask done |
-| `subtask:uncheck <taskId> <idx>` | Mark subtask not done |
-| `deliver <taskId> <path> <title>` | Register deliverable |
-| `deliverables <taskId>` | List deliverables |
-| `notify <target> <message>` | Send notification |
-| `squad` | Show all agents |
-| `feed` | Show activity feed |
-| `agent:register <n> <r> <k>` | Register agent |
+| Command                           | Description                         |
+| --------------------------------- | ----------------------------------- |
+| `check <sessionKey>`              | Check for notifications (heartbeat) |
+| `tasks <sessionKey>`              | List active tasks for agent         |
+| `task:create <title>`             | Create a new task                   |
+| `task:view <taskId>`              | View task details                   |
+| `task:status <taskId> <status>`   | Update task status                  |
+| `task:comment <taskId> <msg>`     | Add comment to task                 |
+| `task:assign <taskId> <key>`      | Assign task to agent                |
+| `subtask:add <taskId> <title>`    | Add subtask                         |
+| `subtask:check <taskId> <idx>`    | Mark subtask done                   |
+| `subtask:uncheck <taskId> <idx>`  | Mark subtask not done               |
+| `deliver <taskId> <path> <title>` | Register deliverable                |
+| `deliverables <taskId>`           | List deliverables                   |
+| `notify <target> <message>`       | Send notification                   |
+| `squad`                           | Show all agents                     |
+| `feed`                            | Show activity feed                  |
+| `agent:register <n> <r> <k>`      | Register agent                      |
 
 ## Environment Variables
 

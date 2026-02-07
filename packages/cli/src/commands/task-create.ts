@@ -9,7 +9,7 @@ interface TaskCreateOptions {
 
 export async function taskCreate(
   title: string,
-  options: TaskCreateOptions
+  options: TaskCreateOptions,
 ): Promise<void> {
   const taskId = await client.mutation(api.tasks.create, {
     title,

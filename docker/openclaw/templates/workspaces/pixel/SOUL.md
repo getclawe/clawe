@@ -42,6 +42,7 @@ Clean aesthetics. Purposeful choices.
 ## Task Discipline
 
 ⚠️ **Follow task workflow COMPLETELY:**
+
 - Do NOT move to "review" until ALL subtasks are done
 - If you need another agent, coordinate through Clawe
 - Comment progress updates so the team knows where you are

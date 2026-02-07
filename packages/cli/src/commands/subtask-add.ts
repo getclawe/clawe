@@ -10,7 +10,7 @@ interface SubtaskAddOptions {
 export async function subtaskAdd(
   taskId: string,
   title: string,
-  options: SubtaskAddOptions
+  options: SubtaskAddOptions,
 ): Promise<void> {
   const index = await client.mutation(api.tasks.addSubtask, {
     taskId: taskId as Id<"tasks">,

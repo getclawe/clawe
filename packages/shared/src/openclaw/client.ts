@@ -175,7 +175,12 @@ export interface CronJob {
   enabled: boolean;
   schedule: { kind: string; expr: string };
   sessionTarget: string;
-  payload: { kind: string; message: string; model?: string; timeoutSeconds?: number };
+  payload: {
+    kind: string;
+    message: string;
+    model?: string;
+    timeoutSeconds?: number;
+  };
 }
 
 export interface CronListResult {
@@ -202,6 +207,8 @@ export async function cronList(): Promise<ToolResult<CronListResult>> {
 }
 
 // Cron - Add job
-export async function cronAdd(job: CronAddJob): Promise<ToolResult<{ id: string }>> {
+export async function cronAdd(
+  job: CronAddJob,
+): Promise<ToolResult<{ id: string }>> {
   return invokeTool("cron", undefined, { action: "add", job });
 }

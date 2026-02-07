@@ -10,7 +10,7 @@ export async function deliver(
   taskId: string,
   path: string,
   title: string,
-  options: DeliverOptions
+  options: DeliverOptions,
 ): Promise<void> {
   await client.mutation(api.documents.registerDeliverable, {
     taskId: taskId as Id<"tasks">,

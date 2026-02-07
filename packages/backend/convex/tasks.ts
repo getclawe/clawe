@@ -11,14 +11,14 @@ export const list = query({
         v.literal("assigned"),
         v.literal("in_progress"),
         v.literal("review"),
-        v.literal("done")
-      )
+        v.literal("done"),
+      ),
     ),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     let tasks;
-    
+
     if (args.status) {
       tasks = await ctx.db
         .query("tasks")
@@ -32,25 +32,25 @@ export const list = query({
         .order("desc")
         .collect();
     }
-    
+
     if (args.limit) {
       tasks = tasks.slice(0, args.limit);
     }
-    
+
     // Enrich with assignee info
     return Promise.all(
       tasks.map(async (task) => {
         const assignees = task.assigneeIds
           ? await Promise.all(task.assigneeIds.map((id) => ctx.db.get(id)))
           : [];
-        
+
         return {
           ...task,
           assignees: assignees
             .filter(Boolean)
             .map((a) => ({ _id: a!._id, name: a!.name, emoji: a!.emoji })),
         };
-      })
+      }),
     );
   },
 });
@@ -63,22 +63,20 @@ export const getForAgent = query({
       .query("agents")
       .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
       .first();
-    
+
     if (!agent) {
       return [];
     }
-    
+
     // Get all non-done tasks and filter by assignee
     const allTasks = await ctx.db
       .query("tasks")
       .withIndex("by_createdAt")
       .order("desc")
       .collect();
-    
+
     return allTasks.filter(
-      (task) =>
-        task.status !== "done" &&
-        task.assigneeIds?.includes(agent._id)
+      (task) => task.status !== "done" && task.assigneeIds?.includes(agent._id),
     );
   },
 });
@@ -89,24 +87,24 @@ export const get = query({
   handler: async (ctx, args) => {
     const task = await ctx.db.get(args.taskId);
     if (!task) return null;
-    
+
     // Get assignees
     const assignees = task.assigneeIds
       ? await Promise.all(task.assigneeIds.map((id) => ctx.db.get(id)))
       : [];
-    
+
     // Get creator
     let creator = null;
     if (task.createdBy) {
       creator = await ctx.db.get(task.createdBy);
     }
-    
+
     // Get messages (comments)
     const messages = await ctx.db
       .query("messages")
       .withIndex("by_task", (q) => q.eq("taskId", args.taskId))
       .collect();
-    
+
     const messagesWithAuthors = await Promise.all(
       messages.map(async (m) => {
         let author = null;
@@ -117,15 +115,15 @@ export const get = query({
           author = { name: m.humanAuthor, emoji: "👤", isHuman: true };
         }
         return { ...m, author };
-      })
+      }),
     );
-    
+
     // Get deliverables
     const deliverables = await ctx.db
       .query("documents")
       .withIndex("by_task", (q) => q.eq("taskId", args.taskId))
       .collect();
-    
+
     // Enrich subtasks with assignee info
     let enrichedSubtasks;
     if (task.subtasks) {
@@ -136,15 +134,19 @@ export const get = query({
             return {
               ...st,
               assignee: assignee
-                ? { _id: assignee._id, name: assignee.name, emoji: assignee.emoji }
+                ? {
+                    _id: assignee._id,
+                    name: assignee.name,
+                    emoji: assignee.emoji,
+                  }
                 : null,
             };
           }
           return { ...st, assignee: null };
-        })
+        }),
       );
     }
-    
+
     return {
       ...task,
       assignees: assignees
@@ -170,40 +172,44 @@ export const create = mutation({
         v.literal("low"),
         v.literal("normal"),
         v.literal("high"),
-        v.literal("urgent")
-      )
+        v.literal("urgent"),
+      ),
     ),
     assigneeSessionKey: v.optional(v.string()),
     createdBySessionKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     // Find assignee if provided
     let assigneeIds: Id<"agents">[] = [];
     if (args.assigneeSessionKey) {
       const assignee = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.assigneeSessionKey!))
+        .withIndex("by_sessionKey", (q) =>
+          q.eq("sessionKey", args.assigneeSessionKey!),
+        )
         .first();
       if (assignee) {
         assigneeIds = [assignee._id];
       }
     }
-    
+
     // Find creator if provided
     let createdBy = undefined;
     let creatorAgent = null;
     if (args.createdBySessionKey) {
       creatorAgent = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.createdBySessionKey!))
+        .withIndex("by_sessionKey", (q) =>
+          q.eq("sessionKey", args.createdBySessionKey!),
+        )
         .first();
       if (creatorAgent) {
         createdBy = creatorAgent._id;
       }
     }
-    
+
     const taskId = await ctx.db.insert("tasks", {
       title: args.title,
       description: args.description,
@@ -214,7 +220,7 @@ export const create = mutation({
       createdAt: now,
       updatedAt: now,
     });
-    
+
     // Log activity
     await ctx.db.insert("activities", {
       type: "task_created",
@@ -223,7 +229,7 @@ export const create = mutation({
       message: `Task created: ${args.title}`,
       createdAt: now,
     });
-    
+
     // Send notification to assignee
     if (assigneeIds.length > 0) {
       const firstAssigneeId = assigneeIds[0]!;
@@ -240,7 +246,7 @@ export const create = mutation({
         });
       }
     }
-    
+
     return taskId;
   },
 });
@@ -254,7 +260,7 @@ export const updateStatus = mutation({
       v.literal("assigned"),
       v.literal("in_progress"),
       v.literal("review"),
-      v.literal("done")
+      v.literal("done"),
     ),
     bySessionKey: v.optional(v.string()),
   },
@@ -262,23 +268,25 @@ export const updateStatus = mutation({
     const now = Date.now();
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("Task not found");
-    
+
     const oldStatus = task.status;
-    
+
     // Find the agent making the change
     let agentId = undefined;
     let agentName = "System";
     if (args.bySessionKey) {
       const agent = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.bySessionKey!))
+        .withIndex("by_sessionKey", (q) =>
+          q.eq("sessionKey", args.bySessionKey!),
+        )
         .first();
       if (agent) {
         agentId = agent._id;
         agentName = agent.name;
       }
     }
-    
+
     // Update task
     const updates: Record<string, unknown> = {
       status: args.status,
@@ -287,9 +295,9 @@ export const updateStatus = mutation({
     if (args.status === "done") {
       updates.completedAt = now;
     }
-    
+
     await ctx.db.patch(args.taskId, updates);
-    
+
     // Log activity
     await ctx.db.insert("activities", {
       type: "task_status_changed",
@@ -299,7 +307,7 @@ export const updateStatus = mutation({
       metadata: { oldStatus, newStatus: args.status },
       createdAt: now,
     });
-    
+
     // Send notifications for review
     if (args.status === "review" && task.createdBy) {
       await ctx.db.insert("notifications", {
@@ -326,7 +334,7 @@ export const assign = mutation({
     const now = Date.now();
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("Task not found");
-    
+
     // Find assignees
     const assigneeIds: Id<"agents">[] = [];
     for (const sessionKey of args.assigneeSessionKeys) {
@@ -338,26 +346,28 @@ export const assign = mutation({
         assigneeIds.push(agent._id);
       }
     }
-    
+
     // Find assigner
     let assignerId = undefined;
     if (args.bySessionKey) {
       const assigner = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.bySessionKey!))
+        .withIndex("by_sessionKey", (q) =>
+          q.eq("sessionKey", args.bySessionKey!),
+        )
         .first();
       if (assigner) {
         assignerId = assigner._id;
       }
     }
-    
+
     // Update task
     await ctx.db.patch(args.taskId, {
       assigneeIds,
       status: task.status === "inbox" ? "assigned" : task.status,
       updatedAt: now,
     });
-    
+
     // Send notifications to assignees
     for (const assigneeId of assigneeIds) {
       await ctx.db.insert("notifications", {
@@ -370,7 +380,7 @@ export const assign = mutation({
         createdAt: now,
       });
     }
-    
+
     // Log activity
     await ctx.db.insert("activities", {
       type: "task_assigned",
@@ -392,21 +402,23 @@ export const addComment = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
+
     let fromAgentId = undefined;
     let authorName = args.humanAuthor ?? "Unknown";
-    
+
     if (args.bySessionKey) {
       const agent = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.bySessionKey!))
+        .withIndex("by_sessionKey", (q) =>
+          q.eq("sessionKey", args.bySessionKey!),
+        )
         .first();
       if (agent) {
         fromAgentId = agent._id;
         authorName = agent.name;
       }
     }
-    
+
     const messageId = await ctx.db.insert("messages", {
       taskId: args.taskId,
       fromAgentId,
@@ -415,10 +427,10 @@ export const addComment = mutation({
       content: args.content,
       createdAt: now,
     });
-    
+
     // Update task timestamp
     await ctx.db.patch(args.taskId, { updatedAt: now });
-    
+
     // Log activity
     await ctx.db.insert("activities", {
       type: "message_sent",
@@ -427,7 +439,7 @@ export const addComment = mutation({
       message: `${authorName} commented on task`,
       createdAt: now,
     });
-    
+
     return messageId;
   },
 });
@@ -443,34 +455,36 @@ export const addSubtask = mutation({
   handler: async (ctx, args) => {
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("Task not found");
-    
+
     // Find assignee if provided
     let assigneeId = undefined;
     if (args.assigneeSessionKey) {
       const assignee = await ctx.db
         .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.assigneeSessionKey!))
+        .withIndex("by_sessionKey", (q) =>
+          q.eq("sessionKey", args.assigneeSessionKey!),
+        )
         .first();
       if (assignee) {
         assigneeId = assignee._id;
       }
     }
-    
+
     const newSubtask = {
       title: args.title,
       description: args.description,
       done: false,
       assigneeId,
     };
-    
+
     const subtasks = task.subtasks || [];
     subtasks.push(newSubtask);
-    
+
     await ctx.db.patch(args.taskId, {
       subtasks,
       updatedAt: Date.now(),
     });
-    
+
     return subtasks.length - 1; // Return index of new subtask
   },
 });
@@ -490,7 +504,7 @@ export const updateSubtask = mutation({
     if (!task.subtasks || !task.subtasks[args.subtaskIndex]) {
       throw new Error("Subtask not found");
     }
-    
+
     const subtasks = [...task.subtasks];
     const currentSubtask = subtasks[args.subtaskIndex]!;
     subtasks[args.subtaskIndex] = {
@@ -500,12 +514,12 @@ export const updateSubtask = mutation({
       done: args.done,
       doneAt: args.done ? now : undefined,
     };
-    
+
     await ctx.db.patch(args.taskId, {
       subtasks,
       updatedAt: now,
     });
-    
+
     // Log activity if completing
     if (args.done) {
       let agentId = undefined;
@@ -513,14 +527,16 @@ export const updateSubtask = mutation({
       if (args.bySessionKey) {
         const agent = await ctx.db
           .query("agents")
-          .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.bySessionKey!))
+          .withIndex("by_sessionKey", (q) =>
+            q.eq("sessionKey", args.bySessionKey!),
+          )
           .first();
         if (agent) {
           agentId = agent._id;
           agentName = agent.name;
         }
       }
-      
+
       const completedSubtask = subtasks[args.subtaskIndex]!;
       await ctx.db.insert("activities", {
         type: "subtask_completed",
@@ -544,16 +560,16 @@ export const update = mutation({
         v.literal("low"),
         v.literal("normal"),
         v.literal("high"),
-        v.literal("urgent")
-      )
+        v.literal("urgent"),
+      ),
     ),
   },
   handler: async (ctx, args) => {
     const { taskId, ...updates } = args;
     const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([, value]) => value !== undefined)
+      Object.entries(updates).filter(([, value]) => value !== undefined),
     );
-    
+
     await ctx.db.patch(taskId, {
       ...filteredUpdates,
       updatedAt: Date.now(),
@@ -570,21 +586,21 @@ export const remove = mutation({
       .query("messages")
       .withIndex("by_task", (q) => q.eq("taskId", args.taskId))
       .collect();
-    
+
     for (const msg of messages) {
       await ctx.db.delete(msg._id);
     }
-    
+
     // Delete related documents
     const documents = await ctx.db
       .query("documents")
       .withIndex("by_task", (q) => q.eq("taskId", args.taskId))
       .collect();
-    
+
     for (const doc of documents) {
       await ctx.db.delete(doc._id);
     }
-    
+
     await ctx.db.delete(args.taskId);
   },
 });

@@ -11,17 +11,13 @@ export default defineSchema({
     status: v.union(
       v.literal("idle"),
       v.literal("active"),
-      v.literal("blocked")
+      v.literal("blocked"),
     ),
     currentTaskId: v.optional(v.id("tasks")),
     config: v.optional(v.any()), // Agent-specific configuration
     // Presence tracking
     presenceStatus: v.optional(
-      v.union(
-        v.literal("online"),
-        v.literal("idle"),
-        v.literal("offline")
-      )
+      v.union(v.literal("online"), v.literal("idle"), v.literal("offline")),
     ),
     lastHeartbeat: v.optional(v.number()),
     lastSeen: v.optional(v.number()),
@@ -43,15 +39,15 @@ export default defineSchema({
       v.literal("assigned"), // Assigned but not started
       v.literal("in_progress"), // Being worked on
       v.literal("review"), // Submitted for review
-      v.literal("done") // Completed and approved
+      v.literal("done"), // Completed and approved
     ),
     priority: v.optional(
       v.union(
         v.literal("low"),
         v.literal("normal"),
         v.literal("high"),
-        v.literal("urgent")
-      )
+        v.literal("urgent"),
+      ),
     ),
     // Subtasks - embedded array for checklist-style tracking
     subtasks: v.optional(
@@ -62,8 +58,8 @@ export default defineSchema({
           done: v.boolean(),
           doneAt: v.optional(v.number()),
           assigneeId: v.optional(v.id("agents")),
-        })
-      )
+        }),
+      ),
     ),
     // Multiple assignees supported
     assigneeIds: v.optional(v.array(v.id("agents"))),
@@ -85,7 +81,7 @@ export default defineSchema({
     type: v.union(
       v.literal("comment"), // Task comment
       v.literal("status_change"), // Status update
-      v.literal("system") // System message
+      v.literal("system"), // System message
     ),
     content: v.string(),
     attachments: v.optional(v.array(v.id("documents"))),
@@ -107,7 +103,7 @@ export default defineSchema({
       v.literal("message_received"),
       v.literal("review_requested"),
       v.literal("blocked"),
-      v.literal("custom")
+      v.literal("custom"),
     ),
     taskId: v.optional(v.id("tasks")),
     content: v.string(), // Human-readable notification text
@@ -129,7 +125,7 @@ export default defineSchema({
       v.literal("message_sent"),
       v.literal("document_created"),
       v.literal("agent_heartbeat"),
-      v.literal("notification_sent")
+      v.literal("notification_sent"),
     ),
     agentId: v.optional(v.id("agents")),
     taskId: v.optional(v.id("tasks")),
@@ -151,7 +147,7 @@ export default defineSchema({
       v.literal("deliverable"),
       v.literal("research"),
       v.literal("reference"),
-      v.literal("note")
+      v.literal("note"),
     ),
     taskId: v.optional(v.id("tasks")),
     createdBy: v.id("agents"),

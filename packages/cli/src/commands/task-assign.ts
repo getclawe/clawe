@@ -9,7 +9,7 @@ interface TaskAssignOptions {
 export async function taskAssign(
   taskId: string,
   assigneeSessionKey: string,
-  options: TaskAssignOptions
+  options: TaskAssignOptions,
 ): Promise<void> {
   await client.mutation(api.tasks.assign, {
     taskId: taskId as Id<"tasks">,

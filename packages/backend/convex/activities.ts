@@ -10,9 +10,9 @@ export const feed = query({
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 50;
-    
+
     let activities;
-    
+
     if (args.taskId) {
       // Filter by task
       activities = await ctx.db
@@ -35,20 +35,20 @@ export const feed = query({
         .order("desc")
         .take(limit);
     }
-    
+
     // Enrich with agent and task info
     return Promise.all(
       activities.map(async (activity) => {
         let agent = null;
         let task = null;
-        
+
         if (activity.agentId) {
           agent = await ctx.db.get(activity.agentId);
         }
         if (activity.taskId) {
           task = await ctx.db.get(activity.taskId);
         }
-        
+
         return {
           ...activity,
           agent: agent
@@ -58,7 +58,7 @@ export const feed = query({
             ? { _id: task._id, title: task.title, status: task.status }
             : null,
         };
-      })
+      }),
     );
   },
 });
@@ -74,13 +74,13 @@ export const byType = query({
       v.literal("message_sent"),
       v.literal("document_created"),
       v.literal("agent_heartbeat"),
-      v.literal("notification_sent")
+      v.literal("notification_sent"),
     ),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 50;
-    
+
     return await ctx.db
       .query("activities")
       .withIndex("by_type", (q) => q.eq("type", args.type))
@@ -100,7 +100,7 @@ export const log = mutation({
       v.literal("message_sent"),
       v.literal("document_created"),
       v.literal("agent_heartbeat"),
-      v.literal("notification_sent")
+      v.literal("notification_sent"),
     ),
     agentId: v.optional(v.id("agents")),
     taskId: v.optional(v.id("tasks")),
@@ -130,7 +130,7 @@ export const logBySession = mutation({
       v.literal("message_sent"),
       v.literal("document_created"),
       v.literal("agent_heartbeat"),
-      v.literal("notification_sent")
+      v.literal("notification_sent"),
     ),
     sessionKey: v.optional(v.string()),
     taskId: v.optional(v.id("tasks")),
@@ -139,7 +139,7 @@ export const logBySession = mutation({
   },
   handler: async (ctx, args) => {
     let agentId = undefined;
-    
+
     if (args.sessionKey) {
       const sessionKey = args.sessionKey;
       const agent = await ctx.db
@@ -150,7 +150,7 @@ export const logBySession = mutation({
         agentId = agent._id;
       }
     }
-    
+
     return await ctx.db.insert("activities", {
       type: args.type,
       agentId,
