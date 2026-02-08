@@ -3,13 +3,22 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@clawe/ui/components/button";
 import { Progress } from "@clawe/ui/components/progress";
-import { Globe, MessageCircle } from "lucide-react";
+import { Globe, MessageCircle, AlertTriangle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@clawe/ui/components/tooltip";
+import { useAgencyStatus } from "@/hooks/use-agency-status";
 
 const TOTAL_STEPS = 4;
 const CURRENT_STEP = 1;
 
 export default function WelcomePage() {
   const router = useRouter();
+  const { status, isLoading } = useAgencyStatus();
+
+  const isOffline = !isLoading && status === "down";
 
   return (
     <div className="flex flex-1 flex-col">
@@ -54,17 +63,54 @@ export default function WelcomePage() {
             </li>
           </ul>
         </div>
+
+        {/* Offline warning */}
+        {isOffline && (
+          <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/30">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-red-800 dark:text-red-300">
+                  OpenClaw service is offline
+                </p>
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  The agent service needs to be running before you can continue.
+                  Start it with:
+                </p>
+                <pre className="rounded-md bg-red-100 px-3 py-2 text-xs text-red-900 dark:bg-red-950/50 dark:text-red-300">
+                  sudo docker compose up -d openclaw
+                </pre>
+                <p className="text-xs text-red-600 dark:text-red-500">
+                  This status will update automatically once the service is
+                  detected.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* CTA - full width on mobile, right-aligned on larger screens */}
       <div className="flex justify-center pt-6 sm:justify-end sm:pt-8">
-        <Button
-          variant="brand"
-          className="w-full sm:w-auto"
-          onClick={() => router.push("/setup/business")}
-        >
-          Get Started
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className={isOffline ? "cursor-not-allowed" : ""}>
+              <Button
+                variant="brand"
+                className="w-full sm:w-auto"
+                disabled={isOffline}
+                onClick={() => router.push("/setup/business")}
+              >
+                Get Started
+              </Button>
+            </span>
+          </TooltipTrigger>
+          {isOffline && (
+            <TooltipContent>
+              <p>Start OpenClaw to continue</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
       </div>
     </div>
   );
