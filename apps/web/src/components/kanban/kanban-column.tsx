@@ -1,15 +1,16 @@
 "use client";
 
-import { Clock, CheckCircle2, CircleDashed, Eye } from "lucide-react";
+import { Clock, CheckCircle2, Inbox, UserCheck, Eye } from "lucide-react";
 import { cn } from "@clawe/ui/lib/utils";
 import { KanbanCard } from "./kanban-card";
 import { columnVariants, type KanbanColumnDef, type KanbanTask } from "./types";
 import { ScrollArea } from "@clawe/ui/components/scroll-area";
 
 const columnIcons: Record<KanbanColumnDef["variant"], React.ReactNode> = {
-  todo: <CircleDashed className="h-3.5 w-3.5 text-gray-400" />,
+  inbox: <Inbox className="h-3.5 w-3.5 text-gray-400" />,
+  assigned: <UserCheck className="h-3.5 w-3.5 text-white" />,
   "in-progress": <Clock className="h-3.5 w-3.5 text-white" />,
-  "in-review": <Eye className="h-3.5 w-3.5 text-white" />,
+  review: <Eye className="h-3.5 w-3.5 text-white" />,
   done: <CheckCircle2 className="h-3.5 w-3.5 text-white" />,
 };
 

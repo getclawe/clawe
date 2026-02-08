@@ -43,6 +43,11 @@ const SYSTEM_MESSAGE_PATTERNS = [
   /^System:\s*\[\d{4}-\d{2}-\d{2}/i,
   /^Cron:/i,
   /HEARTBEAT_OK/i,
+  // Agent startup/system file content
+  /^#\s*WORKING\.md/i,
+  /---EXIT---/i,
+  /clawe not found/i,
+  /This file is the shared memory across all agent/i,
 ];
 
 const isSystemMessage = (content: string): boolean => {

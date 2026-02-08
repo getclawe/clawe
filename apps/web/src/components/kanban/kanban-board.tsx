@@ -22,8 +22,12 @@ export const KanbanBoard = ({ columns, className }: KanbanBoardProps) => {
 
   return (
     <>
-      <ScrollArea className={cn("h-full", className)}>
-        <div className="flex h-full gap-6 pb-4">
+      <ScrollArea
+        type="scroll"
+        className={cn("h-full w-full", className)}
+        data-kanban-board
+      >
+        <div className="flex h-full min-w-max gap-4 pr-4 pb-4">
           {columns.map((column) => (
             <KanbanColumn
               key={column.id}

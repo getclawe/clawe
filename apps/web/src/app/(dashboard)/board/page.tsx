@@ -12,6 +12,7 @@ import {
   type KanbanTask,
   type KanbanColumnDef,
 } from "@/components/kanban";
+import { LiveFeed } from "@/components/live-feed";
 
 // Map priority from Convex to Kanban format
 function mapPriority(priority?: string): "low" | "medium" | "high" {
@@ -78,6 +79,7 @@ const BoardPage = () => {
     done: [],
   };
 
+  // Add real tasks from Convex
   if (tasks) {
     for (const task of tasks) {
       if (isValidStatus(task.status)) {
@@ -90,13 +92,13 @@ const BoardPage = () => {
     {
       id: "inbox",
       title: "Inbox",
-      variant: "todo",
+      variant: "inbox",
       tasks: groupedTasks.inbox,
     },
     {
       id: "assigned",
       title: "Assigned",
-      variant: "todo",
+      variant: "assigned",
       tasks: groupedTasks.assigned,
     },
     {
@@ -108,7 +110,7 @@ const BoardPage = () => {
     {
       id: "review",
       title: "Review",
-      variant: "in-review",
+      variant: "review",
       tasks: groupedTasks.review,
     },
     {
@@ -121,20 +123,22 @@ const BoardPage = () => {
 
   return (
     <>
-      <PageHeader>
+      <PageHeader className="mb-0">
         <PageHeaderRow>
           <PageHeaderTitle>Board</PageHeaderTitle>
         </PageHeaderRow>
       </PageHeader>
 
-      <div className="min-h-0 flex-1">
-        {!tasks ? (
-          <div className="text-muted-foreground flex items-center justify-center p-8">
-            Loading...
-          </div>
-        ) : (
+      <div className="flex min-h-0 flex-1 gap-4 overflow-hidden">
+        {/* Kanban Board */}
+        <div className="min-w-0 flex-1 pt-6">
           <KanbanBoard columns={columns} className="h-full" />
-        )}
+        </div>
+
+        {/* Live Feed Sidebar */}
+        <div className="bg-muted/30 hidden h-full w-80 shrink-0 overflow-hidden border-l lg:block">
+          <LiveFeed className="h-full" />
+        </div>
       </div>
     </>
   );

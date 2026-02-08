@@ -1,1 +1,8 @@
 /* App-specific styles (base styles are in @clawe/ui/globals.css) */
+
+/* Kanban board: Override Radix ScrollArea's display:table to allow full-height columns */
+[data-kanban-board] [data-radix-scroll-area-viewport] > div {
+  display: flex !important;
+  flex-direction: column;
+  height: 100%;
+}

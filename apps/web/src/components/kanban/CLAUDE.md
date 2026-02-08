@@ -17,9 +17,11 @@ Display-only task kanban board with subtask support.
 import { KanbanBoard, type KanbanTask, type KanbanColumnDef } from "@/components/kanban";
 
 const columns: KanbanColumnDef[] = [
-  { id: "pending", title: "To Do", variant: "todo", tasks: [...] },
+  { id: "inbox", title: "Inbox", variant: "inbox", tasks: [...] },
+  { id: "assigned", title: "Assigned", variant: "assigned", tasks: [...] },
   { id: "in_progress", title: "In Progress", variant: "in-progress", tasks: [...] },
-  { id: "completed", title: "Done", variant: "done", tasks: [...] },
+  { id: "review", title: "Review", variant: "review", tasks: [...] },
+  { id: "done", title: "Done", variant: "done", tasks: [...] },
 ];
 
 <KanbanBoard columns={columns} />
