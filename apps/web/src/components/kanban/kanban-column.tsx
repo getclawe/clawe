@@ -70,7 +70,10 @@ export const KanbanColumn = ({ column, onTaskClick }: KanbanColumnProps) => {
     >
       {/* Header */}
       <div className="mb-2 flex w-full items-center gap-2">
-        <IconComponent className={cn("h-4 w-4", variant.icon)} strokeWidth={2} />
+        <IconComponent
+          className={cn("h-4 w-4", variant.icon)}
+          strokeWidth={2}
+        />
         <span
           className={cn(
             "rounded-full px-2 py-0.5 text-xs font-medium",
