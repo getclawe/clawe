@@ -24,7 +24,7 @@ Deploy a team of AI agents that work together — each with their own identity, 
 ### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/your-org/clawe.git
+git clone https://github.com/getclawe/clawe.git
 cd clawe
 cp .env.example .env
 ```
