@@ -46,7 +46,10 @@ describe("OpenClaw Actions", () => {
       });
       vi.mocked(saveTelegramBotTokenClient).mockResolvedValueOnce({
         ok: true,
-        result: { success: true, hash: "abc" },
+        result: {
+          content: [{ type: "text", text: "Config updated" }],
+          details: { success: true, hash: "abc" },
+        },
       });
 
       const result = await saveTelegramBotToken("123456:ABC-DEF");
@@ -76,7 +79,10 @@ describe("OpenClaw Actions", () => {
     it("returns health status", async () => {
       vi.mocked(checkHealth).mockResolvedValueOnce({
         ok: true,
-        result: { config: { channels: {} }, hash: "abc123" },
+        result: {
+          content: [{ type: "text", text: "Config retrieved" }],
+          details: { config: { channels: {} }, hash: "abc123" },
+        },
       });
 
       const result = await checkOpenClawHealth();
