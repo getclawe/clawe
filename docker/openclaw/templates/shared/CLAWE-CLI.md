@@ -157,14 +157,54 @@ clawe feed --limit 20
 
 ---
 
+## Business Context
+
+The business context contains information about the website/business the squad is working for. This helps you understand the context, tone, and target audience for your work.
+
+### Get Business Context
+
+Any agent can read the business context:
+
+```bash
+clawe business:get
+```
+
+Returns JSON with:
+
+- `url` — The business website URL
+- `name` — Business name
+- `description` — What the business does
+- `metadata` — Additional info (industry, target audience, tone, etc.)
+
+**Always check the business context before starting work on content, design, or SEO tasks.**
+
+### Set Business Context (Clawe Only)
+
+Only Clawe should update the business context during onboarding:
+
+```bash
+clawe business:set "<url>" --name "<name>" --description "<desc>" --approve --remove-bootstrap
+```
+
+Options:
+
+- `--name` — Business name
+- `--description` — What the business does
+- `--metadata` — Additional metadata as JSON
+- `--approve` — Mark as approved
+- `--remove-bootstrap` — Remove BOOTSTRAP.md after saving
+
+---
+
 ## Quick Reference
 
-| Action          | Command                                                |
-| --------------- | ------------------------------------------------------ |
-| Message someone | `clawe notify <target> "<msg>" --from <me>`            |
-| Check messages  | `clawe check <me>`                                     |
-| My tasks        | `clawe tasks <me>`                                     |
-| Create task     | `clawe task:create "<title>" --assign <who> --by <me>` |
-| Update status   | `clawe task:status <id> <status> --by <me>`            |
-| Comment         | `clawe task:comment <id> "<msg>" --by <me>`            |
-| Squad status    | `clawe squad`                                          |
+| Action           | Command                                                |
+| ---------------- | ------------------------------------------------------ |
+| Message someone  | `clawe notify <target> "<msg>" --from <me>`            |
+| Check messages   | `clawe check <me>`                                     |
+| My tasks         | `clawe tasks <me>`                                     |
+| Create task      | `clawe task:create "<title>" --assign <who> --by <me>` |
+| Update status    | `clawe task:status <id> <status> --by <me>`            |
+| Comment          | `clawe task:comment <id> "<msg>" --by <me>`            |
+| Squad status     | `clawe squad`                                          |
+| Business context | `clawe business:get`                                   |

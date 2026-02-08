@@ -10,6 +10,7 @@
 
 import type * as activities from "../activities.js";
 import type * as agents from "../agents.js";
+import type * as businessContext from "../businessContext.js";
 import type * as channels from "../channels.js";
 import type * as documents from "../documents.js";
 import type * as messages from "../messages.js";
@@ -26,6 +27,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   activities: typeof activities;
   agents: typeof agents;
+  businessContext: typeof businessContext;
   channels: typeof channels;
   documents: typeof documents;
   messages: typeof messages;

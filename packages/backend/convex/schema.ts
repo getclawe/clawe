@@ -165,6 +165,28 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_key", ["key"]),
 
+  // Business Context - Website/business info for agent context
+  businessContext: defineTable({
+    url: v.string(),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    favicon: v.optional(v.string()),
+    metadata: v.optional(
+      v.object({
+        title: v.optional(v.string()),
+        ogImage: v.optional(v.string()),
+        industry: v.optional(v.string()),
+        keywords: v.optional(v.array(v.string())),
+        targetAudience: v.optional(v.string()),
+        tone: v.optional(v.string()),
+      }),
+    ),
+    approved: v.boolean(),
+    approvedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
+
   // Channels - Connected messaging channels (Telegram, etc.)
   channels: defineTable({
     type: v.string(),

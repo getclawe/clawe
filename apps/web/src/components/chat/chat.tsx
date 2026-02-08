@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { cn } from "@clawe/ui/lib/utils";
 import { ScrollArea } from "@clawe/ui/components/scroll-area";
 import { useChat } from "@/hooks/use-chat";
@@ -16,6 +16,10 @@ export type ChatProps = {
   mode?: "panel" | "full";
   onClose?: () => void;
   className?: string;
+  /** Hide the header (title and border) */
+  hideHeader?: boolean;
+  /** Auto-send this message when history is empty after loading */
+  autoSendMessage?: string;
 };
 
 export const Chat = ({
@@ -23,6 +27,8 @@ export const Chat = ({
   mode = "full",
   onClose,
   className,
+  hideHeader = false,
+  autoSendMessage,
 }: ChatProps) => {
   const {
     messages,
@@ -37,11 +43,25 @@ export const Chat = ({
   } = useChat({ sessionKey });
 
   const { scrollRef, showScrollButton, scrollToBottom } = useAutoScroll();
+  const autoSendTriggered = useRef(false);
 
   // Load history on mount
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
+
+  // Auto-send message when history is empty (only once)
+  useEffect(() => {
+    if (
+      autoSendMessage &&
+      !autoSendTriggered.current &&
+      !isLoading &&
+      messages.length === 0
+    ) {
+      autoSendTriggered.current = true;
+      sendMessage(autoSendMessage);
+    }
+  }, [autoSendMessage, isLoading, messages.length, sendMessage]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -72,7 +92,9 @@ export const Chat = ({
         className,
       )}
     >
-      <ChatHeader mode={mode} onClose={onClose} isStreaming={isStreaming} />
+      {!hideHeader && (
+        <ChatHeader mode={mode} onClose={onClose} isStreaming={isStreaming} />
+      )}
 
       <div className="relative min-h-0 flex-1">
         <ScrollArea ref={scrollRef} className="h-full">

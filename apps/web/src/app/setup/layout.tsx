@@ -15,7 +15,7 @@ const OnboardingGuard = () => {
 
 export default function SetupLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-svh">
+    <div className="relative flex h-svh">
       {/* Guard - redirects if already onboarded */}
       <OnboardingGuard />
 

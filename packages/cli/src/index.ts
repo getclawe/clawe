@@ -12,6 +12,8 @@ import { notify } from "./commands/notify.js";
 import { squad } from "./commands/squad.js";
 import { feed } from "./commands/feed.js";
 import { agentRegister } from "./commands/agent-register.js";
+import { businessGet } from "./commands/business-get.js";
+import { businessSet } from "./commands/business-set.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -66,6 +68,19 @@ Commands:
   clawe feed [--limit N]                Show activity feed
   clawe agent:register <name> <role> <sessionKey>
       --emoji <emoji>                   Agent emoji
+
+Business Context:
+  clawe business:get                    Get current business context (JSON)
+  clawe business:set <url> [opts]       Set business context (Clawe only)
+      --name <name>                     Business name
+      --description <desc>              Business description
+      --favicon <url>                   Favicon URL
+      --metadata <json>                 Additional metadata as JSON
+      --approve                         Mark as approved
+      --remove-bootstrap                Remove BOOTSTRAP.md after saving
+
+  Note: Only Clawe should use business:set. Other agents can read
+  the context via business:get or the API: GET /api/business/context
 
 Environment:
   CONVEX_URL    Convex deployment URL (required)
@@ -275,6 +290,30 @@ async function main(): Promise<void> {
           process.exit(1);
         }
         await agentRegister(name, role, sessionKey, { emoji: options.emoji });
+        break;
+      }
+
+      case "business:get": {
+        await businessGet();
+        break;
+      }
+
+      case "business:set": {
+        const url = positionalArgs[0];
+        if (!url) {
+          console.error(
+            "Usage: clawe business:set <url> [--name <n>] [--description <d>] [--approve] [--remove-bootstrap]",
+          );
+          process.exit(1);
+        }
+        await businessSet(url, {
+          name: options.name,
+          description: options.description,
+          favicon: options.favicon,
+          metadata: options.metadata,
+          approve: options.approve === "true",
+          removeBootstrap: options["remove-bootstrap"] === "true",
+        });
         break;
       }
 

@@ -70,7 +70,7 @@ export const GeneralSettingsForm = () => {
         </p>
       </div>
 
-      <Button type="submit" disabled={!isDirty}>
+      <Button type="submit" variant="brand" disabled={!isDirty}>
         Save changes
       </Button>
     </form>

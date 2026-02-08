@@ -17,8 +17,8 @@ import {
   approvePairingCode,
 } from "@/lib/openclaw/actions";
 
-const TOTAL_STEPS = 3;
-const CURRENT_STEP = 2;
+const TOTAL_STEPS = 4;
+const CURRENT_STEP = 3;
 
 type Step = "token" | "pairing" | "success";
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronLeft, Settings2, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Settings2, AlertTriangle, Globe } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -18,6 +18,11 @@ const settingsItems = [
     title: "General",
     url: "/settings/general",
     icon: Settings2,
+  },
+  {
+    title: "Business",
+    url: "/settings/business",
+    icon: Globe,
   },
   {
     title: "Danger zone",
