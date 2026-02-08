@@ -5,9 +5,30 @@ import { useQuery } from "convex/react";
 import { api } from "@clawe/backend";
 import { cn } from "@clawe/ui/lib/utils";
 import { ScrollArea } from "@clawe/ui/components/scroll-area";
-import { Activity, Loader2 } from "lucide-react";
+import { Bell, BellOff, Loader2 } from "lucide-react";
 import { LiveFeedItem } from "./live-feed-item";
 import type { FeedActivity, FeedFilter } from "./types";
+
+/** Title component for use in drawer header */
+export const LiveFeedTitle = ({ limit = 50 }: { limit?: number }) => {
+  const activities = useQuery(api.activities.feed, { limit });
+  const count = activities?.length ?? 0;
+
+  return (
+    <>
+      <div className="relative">
+        <Bell className="text-foreground h-5 w-5" />
+        <span className="border-background absolute top-[3px] right-[1px] h-[8px] w-[8px] rounded-full border bg-emerald-500">
+          <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500 opacity-75" />
+        </span>
+      </div>
+      <span>Activity</span>
+      <span className="text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5 text-xs tabular-nums">
+        {count}
+      </span>
+    </>
+  );
+};
 
 const FILTER_CONFIG: {
   id: FeedFilter;
@@ -83,25 +104,9 @@ export const LiveFeed = ({ className, limit = 50 }: LiveFeedProps) => {
     <div
       className={cn("flex h-full min-h-0 flex-col overflow-hidden", className)}
     >
-      {/* Header */}
-      <div className="border-b px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="relative">
-              <Activity className="text-foreground h-5 w-5" />
-              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500">
-                <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500 opacity-75" />
-              </span>
-            </div>
-            <h2 className="font-semibold tracking-tight">Activity</h2>
-          </div>
-          <span className="text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5 text-xs tabular-nums">
-            {filteredActivities.length}
-          </span>
-        </div>
-
-        {/* Filter tabs */}
-        <div className="mt-3 flex gap-1">
+      {/* Filter tabs */}
+      <div className="border-b px-4 py-3">
+        <div className="flex gap-1">
           {FILTER_CONFIG.map((filter) => {
             const count = filterCounts[filter.id] ?? 0;
             const isActive = activeFilter === filter.id;
@@ -146,7 +151,7 @@ export const LiveFeed = ({ className, limit = 50 }: LiveFeedProps) => {
             </div>
           ) : filteredActivities.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Activity className="text-muted-foreground/50 h-8 w-8" />
+              <BellOff className="text-muted-foreground/50 h-8 w-8" />
               <span className="text-muted-foreground mt-2 text-sm">
                 No activity yet
               </span>

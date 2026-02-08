@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Separator } from "@clawe/ui/components/separator";
 import { SidebarToggle } from "@dashboard/sidebar-toggle";
+import { ChatPanelToggle } from "@dashboard/chat-panel-toggle";
 import { isLockedSidebarRoute } from "@dashboard/sidebar-config";
 import { AgencyStatus } from "@/components/agency-status";
 
@@ -25,7 +26,14 @@ const DefaultHeaderContent = () => {
           </>
         )}
       </div>
-      <AgencyStatus />
+      <div className="flex items-center gap-2">
+        <AgencyStatus />
+        <Separator
+          orientation="vertical"
+          className="data-[orientation=vertical]:h-4"
+        />
+        <ChatPanelToggle />
+      </div>
     </div>
   );
 };

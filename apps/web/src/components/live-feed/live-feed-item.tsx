@@ -26,26 +26,18 @@ const formatRelativeTime = (timestamp: number): string => {
   return `${days}d ago`;
 };
 
-// Generate a consistent color based on agent name
+// Generate a consistent color based on agent name (matches agents panel)
 const getAgentColor = (name: string): string => {
-  // Light, colorful pastels
   const colors = [
-    "bg-violet-300 dark:bg-violet-400",
-    "bg-blue-300 dark:bg-blue-400",
-    "bg-emerald-300 dark:bg-emerald-400",
-    "bg-amber-300 dark:bg-amber-400",
-    "bg-rose-300 dark:bg-rose-400",
-    "bg-cyan-300 dark:bg-cyan-400",
-    "bg-fuchsia-300 dark:bg-fuchsia-400",
-    "bg-teal-300 dark:bg-teal-400",
-  ] as const;
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return (
-    colors[Math.abs(hash) % colors.length] ?? "bg-violet-300 dark:bg-violet-400"
-  );
+    "bg-violet-100 dark:bg-violet-900/40",
+    "bg-rose-100 dark:bg-rose-900/40",
+    "bg-amber-100 dark:bg-amber-900/40",
+    "bg-emerald-100 dark:bg-emerald-900/40",
+    "bg-sky-100 dark:bg-sky-900/40",
+    "bg-fuchsia-100 dark:bg-fuchsia-900/40",
+  ];
+  const index = name.charCodeAt(0) % colors.length;
+  return colors[index] || "bg-violet-100 dark:bg-violet-900/40";
 };
 
 // Get activity type config
@@ -126,29 +118,34 @@ export const LiveFeedItem = ({
     <div className={cn("group relative flex gap-3", className)}>
       {/* Timeline line */}
       {!isLast && (
-        <div className="bg-border absolute top-8 left-4 h-[calc(100%+12px)] w-px" />
+        <div className="bg-border absolute top-9 left-4.5 h-[calc(100%+8px)] w-px" />
       )}
 
       {/* Avatar with emoji */}
       <div
         className={cn(
-          "ring-background relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ring-4",
+          "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base",
           agentColor,
         )}
       >
-        <span className="text-white drop-shadow-sm">{agentEmoji}</span>
+        {agentEmoji}
       </div>
 
       {/* Content */}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5 pb-4">
-        <div className="flex items-center gap-2">
-          <span className="truncate text-sm font-medium">{agentName}</span>
-          <span className={cn("flex items-center gap-1 text-xs", config.color)}>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="shrink-0 text-sm font-medium">{agentName}</span>
+          <span
+            className={cn(
+              "flex shrink-0 items-center gap-1 text-xs",
+              config.color,
+            )}
+          >
             {config.icon}
             <span>{config.verb}</span>
           </span>
           {taskTitle && (
-            <span className="text-muted-foreground truncate text-xs">
+            <span className="text-muted-foreground min-w-0 truncate text-xs">
               {taskTitle}
             </span>
           )}
