@@ -21,6 +21,9 @@ type DashboardLayoutProps = {
 const isFullHeightRoute = (path: string) =>
   path === "/board" || path === "/chat";
 
+// Routes that handle their own padding
+const isNoPaddingRoute = (path: string) => path === "/board";
+
 const DashboardLayout = ({ children, header }: DashboardLayoutProps) => {
   const pathname = usePathname();
   const { isLoading } = useRequireOnboarding();
@@ -29,6 +32,7 @@ const DashboardLayout = ({ children, header }: DashboardLayoutProps) => {
   );
 
   const fullHeight = isFullHeightRoute(pathname);
+  const noPadding = isNoPaddingRoute(pathname);
 
   // Update sidebar state when route changes
   useEffect(() => {
@@ -59,7 +63,9 @@ const DashboardLayout = ({ children, header }: DashboardLayoutProps) => {
             </header>
             <DrawerProvider>
               {fullHeight ? (
-                <main className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
+                <main
+                  className={`flex min-h-0 flex-1 flex-col overflow-hidden ${noPadding ? "" : "p-6"}`}
+                >
                   {children}
                 </main>
               ) : (

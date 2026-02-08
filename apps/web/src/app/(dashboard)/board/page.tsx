@@ -1,9 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@clawe/backend";
 import { Bell } from "lucide-react";
 import { Button } from "@clawe/ui/components/button";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@clawe/ui/components/resizable";
 import {
   PageHeader,
   PageHeaderRow,
@@ -17,6 +23,7 @@ import {
 } from "@/components/kanban";
 import { LiveFeed, LiveFeedTitle } from "@/components/live-feed";
 import { useDrawer } from "@/providers/drawer-provider";
+import { AgentsPanel } from "./_components/agents-panel";
 
 // Map priority from Convex to Kanban format
 function mapPriority(priority?: string): "low" | "medium" | "high" {
@@ -31,18 +38,20 @@ function mapPriority(priority?: string): "low" | "medium" | "high" {
   }
 }
 
-// Map Convex task to Kanban task format
-function mapTask(task: {
+type ConvexTask = {
   _id: string;
   title: string;
   description?: string;
   priority?: string;
-  assignees?: { name: string; emoji?: string }[];
+  assignees?: { _id: string; name: string; emoji?: string }[];
   subtasks?: { title: string; description?: string; done: boolean }[];
-}): KanbanTask {
+};
+
+// Map Convex task to Kanban task format
+function mapTask(task: ConvexTask): KanbanTask {
   const subtasks: KanbanTask[] =
     task.subtasks
-      ?.filter((st) => !st.done) // Only show incomplete subtasks
+      ?.filter((st) => !st.done)
       .map((st, i) => ({
         id: `${task._id}-${i}`,
         title: st.title,
@@ -71,9 +80,25 @@ function isValidStatus(status: string): status is TaskStatus {
   );
 }
 
+// Panel sizes in pixels
+const COLLAPSED_SIZE = "48px";
+const DEFAULT_SIZE = "220px";
+const MIN_SIZE = "180px"; // Must be > COLLAPSED_SIZE for expand to work
+const MAX_SIZE = "280px";
+
 const BoardPage = () => {
   const { openDrawer } = useDrawer();
   const tasks = useQuery(api.tasks.list, {});
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
+
+  // Filter tasks by selected agents
+  const filteredTasks = tasks?.filter((task) => {
+    // If no agents selected, show all tasks
+    if (selectedAgentIds.length === 0) return true;
+    // Show task if any of its assignees is selected
+    return task.assignees?.some((a) => selectedAgentIds.includes(a._id));
+  });
 
   // Group tasks by status
   const groupedTasks: Record<TaskStatus, KanbanTask[]> = {
@@ -84,9 +109,8 @@ const BoardPage = () => {
     done: [],
   };
 
-  // Add real tasks from Convex
-  if (tasks) {
-    for (const task of tasks) {
+  if (filteredTasks) {
+    for (const task of filteredTasks) {
       if (isValidStatus(task.status)) {
         groupedTasks[task.status].push(mapTask(task));
       }
@@ -118,36 +142,63 @@ const BoardPage = () => {
       variant: "review",
       tasks: groupedTasks.review,
     },
-    {
-      id: "done",
-      title: "Done",
-      variant: "done",
-      tasks: groupedTasks.done,
-    },
+    { id: "done", title: "Done", variant: "done", tasks: groupedTasks.done },
   ];
 
   const handleOpenFeed = () => {
     openDrawer(<LiveFeed className="h-full" />, <LiveFeedTitle />);
   };
 
-  return (
-    <>
-      <PageHeader className="mb-0">
-        <PageHeaderRow>
-          <PageHeaderTitle>Board</PageHeaderTitle>
-          <PageHeaderActions>
-            <Button variant="outline" size="sm" onClick={handleOpenFeed}>
-              <Bell className="mr-2 h-4 w-4" />
-              Feed
-            </Button>
-          </PageHeaderActions>
-        </PageHeaderRow>
-      </PageHeader>
+  const handlePanelResize = (size: {
+    asPercentage: number;
+    inPixels: number;
+  }) => {
+    // Panel is collapsed when size is at or near collapsedSize (48px)
+    setIsCollapsed(size.inPixels <= 60);
+  };
 
-      <div className="min-h-0 flex-1 overflow-hidden pt-6">
-        <KanbanBoard columns={columns} className="h-full" />
-      </div>
-    </>
+  return (
+    <ResizablePanelGroup orientation="horizontal" className="h-full">
+      {/* Agents Panel */}
+      <ResizablePanel
+        defaultSize={DEFAULT_SIZE}
+        minSize={MIN_SIZE}
+        maxSize={MAX_SIZE}
+        collapsible
+        collapsedSize={COLLAPSED_SIZE}
+        onResize={handlePanelResize}
+        className="hidden md:block"
+      >
+        <AgentsPanel
+          collapsed={isCollapsed}
+          selectedAgentIds={selectedAgentIds}
+          onSelectionChange={setSelectedAgentIds}
+        />
+      </ResizablePanel>
+
+      <ResizableHandle className="hover:bg-border hidden w-px bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:flex" />
+
+      {/* Main Content */}
+      <ResizablePanel minSize="400px">
+        <div className="flex h-full flex-col p-6">
+          <PageHeader className="mb-0">
+            <PageHeaderRow>
+              <PageHeaderTitle>Board</PageHeaderTitle>
+              <PageHeaderActions>
+                <Button variant="outline" size="sm" onClick={handleOpenFeed}>
+                  <Bell className="mr-2 h-4 w-4" />
+                  Feed
+                </Button>
+              </PageHeaderActions>
+            </PageHeaderRow>
+          </PageHeader>
+
+          <div className="min-h-0 flex-1 overflow-hidden pt-6">
+            <KanbanBoard columns={columns} className="h-full" />
+          </div>
+        </div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 };
 
