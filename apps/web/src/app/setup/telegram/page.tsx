@@ -9,13 +9,14 @@ import { Input } from "@clawe/ui/components/input";
 import { Label } from "@clawe/ui/components/label";
 import { Progress } from "@clawe/ui/components/progress";
 import { Spinner } from "@clawe/ui/components/spinner";
-import { CheckCircle2, MessageCircle, Copy, Check } from "lucide-react";
+import { CheckCircle2, MessageCircle, Copy, Check, Play } from "lucide-react";
 import { api } from "@clawe/backend";
 import {
   validateTelegramToken,
   saveTelegramBotToken,
   approvePairingCode,
 } from "@/lib/openclaw/actions";
+import { SetupRightPanelContent } from "../_components/setup-right-panel";
 
 const TOTAL_STEPS = 4;
 const CURRENT_STEP = 3;
@@ -266,52 +267,118 @@ export default function TelegramPage() {
   // Token step (default)
   return (
     <form onSubmit={handleTokenSubmit} className="flex flex-1 flex-col">
-      <div className="max-w-xl flex-1">
-        <div className="mb-8 sm:mb-12">
-          <Progress
-            value={(CURRENT_STEP / TOTAL_STEPS) * 100}
-            className="h-1 w-full max-w-sm"
-            indicatorClassName="bg-brand"
-          />
-        </div>
-
-        <h1 className="mb-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-          Connect Telegram
-        </h1>
-        <p className="text-muted-foreground mb-8">
-          Enter your Telegram bot token to start receiving messages.
-        </p>
-
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="bot-token">Bot Token</Label>
-            <Input
-              id="bot-token"
-              type="password"
-              placeholder="123456789:ABCDefGHijKLmnOPqrSTuvWxyZ"
-              value={botToken}
-              onChange={(e) => setBotToken(e.target.value)}
-            />
-            <p className="text-muted-foreground text-sm">
-              Get your token from{" "}
-              <a
-                href="https://t.me/BotFather"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                @BotFather
-              </a>{" "}
-              on Telegram
+      <SetupRightPanelContent>
+        <div className="flex h-full items-center justify-center p-12">
+          <div className="flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl border bg-white/50 p-8 dark:bg-zinc-900/50">
+            <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+              <Play className="text-muted-foreground h-6 w-6" />
+            </div>
+            <p className="text-muted-foreground text-sm font-medium">
+              Video tutorial coming soon
             </p>
           </div>
-
-          {tokenMutation.error && (
-            <p className="text-destructive text-sm">
-              {tokenMutation.error.message}
-            </p>
-          )}
         </div>
+      </SetupRightPanelContent>
+      <div className="max-w-xl flex-1">
+          <div className="mb-8 sm:mb-12">
+            <Progress
+              value={(CURRENT_STEP / TOTAL_STEPS) * 100}
+              className="h-1 w-full max-w-sm"
+              indicatorClassName="bg-brand"
+            />
+          </div>
+
+          <h1 className="mb-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+            Connect Telegram
+          </h1>
+          <p className="text-muted-foreground mb-8">
+            Create a Telegram bot and connect it to Clawe so your AI agents can
+            receive and respond to messages.
+          </p>
+
+          {/* How to get your bot token */}
+          <div className="mb-8">
+            <h2 className="mb-4 text-sm font-medium">
+              How to get your bot token?
+            </h2>
+            <ol className="space-y-3">
+              <li className="flex items-start gap-3">
+                <span className="bg-muted text-muted-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
+                  1
+                </span>
+                <p className="text-muted-foreground text-sm">
+                  Open Telegram and go to{" "}
+                  <a
+                    href="https://t.me/BotFather"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground font-medium underline underline-offset-2"
+                  >
+                    @BotFather
+                  </a>
+                  .
+                </p>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="bg-muted text-muted-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
+                  2
+                </span>
+                <p className="text-muted-foreground text-sm">
+                  Start a chat and type{" "}
+                  <code className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium">
+                    /newbot
+                  </code>
+                  .
+                </p>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="bg-muted text-muted-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
+                  3
+                </span>
+                <p className="text-muted-foreground text-sm">
+                  Follow the prompts to name your bot and choose a username.
+                </p>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="bg-muted text-muted-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
+                  4
+                </span>
+                <p className="text-muted-foreground text-sm">
+                  BotFather will send you a message with your bot token. Copy
+                  the entire token (it looks like a long string of numbers and
+                  letters).
+                </p>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="bg-muted text-muted-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium">
+                  5
+                </span>
+                <p className="text-muted-foreground text-sm">
+                  Paste the token in the field below and click Connect.
+                </p>
+              </li>
+            </ol>
+          </div>
+
+          {/* Token input */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="bot-token">Enter bot token</Label>
+              <Input
+                id="bot-token"
+                type="password"
+                placeholder="123456789:ABCDefGHijKLmnOPqrSTuvWxyZ"
+                value={botToken}
+                onChange={(e) => setBotToken(e.target.value)}
+              />
+            </div>
+
+            {tokenMutation.error && (
+              <p className="text-destructive text-sm">
+                {tokenMutation.error.message}
+              </p>
+            )}
+          </div>
       </div>
 
       <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end sm:pt-8">
