@@ -17,9 +17,8 @@ type DashboardLayoutProps = {
   header: React.ReactNode;
 };
 
-// Routes that handle their own scrolling (e.g., kanban board, chat)
-const isFullHeightRoute = (path: string) =>
-  path === "/board" || path === "/chat";
+// Routes that handle their own scrolling (e.g., kanban board)
+const isFullHeightRoute = (path: string) => path === "/board";
 
 // Routes that handle their own padding
 const isNoPaddingRoute = (path: string) => path === "/board";
