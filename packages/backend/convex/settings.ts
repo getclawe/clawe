@@ -69,3 +69,41 @@ export const completeOnboarding = mutation({
     });
   },
 });
+
+// Timezone settings
+const DEFAULT_TIMEZONE = "America/New_York";
+
+export const getTimezone = query({
+  args: {},
+  handler: async (ctx) => {
+    const setting = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "timezone"))
+      .first();
+    return (setting?.value as string) ?? DEFAULT_TIMEZONE;
+  },
+});
+
+export const setTimezone = mutation({
+  args: { timezone: v.string() },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "timezone"))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        value: args.timezone,
+        updatedAt: Date.now(),
+      });
+      return existing._id;
+    }
+
+    return await ctx.db.insert("settings", {
+      key: "timezone",
+      value: args.timezone,
+      updatedAt: Date.now(),
+    });
+  },
+});

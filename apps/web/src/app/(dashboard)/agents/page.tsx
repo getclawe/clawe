@@ -10,6 +10,7 @@ import {
 import { Badge } from "@clawe/ui/components/badge";
 import { Skeleton } from "@clawe/ui/components/skeleton";
 import { deriveStatus, type AgentStatus } from "@clawe/shared/agents";
+import { WeeklyRoutineGrid } from "./_components/weekly-routine-grid";
 
 const statusConfig: Record<
   AgentStatus,
@@ -53,67 +54,78 @@ const AgentsPage = () => {
         </PageHeaderRow>
       </PageHeader>
 
-      <div className="space-y-4">
-        <p className="text-muted-foreground text-sm">
-          Your AI agents and their current status.
-        </p>
+      <div className="space-y-8">
+        {/* Agents section */}
+        <section>
+          <p className="text-muted-foreground mb-4 text-sm">
+            Your AI agents and their current status.
+          </p>
 
-        {agents === undefined ? (
-          <div className="flex flex-wrap gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <AgentCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : agents.length === 0 ? (
-          <p className="text-muted-foreground">No agents registered yet.</p>
-        ) : (
-          <div className="flex flex-wrap gap-4">
-            {agents.map((agent) => {
-              const status = deriveStatus(agent);
-              const config = statusConfig[status];
+          {agents === undefined ? (
+            <div className="flex flex-wrap gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <AgentCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : agents.length === 0 ? (
+            <p className="text-muted-foreground">No agents registered yet.</p>
+          ) : (
+            <div className="flex flex-wrap gap-4">
+              {agents.map((agent) => {
+                const status = deriveStatus(agent);
+                const config = statusConfig[status];
 
-              return (
-                <div
-                  key={agent._id}
-                  className="flex w-52 flex-col rounded-lg border p-4"
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="text-3xl">{agent.emoji}</span>
-                    {status === "offline" ? (
-                      <Badge variant="outline">{config.label}</Badge>
-                    ) : (
-                      <Badge
-                        variant="secondary"
-                        className={`${config.bgColor} ${config.textColor}`}
-                      >
-                        <span
-                          className={`mr-1.5 h-1.5 w-1.5 rounded-full ${config.dotColor}`}
-                        />
-                        {config.label}
-                      </Badge>
-                    )}
+                return (
+                  <div
+                    key={agent._id}
+                    className="flex w-52 flex-col rounded-lg border p-4"
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-3xl">{agent.emoji}</span>
+                      {status === "offline" ? (
+                        <Badge variant="outline">{config.label}</Badge>
+                      ) : (
+                        <Badge
+                          variant="secondary"
+                          className={`${config.bgColor} ${config.textColor}`}
+                        >
+                          <span
+                            className={`mr-1.5 h-1.5 w-1.5 rounded-full ${config.dotColor}`}
+                          />
+                          {config.label}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <h3 className="mb-1 font-medium">{agent.name}</h3>
+                    <p className="text-muted-foreground text-sm">
+                      {agent.role}
+                    </p>
+
+                    <div className="mt-auto pt-4">
+                      {agent.currentTask ? (
+                        <p className="truncate text-xs">
+                          <span className="text-muted-foreground">Task: </span>
+                          {agent.currentTask.title}
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground text-xs">
+                          Last seen: {formatLastSeen(agent.lastHeartbeat)}
+                        </p>
+                      )}
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
-                  <h3 className="mb-1 font-medium">{agent.name}</h3>
-                  <p className="text-muted-foreground text-sm">{agent.role}</p>
-
-                  <div className="mt-auto pt-4">
-                    {agent.currentTask ? (
-                      <p className="truncate text-xs">
-                        <span className="text-muted-foreground">Task: </span>
-                        {agent.currentTask.title}
-                      </p>
-                    ) : (
-                      <p className="text-muted-foreground text-xs">
-                        Last seen: {formatLastSeen(agent.lastHeartbeat)}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {/* Weekly Routines section */}
+        <section>
+          <h2 className="mb-4 text-lg font-semibold">Weekly Routines</h2>
+          <WeeklyRoutineGrid />
+        </section>
       </div>
     </>
   );

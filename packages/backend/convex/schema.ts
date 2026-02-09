@@ -187,4 +187,39 @@ export default defineSchema({
     connectedAt: v.optional(v.number()),
     metadata: v.optional(v.any()),
   }).index("by_type", ["type"]),
+
+  // Routines - Recurring task templates with schedules
+  routines: defineTable({
+    // Template info (used to create tasks)
+    title: v.string(),
+    description: v.optional(v.string()),
+    priority: v.optional(
+      v.union(
+        v.literal("low"),
+        v.literal("normal"),
+        v.literal("high"),
+        v.literal("urgent"),
+      ),
+    ),
+
+    // Schedule (weekly only for now)
+    // Note: Timezone is global (from settings), not per-routine
+    schedule: v.object({
+      type: v.literal("weekly"),
+      daysOfWeek: v.array(v.number()), // 0=Sun, 1=Mon, ..., 6=Sat
+      hour: v.number(), // 0-23
+      minute: v.number(), // 0-59
+    }),
+
+    // Display
+    color: v.string(), // Tailwind color name (emerald, amber, rose, etc.)
+
+    // Status
+    enabled: v.boolean(),
+    lastTriggeredAt: v.optional(v.number()), // Timestamp of last task creation
+
+    // Metadata
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_enabled", ["enabled"]),
 });

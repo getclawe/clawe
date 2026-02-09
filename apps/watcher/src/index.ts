@@ -12,6 +12,7 @@
 
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@clawe/backend";
+import type { Doc } from "@clawe/backend/dataModel";
 import {
   sessionsSend,
   cronList,
@@ -19,6 +20,7 @@ import {
   type CronAddJob,
   type CronJob,
 } from "@clawe/shared/openclaw";
+import { getTimeInZone, DEFAULT_TIMEZONE } from "@clawe/shared/timezone";
 import { validateEnv, config, POLL_INTERVAL_MS } from "./config.js";
 
 // Validate environment on startup
@@ -61,8 +63,55 @@ const AGENTS = [
 const HEARTBEAT_MESSAGE =
   "Read HEARTBEAT.md and follow it strictly. Check for notifications with 'clawe check'. If nothing needs attention, reply HEARTBEAT_OK.";
 
-const STARTUP_RETRY_ATTEMPTS = 10;
-const STARTUP_RETRY_DELAY_MS = 3000;
+// Input type for creating a routine (fields required by routines.create mutation)
+type RoutineInput = Pick<
+  Doc<"routines">,
+  "title" | "description" | "priority" | "schedule" | "color"
+>;
+
+// Routine seed data (hardcoded for initial setup)
+const SEED_ROUTINES: RoutineInput[] = [
+  {
+    title: "AI Scarcity Research",
+    description: "Research AI scarcity patterns and trends",
+    priority: "normal",
+    schedule: {
+      type: "weekly",
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      hour: 5,
+      minute: 0,
+    },
+    color: "emerald",
+  },
+  {
+    title: "Morning Brief",
+    description: "Prepare daily morning brief for the team",
+    priority: "high",
+    schedule: {
+      type: "weekly",
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      hour: 8,
+      minute: 0,
+    },
+    color: "amber",
+  },
+  {
+    title: "Competitor Scan",
+    description: "Scan competitor activities and updates",
+    priority: "normal",
+    schedule: {
+      type: "weekly",
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      hour: 10,
+      minute: 0,
+    },
+    color: "rose",
+  },
+];
+
+const RETRY_BASE_DELAY_MS = 3000;
+const RETRY_MAX_DELAY_MS = 30000;
+const ROUTINE_CHECK_INTERVAL_MS = 10_000; // Check routines every 10 seconds
 
 /**
  * Sleep helper
@@ -72,39 +121,29 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Retry a function with exponential backoff
+ * Retry a function indefinitely with exponential backoff (capped)
  */
 async function withRetry<T>(
   fn: () => Promise<T>,
   label: string,
-  maxAttempts = STARTUP_RETRY_ATTEMPTS,
-  baseDelayMs = STARTUP_RETRY_DELAY_MS,
+  baseDelayMs = RETRY_BASE_DELAY_MS,
 ): Promise<T> {
-  let lastError: Error | undefined;
+  let attempt = 0;
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  while (true) {
+    attempt++;
     try {
       return await fn();
     } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
+      const error = err instanceof Error ? err : new Error(String(err));
+      const delayMs = Math.min(baseDelayMs * attempt, RETRY_MAX_DELAY_MS);
 
-      if (attempt === maxAttempts) {
-        console.error(
-          `[watcher] ${label} failed after ${maxAttempts} attempts:`,
-          lastError.message,
-        );
-        throw lastError;
-      }
-
-      const delayMs = baseDelayMs * attempt;
       console.log(
-        `[watcher] ${label} failed (attempt ${attempt}/${maxAttempts}), retrying in ${delayMs / 1000}s...`,
+        `[watcher] ${label} failed (attempt ${attempt}), retrying in ${delayMs / 1000}s... (${error.message})`,
       );
       await sleep(delayMs);
     }
   }
-
-  throw lastError;
 }
 
 /**
@@ -217,6 +256,85 @@ async function setupCrons(): Promise<void> {
 }
 
 /**
+ * Seed initial routines if none exist
+ */
+async function seedRoutines(): Promise<void> {
+  console.log("[watcher] Checking routines...");
+
+  const existing = await convex.query(api.routines.list, {});
+
+  if (existing.length > 0) {
+    console.log(`[watcher] ✓ ${existing.length} routine(s) already exist`);
+    return;
+  }
+
+  console.log("[watcher] Seeding initial routines...");
+
+  for (const routine of SEED_ROUTINES) {
+    try {
+      await convex.mutation(api.routines.create, routine);
+      console.log(`[watcher] ✓ Created routine: ${routine.title}`);
+    } catch (err) {
+      console.error(
+        `[watcher] Failed to create routine "${routine.title}":`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+
+  console.log("[watcher] Routine seeding complete.\n");
+}
+
+/**
+ * Check for due routines and trigger them.
+ *
+ * Uses a 1-hour window for crash tolerance: if a routine is scheduled
+ * for 6:00 AM, it can trigger anytime between 6:00 AM and 6:59 AM.
+ */
+async function checkRoutines(): Promise<void> {
+  try {
+    // Get user's timezone from settings
+    const timezone =
+      (await convex.query(api.settings.getTimezone)) ?? DEFAULT_TIMEZONE;
+
+    // Get current timestamp and time in user's timezone
+    const now = new Date();
+    const currentTimestamp = now.getTime();
+    const { dayOfWeek, hour, minute } = getTimeInZone(now, timezone);
+
+    // Query for due routines (with 1-hour window tolerance)
+    const dueRoutines = await convex.query(api.routines.getDueRoutines, {
+      currentTimestamp,
+      dayOfWeek,
+      hour,
+      minute,
+    });
+
+    // Trigger each due routine
+    for (const routine of dueRoutines) {
+      try {
+        const taskId = await convex.mutation(api.routines.trigger, {
+          routineId: routine._id,
+        });
+        console.log(
+          `[watcher] ✓ Triggered routine "${routine.title}" → task ${taskId}`,
+        );
+      } catch (err) {
+        console.error(
+          `[watcher] Failed to trigger routine "${routine.title}":`,
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }
+  } catch (err) {
+    console.error(
+      "[watcher] Error checking routines:",
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
+
+/**
  * Format a notification for delivery to an agent
  */
 function formatNotification(notification: {
@@ -314,13 +432,54 @@ async function deliveryLoop(): Promise<void> {
 }
 
 /**
+ * Start the routine check loop (runs every 10 seconds)
+ */
+function startRoutineCheckLoop(): void {
+  const runCheck = async () => {
+    try {
+      await checkRoutines();
+    } catch (err) {
+      console.error(
+        "[watcher] Routine check error:",
+        err instanceof Error ? err.message : err,
+      );
+    }
+  };
+
+  // Run immediately, then every 10 seconds
+  void runCheck();
+  setInterval(() => void runCheck(), ROUTINE_CHECK_INTERVAL_MS);
+}
+
+/**
+ * Start the notification delivery loop
+ */
+async function startDeliveryLoop(): Promise<void> {
+  while (true) {
+    try {
+      await deliveryLoop();
+    } catch (err) {
+      console.error(
+        "[watcher] Delivery loop error:",
+        err instanceof Error ? err.message : err,
+      );
+    }
+
+    await sleep(POLL_INTERVAL_MS);
+  }
+}
+
+/**
  * Main entry point
  */
 async function main(): Promise<void> {
   console.log("[watcher] 🦞 Clawe Watcher starting...");
   console.log(`[watcher] Convex: ${config.convexUrl}`);
   console.log(`[watcher] OpenClaw: ${config.openclawUrl}`);
-  console.log(`[watcher] Poll interval: ${POLL_INTERVAL_MS}ms\n`);
+  console.log(`[watcher] Notification poll interval: ${POLL_INTERVAL_MS}ms`);
+  console.log(
+    `[watcher] Routine check interval: ${ROUTINE_CHECK_INTERVAL_MS}ms\n`,
+  );
 
   // Register agents in Convex
   await registerAgents();
@@ -328,21 +487,16 @@ async function main(): Promise<void> {
   // Setup crons on startup
   await setupCrons();
 
-  console.log("[watcher] Starting notification delivery loop...\n");
+  // Seed routines if needed
+  await seedRoutines();
 
-  // Main loop
-  while (true) {
-    try {
-      await deliveryLoop();
-    } catch (err) {
-      console.error(
-        "[watcher] Loop error:",
-        err instanceof Error ? err.message : err,
-      );
-    }
+  console.log("[watcher] Starting loops...\n");
 
-    await sleep(POLL_INTERVAL_MS);
-  }
+  // Start routine check loop (every 10 seconds)
+  startRoutineCheckLoop();
+
+  // Start notification delivery loop (uses POLL_INTERVAL_MS)
+  await startDeliveryLoop();
 }
 
 // Start the watcher

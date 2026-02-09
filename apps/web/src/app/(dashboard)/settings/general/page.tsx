@@ -5,7 +5,9 @@ import {
   PageHeaderRow,
   PageHeaderTitle,
 } from "@dashboard/page-header";
+import { Separator } from "@clawe/ui/components/separator";
 import { GeneralSettingsForm } from "./_components/general-settings-form";
+import { TimezoneSettings } from "./_components/timezone-settings";
 
 const GeneralSettingsPage = () => {
   return (
@@ -16,8 +18,12 @@ const GeneralSettingsPage = () => {
         </PageHeaderRow>
       </PageHeader>
 
-      <div className="max-w-2xl">
+      <div className="max-w-2xl space-y-8">
         <GeneralSettingsForm />
+
+        <Separator />
+
+        <TimezoneSettings />
       </div>
     </>
   );
