@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@clawe/ui/lib/utils";
+import { Spinner } from "@clawe/ui/components/spinner";
 import { ChatMessage } from "./chat-message";
 import { ChatEmpty } from "./chat-empty";
 import { ChatThinking } from "./chat-thinking";
@@ -28,7 +29,24 @@ export const ChatMessages = ({
   const showThinking =
     isStreaming && lastMessage?.role === "assistant" && !lastMessage.content;
 
-  if (!hasMessages && !isLoading && !isStreaming) {
+  // Show loading spinner when fetching history
+  if (isLoading && !hasMessages) {
+    return (
+      <div
+        className={cn(
+          "flex min-h-[50vh] items-center justify-center px-4",
+          className,
+        )}
+      >
+        <div className="text-muted-foreground flex flex-col items-center gap-2">
+          <Spinner className="h-6 w-6" />
+          <span className="text-sm">Loading messages...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasMessages && !isStreaming) {
     return <ChatEmpty className={className} />;
   }
 

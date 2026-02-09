@@ -6,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@clawe/ui/components/tooltip";
+import type { Agent } from "@clawe/backend/types";
 
 type AgentStatus = "idle" | "active" | "blocked";
 
@@ -68,14 +69,7 @@ const getAvatarColor = (name: string) => {
 };
 
 export type AgentsPanelItemProps = {
-  agent: {
-    _id: string;
-    name: string;
-    emoji?: string;
-    role: string;
-    status: string;
-    lastSeen?: number;
-  };
+  agent: Agent;
   collapsed?: boolean;
   selected?: boolean;
   onToggle?: () => void;

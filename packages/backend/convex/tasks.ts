@@ -38,7 +38,7 @@ export const list = query({
       tasks = tasks.slice(0, args.limit);
     }
 
-    // Enrich with assignee info
+    // Enrich with assignee info and document count
     return Promise.all(
       tasks.map(async (task) => {
         const assignees = task.assigneeIds
@@ -49,6 +49,15 @@ export const list = query({
           (a): a is NonNullable<typeof a> => a !== null,
         );
 
+        // Get deliverable count for this task
+        const documents = await ctx.db
+          .query("documents")
+          .withIndex("by_task", (q) => q.eq("taskId", task._id))
+          .collect();
+        const documentCount = documents.filter(
+          (d) => d.type === "deliverable",
+        ).length;
+
         return {
           ...task,
           assignees: validAssignees.map((a) => ({
@@ -56,6 +65,7 @@ export const list = query({
             name: a.name,
             emoji: a.emoji,
           })),
+          documentCount,
         };
       }),
     );

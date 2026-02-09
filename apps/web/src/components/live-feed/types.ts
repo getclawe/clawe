@@ -1,20 +1,7 @@
-import type { Doc, Id } from "@clawe/backend/dataModel";
+import type { ActivityType, ActivityWithDetails } from "@clawe/backend/types";
 
-// Activity type from backend schema
-export type ActivityType = Doc<"activities">["type"];
-
-// Enriched activity returned by activities.feed query
-export type FeedActivity = Doc<"activities"> & {
-  agent: {
-    _id: Id<"agents">;
-    name: string;
-    emoji?: string;
-  } | null;
-  task: {
-    _id: Id<"tasks">;
-    title: string;
-    status: string;
-  } | null;
-};
+// Re-export from shared types for convenience
+export type { ActivityType };
+export type FeedActivity = ActivityWithDetails;
 
 export type FeedFilter = "all" | "tasks" | "status" | "heartbeats";

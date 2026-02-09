@@ -31,13 +31,13 @@ export const ChatMessage = ({ message, className }: ChatMessageProps) => {
   if (isContext) {
     return (
       <div className={cn("flex justify-center px-4 py-2", className)}>
-        <div className="border-border/50 bg-muted/30 flex max-w-[90%] items-start gap-2 rounded-lg border border-dashed px-4 py-3">
+        <div className="border-border/50 bg-muted/30 flex max-w-[90%] min-w-0 items-start gap-2 rounded-lg border border-dashed px-4 py-3">
           <Info className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
           <div className="min-w-0 flex-1">
             <span className="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">
               Context
             </span>
-            <div className="text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
+            <div className="text-muted-foreground prose prose-sm dark:prose-invert max-w-none break-words">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -66,13 +66,28 @@ export const ChatMessage = ({ message, className }: ChatMessageProps) => {
                       {children}
                     </strong>
                   ),
-                  code: ({ children, ...props }) => (
-                    <code
-                      className="rounded bg-black/10 px-1 py-0.5 font-mono text-xs dark:bg-white/10"
+                  code: ({ children, className: codeClassName, ...props }) => {
+                    const isInline = !codeClassName;
+                    return isInline ? (
+                      <code
+                        className="rounded bg-black/10 px-1 py-0.5 font-mono text-xs break-all dark:bg-white/10"
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    ) : (
+                      <code className="font-mono text-xs" {...props}>
+                        {children}
+                      </code>
+                    );
+                  },
+                  pre: ({ children, ...props }) => (
+                    <pre
+                      className="my-2 overflow-auto rounded-md bg-black/10 p-2 dark:bg-white/10"
                       {...props}
                     >
                       {children}
-                    </code>
+                    </pre>
                   ),
                 }}
               >
@@ -108,22 +123,24 @@ export const ChatMessage = ({ message, className }: ChatMessageProps) => {
       {/* Message Content */}
       <div
         className={cn(
-          "flex max-w-[80%] flex-col gap-1",
+          "flex max-w-[80%] min-w-0 flex-col gap-1",
           isUser ? "items-end" : "items-start",
         )}
       >
         <div
           className={cn(
-            "rounded-2xl px-4 py-2",
+            "max-w-full min-w-0 rounded-2xl px-4 py-2",
             isUser
               ? "bg-primary text-primary-foreground"
               : "bg-muted text-foreground",
           )}
         >
           {isUser ? (
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            <p className="text-sm break-words whitespace-pre-wrap">
+              {message.content}
+            </p>
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
+            <div className="prose prose-sm dark:prose-invert max-w-none break-words">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{

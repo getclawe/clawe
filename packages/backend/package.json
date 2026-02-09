@@ -15,6 +15,10 @@
     "./dataModel": {
       "types": "./convex/_generated/dataModel.d.ts",
       "default": "./convex/_generated/dataModel.js"
+    },
+    "./types": {
+      "types": "./convex/types.ts",
+      "default": "./convex/types.ts"
     }
   },
   "scripts": {

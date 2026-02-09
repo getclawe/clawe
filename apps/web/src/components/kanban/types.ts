@@ -6,6 +6,7 @@ export type KanbanTask = {
   priority: "low" | "medium" | "high";
   assignee?: string;
   subtasks: KanbanTask[];
+  documentCount?: number;
 };
 
 // Predefined column variants with built-in styling

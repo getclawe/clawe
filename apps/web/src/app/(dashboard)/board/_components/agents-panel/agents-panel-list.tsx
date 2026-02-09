@@ -2,16 +2,8 @@
 
 import { ScrollArea } from "@clawe/ui/components/scroll-area";
 import { cn } from "@clawe/ui/lib/utils";
+import type { Agent } from "@clawe/backend/types";
 import { AgentsPanelItem } from "./agents-panel-item";
-
-type Agent = {
-  _id: string;
-  name: string;
-  emoji?: string;
-  role: string;
-  status: string;
-  lastSeen?: number;
-};
 
 export type AgentsPanelListProps = {
   agents: Agent[];

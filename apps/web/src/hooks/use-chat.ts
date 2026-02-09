@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import axios from "axios";
 import type { ChatAttachment } from "@/components/chat/types";
 
 export type Message = {
@@ -196,35 +197,26 @@ export const useChat = ({
     setStatus("loading");
 
     try {
-      const response = await fetch(
+      const response = await axios.get<{ messages?: unknown[] }>(
         `/api/chat/history?sessionKey=${encodeURIComponent(sessionKey)}&limit=200`,
-        { cache: "no-store" },
       );
 
-      if (!response.ok) {
-        // History loading failed - just continue without history
-        console.warn("[chat] Failed to load history, continuing without");
-        setStatus("idle");
-        return;
-      }
-
-      const data = await response.json();
-      const historyMessages: Message[] = (data.messages || [])
-        .map(
-          (
-            msg: { role?: string; content?: unknown },
-            i: number,
-          ): Message | null => {
-            const content = extractTextContent(msg.content);
-            if (msg.role === "system" || isSystemMessage(content)) return null;
-            return {
-              id: `history_${i}`,
-              role: msg.role === "user" ? "user" : "assistant",
-              content,
-            };
-          },
-        )
-        .filter((m: Message | null): m is Message => m !== null);
+      const data = response.data;
+      const messages = (data.messages || []) as Array<{
+        role?: string;
+        content?: unknown;
+      }>;
+      const historyMessages: Message[] = messages
+        .map((msg, i): Message | null => {
+          const content = extractTextContent(msg.content);
+          if (msg.role === "system" || isSystemMessage(content)) return null;
+          return {
+            id: `history_${i}`,
+            role: msg.role === "user" ? "user" : "assistant",
+            content,
+          };
+        })
+        .filter((m): m is Message => m !== null);
 
       setMessages(historyMessages);
       setStatus("idle");

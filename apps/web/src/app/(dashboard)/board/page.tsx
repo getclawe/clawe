@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@clawe/backend";
+import type { TaskWithAssignees } from "@clawe/backend/types";
 import { Bell } from "lucide-react";
 import { Button } from "@clawe/ui/components/button";
 import {
@@ -38,17 +39,8 @@ function mapPriority(priority?: string): "low" | "medium" | "high" {
   }
 }
 
-type ConvexTask = {
-  _id: string;
-  title: string;
-  description?: string;
-  priority?: string;
-  assignees?: { _id: string; name: string; emoji?: string }[];
-  subtasks?: { title: string; description?: string; done: boolean }[];
-};
-
 // Map Convex task to Kanban task format
-function mapTask(task: ConvexTask): KanbanTask {
+function mapTask(task: TaskWithAssignees): KanbanTask {
   const subtasks: KanbanTask[] =
     task.subtasks
       ?.filter((st) => !st.done)
@@ -69,6 +61,7 @@ function mapTask(task: ConvexTask): KanbanTask {
       ? `${task.assignees[0].emoji || ""} ${task.assignees[0].name}`.trim()
       : undefined,
     subtasks,
+    documentCount: task.documentCount,
   };
 }
 

@@ -1,5 +1,13 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { action, mutation, query } from "./_generated/server";
+
+// Generate upload URL for file storage
+export const generateUploadUrl = action({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
 
 // List all documents
 export const list = query({
@@ -39,12 +47,17 @@ export const getForTask = query({
       .withIndex("by_task", (q) => q.eq("taskId", args.taskId))
       .collect();
 
-    // Enrich with creator info
+    // Enrich with creator info and file URL
     return Promise.all(
       documents.map(async (doc) => {
         const creator = await ctx.db.get(doc.createdBy);
+        const fileUrl = doc.fileId
+          ? await ctx.storage.getUrl(doc.fileId)
+          : null;
+
         return {
           ...doc,
+          fileUrl,
           creator: creator
             ? { _id: creator._id, name: creator.name, emoji: creator.emoji }
             : null,
@@ -121,6 +134,7 @@ export const registerDeliverable = mutation({
   args: {
     title: v.string(),
     path: v.string(),
+    fileId: v.optional(v.id("_storage")),
     taskId: v.id("tasks"),
     createdBySessionKey: v.string(),
   },
@@ -141,6 +155,7 @@ export const registerDeliverable = mutation({
     const documentId = await ctx.db.insert("documents", {
       title: args.title,
       path: args.path,
+      fileId: args.fileId,
       type: "deliverable",
       taskId: args.taskId,
       createdBy: agent._id,

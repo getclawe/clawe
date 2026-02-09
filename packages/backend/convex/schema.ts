@@ -143,6 +143,7 @@ export default defineSchema({
     title: v.string(),
     content: v.optional(v.string()), // Markdown content (for text docs)
     path: v.optional(v.string()), // File path (for file deliverables)
+    fileId: v.optional(v.id("_storage")), // Convex storage ID for uploaded files
     type: v.union(
       v.literal("deliverable"),
       v.literal("research"),

@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, AlignLeft, User } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  AlignLeft,
+  User,
+  FileText,
+} from "lucide-react";
 import { cn } from "@clawe/ui/lib/utils";
 import {
   Popover,
@@ -120,21 +126,35 @@ export const KanbanCard = ({
           </div>
         )}
 
-        {/* Subtask toggle */}
-        {hasSubtasks && !isSubtask && (
-          <Button
-            variant="ghost"
-            onClick={handleToggleClick}
-            className="mt-3 h-auto gap-1 p-1 px-1.5! text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            {expanded ? (
-              <ChevronDown className="h-3 w-3" />
-            ) : (
-              <ChevronRight className="h-3 w-3" />
-            )}
-            {task.subtasks.length} subtask{task.subtasks.length !== 1 && "s"}
-          </Button>
-        )}
+        {/* Subtask toggle and document badge */}
+        {(hasSubtasks || (task.documentCount && task.documentCount > 0)) &&
+          !isSubtask && (
+            <div className="mt-3 flex items-center gap-3">
+              {hasSubtasks && (
+                <Button
+                  variant="ghost"
+                  onClick={handleToggleClick}
+                  className="h-auto gap-1 p-1 px-1.5! text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  {expanded ? (
+                    <ChevronDown className="h-3 w-3" />
+                  ) : (
+                    <ChevronRight className="h-3 w-3" />
+                  )}
+                  {task.subtasks.length} subtask
+                  {task.subtasks.length !== 1 && "s"}
+                </Button>
+              )}
+
+              {task.documentCount && task.documentCount > 0 && (
+                <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                  <FileText className="h-3 w-3" />
+                  {task.documentCount} document
+                  {task.documentCount !== 1 && "s"}
+                </span>
+              )}
+            </div>
+          )}
       </div>
 
       {/* Expanded subtasks */}
