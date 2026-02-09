@@ -1,8 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useChat } from "./use-chat";
+import axios from "axios";
 
-// Mock fetch
+// Mock axios
+vi.mock("axios");
+const mockAxiosGet = vi.fn();
+(axios.get as unknown) = mockAxiosGet;
+
+// Mock fetch for streaming (sendMessage still uses fetch)
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
@@ -46,23 +52,21 @@ describe("useChat", () => {
 
   describe("loadHistory", () => {
     it("loads messages from API", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            messages: [
-              {
-                role: "user",
-                content: [{ type: "text", text: "Hi" }],
-                timestamp: 1234567890,
-              },
-              {
-                role: "assistant",
-                content: [{ type: "text", text: "Hello!" }],
-                timestamp: 1234567891,
-              },
-            ],
-          }),
+      mockAxiosGet.mockResolvedValueOnce({
+        data: {
+          messages: [
+            {
+              role: "user",
+              content: [{ type: "text", text: "Hi" }],
+              timestamp: 1234567890,
+            },
+            {
+              role: "assistant",
+              content: [{ type: "text", text: "Hello!" }],
+              timestamp: 1234567891,
+            },
+          ],
+        },
       });
 
       const { result } = renderHook(() =>
@@ -78,10 +82,7 @@ describe("useChat", () => {
     });
 
     it("continues gracefully on API failure", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: "Failed to load" }),
-      });
+      mockAxiosGet.mockRejectedValueOnce(new Error("Failed to load"));
 
       const { result } = renderHook(() =>
         useChat({ sessionKey: "test-session" }),
