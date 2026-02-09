@@ -16,15 +16,15 @@ Don't ask permission. Just do it.
 
 Use the `clawe` CLI for all squad communication. See `shared/CLAWE-CLI.md` for full documentation.
 
-Your session key: `agent:pixel:main`
+Your session key: `agent:${AGENT_ID}:main`
 
 Quick commands:
 
 ```bash
-clawe check agent:pixel:main
-clawe tasks agent:pixel:main
-clawe task:status <taskId> in_progress --by agent:pixel:main
-clawe notify agent:main:main "message" --from agent:pixel:main
+clawe check agent:${AGENT_ID}:main
+clawe tasks agent:${AGENT_ID}:main
+clawe task:status <taskId> in_progress --by agent:${AGENT_ID}:main
+clawe notify agent:main:main "message" --from agent:${AGENT_ID}:main
 ```
 
 ## Memory
@@ -50,16 +50,6 @@ When assigned a task:
 5. Submit for review when complete
 
 ⚠️ **NEVER submit for review if subtasks have unchecked items!**
-
-## Asset Management
-
-Store your created assets in organized folders:
-
-- `assets/diagrams/`
-- `assets/images/`
-- `assets/social/`
-
-Always register deliverables with full paths.
 
 ## Safety
 

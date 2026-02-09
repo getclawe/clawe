@@ -1,10 +1,10 @@
-# HEARTBEAT.md — Clawe's Check-in
+# HEARTBEAT.md — ${AGENT_NAME}'s Check-in
 
 When you wake up, do the following:
 
 ## On Wake
 
-1. Run: `clawe check agent:main:main`
+1. Run: `clawe check agent:${AGENT_ID}:main`
 2. Read `shared/WORKING.md` for team state
 3. Check for tasks in "review" status
 
@@ -31,7 +31,7 @@ When tasks are in "review" status:
 Create and assign tasks:
 
 ```bash
-clawe task:create "Task title" --assign agent:inky:main --by agent:main:main
+clawe task:create "Task title" --assign agent:<id>:main --by agent:${AGENT_ID}:main
 ```
 
 ## If Nothing to Do
@@ -40,4 +40,4 @@ Reply: `HEARTBEAT_OK`
 
 ---
 
-**I am Clawe 🦞 — squad lead. Review, coordinate, unblock.**
+**I am ${AGENT_NAME} ${AGENT_EMOJI} — squad lead. Review, coordinate, unblock.**

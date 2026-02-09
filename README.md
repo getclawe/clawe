@@ -183,27 +183,31 @@ Each agent has an isolated workspace with:
 
 ### Adding New Agents
 
-1. Create workspace template in `docker/openclaw/templates/workspaces/{name}/`
-2. Add agent to `docker/openclaw/templates/config.template.json`
-3. Add agent to watcher's `AGENTS` array in `apps/watcher/src/index.ts`
-4. Rebuild: `docker compose build && docker compose up -d`
+**Live (no rebuild):**
+
+```bash
+clawe agent:onboard coder Coder Developer --emoji 💻 --cron "15,45 * * * *"
+```
+
+**Build-time (persists across rebuilds):**
+
+```bash
+./scripts/add-agent.sh coder Coder 💻 Developer "15,45 * * * *"
+docker compose build --no-cache openclaw && docker compose up -d
+clawe agent:onboard coder Coder Developer --emoji 💻 --cron "15,45 * * * *"
+```
+
+See [docs/AGENT_ONBOARDING.md](docs/AGENT_ONBOARDING.md) for the full guide.
 
 ### Changing Heartbeat Schedules
 
-Edit the `AGENTS` array in `apps/watcher/src/index.ts`:
+Heartbeat schedules are stored in Convex (per agent). Update them via the CLI:
 
-```typescript
-const AGENTS = [
-  {
-    id: "main",
-    name: "Clawe",
-    emoji: "🦞",
-    role: "Squad Lead",
-    cron: "0 * * * *",
-  },
-  // Add or modify agents here
-];
+```bash
+clawe agent:onboard <id> <name> <role> --cron "new schedule"
 ```
+
+Or update the agent's `cronSchedule` field directly in Convex. Changes take effect on next watcher restart.
 
 ## Development
 

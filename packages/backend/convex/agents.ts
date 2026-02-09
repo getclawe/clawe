@@ -76,6 +76,9 @@ export const upsert = mutation({
     sessionKey: v.string(),
     emoji: v.optional(v.string()),
     config: v.optional(v.any()),
+    agentType: v.optional(v.union(v.literal("lead"), v.literal("worker"))),
+    cronSchedule: v.optional(v.string()),
+    model: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
@@ -91,6 +94,9 @@ export const upsert = mutation({
         role: args.role,
         emoji: args.emoji,
         config: args.config,
+        agentType: args.agentType,
+        cronSchedule: args.cronSchedule,
+        model: args.model,
         updatedAt: now,
       });
       return existing._id;
@@ -101,6 +107,9 @@ export const upsert = mutation({
         sessionKey: args.sessionKey,
         emoji: args.emoji,
         config: args.config,
+        agentType: args.agentType,
+        cronSchedule: args.cronSchedule,
+        model: args.model,
         status: "offline",
         createdAt: now,
         updatedAt: now,

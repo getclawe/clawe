@@ -2,9 +2,11 @@
 set -e
 
 # Clawe Agent Initialization Script
-# This script initializes agent workspaces and shared state
+# Generates agent workspaces from base templates + agent-specific SOUL.md
 
 TEMPLATES_DIR="/opt/clawe/templates"
+BASE_DIR="$TEMPLATES_DIR/base"
+WORKSPACES_DIR="$TEMPLATES_DIR/workspaces"
 DATA_DIR="/data"
 
 echo "🦞 Initializing Clawe agents..."
@@ -15,41 +17,61 @@ mkdir -p "$DATA_DIR/shared"
 cp -r "$TEMPLATES_DIR/shared/"* "$DATA_DIR/shared/"
 echo "  ✓ Shared state initialized"
 
-# Initialize Clawe (lead) workspace
-echo "  → Creating Clawe workspace..."
-mkdir -p "$DATA_DIR/workspace/memory"
-cp -r "$TEMPLATES_DIR/workspaces/clawe/"* "$DATA_DIR/workspace/"
-ln -sf "$DATA_DIR/shared" "$DATA_DIR/workspace/shared"
-echo "  ✓ Clawe workspace initialized"
+# ──────────────────────────────────────────────
+# init_agent <id> <name> <emoji> <role> <type>
+#   type: "lead" or "worker"
+# ──────────────────────────────────────────────
+init_agent() {
+    AGENT_ID="$1"
+    AGENT_NAME="$2"
+    AGENT_EMOJI="$3"
+    AGENT_ROLE="$4"
+    AGENT_TYPE="${5:-worker}"
 
-# Initialize Inky (writer) workspace
-echo "  → Creating Inky workspace..."
-mkdir -p "$DATA_DIR/workspace-inky/memory"
-cp -r "$TEMPLATES_DIR/workspaces/inky/"* "$DATA_DIR/workspace-inky/"
-ln -sf "$DATA_DIR/shared" "$DATA_DIR/workspace-inky/shared"
-echo "  ✓ Inky workspace initialized"
+    # Workspace path: lead uses /data/workspace, workers use /data/workspace-<id>
+    if [ "$AGENT_TYPE" = "lead" ]; then
+        WS_DIR="$DATA_DIR/workspace"
+    else
+        WS_DIR="$DATA_DIR/workspace-$AGENT_ID"
+    fi
 
-# Initialize Pixel (designer) workspace
-echo "  → Creating Pixel workspace..."
-mkdir -p "$DATA_DIR/workspace-pixel/memory"
-mkdir -p "$DATA_DIR/workspace-pixel/assets"
-cp -r "$TEMPLATES_DIR/workspaces/pixel/"* "$DATA_DIR/workspace-pixel/"
-ln -sf "$DATA_DIR/shared" "$DATA_DIR/workspace-pixel/shared"
-echo "  ✓ Pixel workspace initialized"
+    echo "  → Creating $AGENT_NAME $AGENT_EMOJI workspace..."
+    mkdir -p "$WS_DIR/memory"
 
-# Initialize Scout (SEO) workspace
-echo "  → Creating Scout workspace..."
-mkdir -p "$DATA_DIR/workspace-scout/memory"
-mkdir -p "$DATA_DIR/workspace-scout/research"
-cp -r "$TEMPLATES_DIR/workspaces/scout/"* "$DATA_DIR/workspace-scout/"
-ln -sf "$DATA_DIR/shared" "$DATA_DIR/workspace-scout/shared"
-echo "  ✓ Scout workspace initialized"
+    # Export variables for envsubst
+    export AGENT_ID AGENT_NAME AGENT_EMOJI AGENT_ROLE
+
+    # Generate files from base templates
+    for template in "$BASE_DIR/$AGENT_TYPE"/*.md; do
+        filename=$(basename "$template")
+        envsubst '${AGENT_ID} ${AGENT_NAME} ${AGENT_EMOJI} ${AGENT_ROLE}' < "$template" > "$WS_DIR/$filename"
+    done
+
+    # Copy agent-specific files (SOUL.md and any overrides)
+    if [ -d "$WORKSPACES_DIR/$AGENT_ID" ]; then
+        cp -r "$WORKSPACES_DIR/$AGENT_ID/"* "$WS_DIR/"
+    fi
+
+    # Symlink shared directory
+    ln -sf "$DATA_DIR/shared" "$WS_DIR/shared"
+
+    echo "  ✓ $AGENT_NAME workspace initialized"
+}
+
+# ──────────────────────────────────────────────
+# Initialize all agents
+# ──────────────────────────────────────────────
+
+init_agent "main"  "Clawe" "🦞" "Squad Lead"       "lead"
+init_agent "inky"  "Inky"  "✍️"  "Content Writer"   "worker"
+init_agent "pixel" "Pixel" "🎨" "Graphic Designer"  "worker"
+init_agent "scout" "Scout" "🔍" "SEO Specialist"    "worker"
 
 echo "✅ Agent initialization complete!"
 echo ""
 echo "Squad:"
-echo "  🦞 Clawe (Lead)      → $DATA_DIR/workspace"
-echo "  ✍️ Inky (Writer)     → $DATA_DIR/workspace-inky"
-echo "  🎨 Pixel (Designer)  → $DATA_DIR/workspace-pixel"
-echo "  🔍 Scout (SEO)       → $DATA_DIR/workspace-scout"
+echo "  🦞 Clawe (Squad Lead)       → $DATA_DIR/workspace"
+echo "  ✍️  Inky (Content Writer)    → $DATA_DIR/workspace-inky"
+echo "  🎨 Pixel (Graphic Designer)  → $DATA_DIR/workspace-pixel"
+echo "  🔍 Scout (SEO Specialist)    → $DATA_DIR/workspace-scout"
 echo ""

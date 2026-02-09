@@ -29,7 +29,7 @@
         "workspace": "/data/workspace",
         "identity": {
           "name": "Clawe",
-          "emoji": "🦞"
+          "emoji": "\ud83e\udd9e"
         }
       },
       {
@@ -39,7 +39,7 @@
         "model": "anthropic/claude-sonnet-4-20250514",
         "identity": {
           "name": "Inky",
-          "emoji": "✍️"
+          "emoji": "\u270d\ufe0f"
         }
       },
       {
@@ -49,7 +49,7 @@
         "model": "anthropic/claude-sonnet-4-20250514",
         "identity": {
           "name": "Pixel",
-          "emoji": "🎨"
+          "emoji": "\ud83c\udfa8"
         }
       },
       {
@@ -59,7 +59,7 @@
         "model": "anthropic/claude-sonnet-4-20250514",
         "identity": {
           "name": "Scout",
-          "emoji": "🔍"
+          "emoji": "\ud83d\udd0d"
         }
       }
     ]

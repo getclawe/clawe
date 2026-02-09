@@ -11,6 +11,13 @@ export default defineSchema({
     status: v.union(v.literal("online"), v.literal("offline")),
     currentTaskId: v.optional(v.id("tasks")),
     config: v.optional(v.any()), // Agent-specific configuration
+    agentType: v.optional(v.union(v.literal("lead"), v.literal("worker"))), // "lead" or "worker"
+    cronSchedule: v.optional(v.string()), // Heartbeat cron expression, e.g. "3,18,33,48 * * * *"
+    model: v.optional(v.string()), // Model override, e.g. "anthropic/claude-sonnet-4-20250514"
+    // Presence tracking
+    presenceStatus: v.optional(
+      v.union(v.literal("online"), v.literal("idle"), v.literal("offline")),
+    ),
     lastHeartbeat: v.optional(v.number()),
     lastSeen: v.optional(v.number()),
     currentActivity: v.optional(v.string()),

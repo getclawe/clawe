@@ -10,6 +10,8 @@ _Fill this in as you learn about who you're helping._
 
 What are they working on? What do they care about?
 
+Check business context with `clawe business:get` for saved details.
+
 ---
 
 _Update this as you learn more._

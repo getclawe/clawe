@@ -1,8 +1,12 @@
 /**
  * Clawe Notification Watcher
  *
- * 1. On startup: ensures heartbeat crons are configured for all agents
- * 2. Continuously: polls Convex for undelivered notifications and delivers them
+ * 1. On startup: registers default agents if none exist
+ * 2. On startup: ensures heartbeat crons are configured for all agents
+ * 3. Continuously: polls Convex for undelivered notifications and delivers them
+ *
+ * Agents are read from Convex — no hardcoded list.
+ * New agents can be added at runtime via CLI or API.
  *
  * Environment variables:
  *   CONVEX_URL        - Convex deployment URL
@@ -26,14 +30,15 @@ validateEnv();
 
 const convex = new ConvexHttpClient(config.convexUrl);
 
-// Agent configuration
-const AGENTS = [
+// Default agents — only used on first run when Convex is empty
+const DEFAULT_AGENTS = [
   {
     id: "main",
     name: "Clawe",
     emoji: "🦞",
     role: "Squad Lead",
     cron: "0,15,30,45 * * * *",
+    agentType: "lead" as const,
   },
   {
     id: "inky",
@@ -41,6 +46,7 @@ const AGENTS = [
     emoji: "✍️",
     role: "Writer",
     cron: "3,18,33,48 * * * *",
+    agentType: "worker" as const,
   },
   {
     id: "pixel",
@@ -48,6 +54,7 @@ const AGENTS = [
     emoji: "🎨",
     role: "Designer",
     cron: "7,22,37,52 * * * *",
+    agentType: "worker" as const,
   },
   {
     id: "scout",
@@ -55,6 +62,7 @@ const AGENTS = [
     emoji: "🔍",
     role: "SEO",
     cron: "11,26,41,56 * * * *",
+    agentType: "worker" as const,
   },
 ];
 
@@ -108,31 +116,25 @@ async function withRetry<T>(
 }
 
 /**
- * Register all agents in Convex (upsert - creates or updates)
+ * Register default agents in Convex (only if no agents exist yet)
  */
-async function registerAgents(): Promise<void> {
-  console.log("[watcher] Registering agents in Convex...");
-  console.log("[watcher] CONVEX_URL:", config.convexUrl);
+async function registerDefaultAgents(): Promise<void> {
+  console.log("[watcher] Checking for existing agents in Convex...");
 
-  // Try to register first agent with retry (waits for Convex to be ready)
-  const firstAgent = AGENTS[0];
-  if (firstAgent) {
-    await withRetry(async () => {
-      const sessionKey = `agent:${firstAgent.id}:main`;
-      await convex.mutation(api.agents.upsert, {
-        name: firstAgent.name,
-        role: firstAgent.role,
-        sessionKey,
-        emoji: firstAgent.emoji,
-      });
-      console.log(
-        `[watcher] ✓ ${firstAgent.name} ${firstAgent.emoji} registered (${sessionKey})`,
-      );
-    }, "Convex connection");
+  const existingAgents = await withRetry(async () => {
+    return await convex.query(api.agents.list, {});
+  }, "Convex connection");
+
+  if (existingAgents.length > 0) {
+    console.log(
+      `[watcher] Found ${existingAgents.length} agent(s) in Convex. Skipping default registration.`,
+    );
+    return;
   }
 
-  // Register remaining agents (Convex is now ready)
-  for (const agent of AGENTS.slice(1)) {
+  console.log("[watcher] No agents found. Registering defaults...");
+
+  for (const agent of DEFAULT_AGENTS) {
     const sessionKey = `agent:${agent.id}:main`;
 
     try {
@@ -141,6 +143,8 @@ async function registerAgents(): Promise<void> {
         role: agent.role,
         sessionKey,
         emoji: agent.emoji,
+        agentType: agent.agentType,
+        cronSchedule: agent.cron,
       });
       console.log(
         `[watcher] ✓ ${agent.name} ${agent.emoji} registered (${sessionKey})`,
@@ -153,16 +157,21 @@ async function registerAgents(): Promise<void> {
     }
   }
 
-  console.log("[watcher] Agent registration complete.\n");
+  console.log("[watcher] Default agent registration complete.\n");
 }
 
 /**
- * Setup heartbeat crons for all agents (if not already configured)
+ * Setup heartbeat crons for all agents from Convex
  */
 async function setupCrons(): Promise<void> {
-  console.log("[watcher] Checking heartbeat crons...");
+  console.log("[watcher] Syncing heartbeat crons...");
 
-  // Retry getting cron list (waits for OpenClaw to be ready)
+  // Get agents from Convex
+  const agents = await withRetry(async () => {
+    return await convex.query(api.agents.list, {});
+  }, "Convex agent list");
+
+  // Get existing crons from OpenClaw
   const result = await withRetry(async () => {
     const res = await cronList();
     if (!res.ok) {
@@ -175,26 +184,42 @@ async function setupCrons(): Promise<void> {
     result.result.details.jobs.map((j: CronJob) => j.name),
   );
 
-  for (const agent of AGENTS) {
-    const cronName = `${agent.id}-heartbeat`;
+  for (const agent of agents) {
+    // Extract agent ID from sessionKey (agent:<id>:main)
+    const agentId = agent.sessionKey.split(":")[1];
+    if (!agentId) continue;
 
-    if (existingNames.has(cronName)) {
-      console.log(`[watcher] ✓ ${agent.name} ${agent.emoji} heartbeat exists`);
+    const cronSchedule = agent.cronSchedule;
+    if (!cronSchedule) {
+      console.log(
+        `[watcher] ⏭ ${agent.name} ${agent.emoji || ""} — no cron schedule, skipping`,
+      );
       continue;
     }
 
-    console.log(`[watcher] Adding ${agent.name} ${agent.emoji} heartbeat...`);
+    const cronName = `${agentId}-heartbeat`;
+
+    if (existingNames.has(cronName)) {
+      console.log(
+        `[watcher] ✓ ${agent.name} ${agent.emoji || ""} heartbeat exists`,
+      );
+      continue;
+    }
+
+    console.log(
+      `[watcher] Adding ${agent.name} ${agent.emoji || ""} heartbeat...`,
+    );
 
     const job: CronAddJob = {
       name: cronName,
-      agentId: agent.id,
+      agentId: agentId,
       enabled: true,
-      schedule: { kind: "cron", expr: agent.cron },
+      schedule: { kind: "cron", expr: cronSchedule },
       sessionTarget: "isolated",
       payload: {
         kind: "agentTurn",
         message: HEARTBEAT_MESSAGE,
-        model: "anthropic/claude-sonnet-4-20250514",
+        model: agent.model || "anthropic/claude-sonnet-4-20250514",
         timeoutSeconds: 600,
       },
       delivery: { mode: "none" },
@@ -203,7 +228,7 @@ async function setupCrons(): Promise<void> {
     const addResult = await cronAdd(job);
     if (addResult.ok) {
       console.log(
-        `[watcher] ✓ ${agent.name} ${agent.emoji} heartbeat: ${agent.cron}`,
+        `[watcher] ✓ ${agent.name} ${agent.emoji || ""} heartbeat: ${cronSchedule}`,
       );
     } else {
       console.error(
@@ -213,7 +238,7 @@ async function setupCrons(): Promise<void> {
     }
   }
 
-  console.log("[watcher] Cron setup complete.\n");
+  console.log("[watcher] Cron sync complete.\n");
 }
 
 /**
@@ -322,10 +347,10 @@ async function main(): Promise<void> {
   console.log(`[watcher] OpenClaw: ${config.openclawUrl}`);
   console.log(`[watcher] Poll interval: ${POLL_INTERVAL_MS}ms\n`);
 
-  // Register agents in Convex
-  await registerAgents();
+  // Register default agents if Convex is empty
+  await registerDefaultAgents();
 
-  // Setup crons on startup
+  // Setup crons from Convex agent data
   await setupCrons();
 
   console.log("[watcher] Starting notification delivery loop...\n");

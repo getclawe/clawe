@@ -12,6 +12,7 @@ import { notify } from "./commands/notify.js";
 import { squad } from "./commands/squad.js";
 import { feed } from "./commands/feed.js";
 import { agentRegister } from "./commands/agent-register.js";
+import { agentOnboard } from "./commands/agent-onboard.js";
 import { businessGet } from "./commands/business-get.js";
 import { businessSet } from "./commands/business-set.js";
 
@@ -68,6 +69,11 @@ Commands:
   clawe feed [--limit N]                Show activity feed
   clawe agent:register <name> <role> <sessionKey>
       --emoji <emoji>                   Agent emoji
+  clawe agent:onboard <id> <name> <role>  Full onboard (live, no rebuild)
+      --emoji <emoji>                   Agent emoji (default: 🤖)
+      --cron <expr>                     Heartbeat cron (default: 15,45 * * * *)
+      --model <model>                   Model override
+      --type <lead|worker>              Agent type (default: worker)
 
 Business Context:
   clawe business:get                    Get current business context (JSON)
@@ -291,6 +297,25 @@ async function main(): Promise<void> {
           process.exit(1);
         }
         await agentRegister(name, role, sessionKey, { emoji: options.emoji });
+        break;
+      }
+
+      case "agent:onboard": {
+        const agentId = positionalArgs[0];
+        const name = positionalArgs[1];
+        const role = positionalArgs[2];
+        if (!agentId || !name || !role) {
+          console.error(
+            "Usage: clawe agent:onboard <id> <name> <role> [--emoji <e>] [--cron <expr>] [--model <m>] [--type <lead|worker>]",
+          );
+          process.exit(1);
+        }
+        await agentOnboard(agentId, name, role, {
+          emoji: options.emoji,
+          cron: options.cron,
+          model: options.model,
+          type: options.type,
+        });
         break;
       }
 

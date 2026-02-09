@@ -29,6 +29,8 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - CONVEX_URL=${CONVEX_URL}
+      - OPENCLAW_DATA_DIR=/data
+      - CLAWE_TEMPLATES_DIR=/opt/clawe/templates
     volumes:
       - openclaw-data:/data
     healthcheck:
