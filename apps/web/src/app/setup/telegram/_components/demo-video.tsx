@@ -40,7 +40,7 @@ export const DemoVideo = ({ onLoaded }: DemoVideoProps) => {
         playsInline
         preload="auto"
         onLoadedData={onLoaded}
-        className="max-h-[95vh] w-auto rounded-[2.5rem] shadow-2xl shadow-black/50"
+        className="max-h-[95vh] w-auto rounded-[2.5rem]"
       />
 
       {/* Pause/play overlay */}
