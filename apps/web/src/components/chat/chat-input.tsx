@@ -182,7 +182,7 @@ export const ChatInput = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="destructive"
+                variant="secondary"
                 size="icon"
                 onClick={onStop}
                 className="h-10 w-10 shrink-0"

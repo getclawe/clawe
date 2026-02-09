@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { cn } from "@clawe/ui/lib/utils";
 
 export type ChatInputTextareaProps = {
@@ -10,7 +10,6 @@ export type ChatInputTextareaProps = {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
-  minRows?: number;
   maxRows?: number;
 };
 
@@ -21,51 +20,50 @@ export const ChatInputTextarea = ({
   placeholder,
   disabled,
   className,
-  minRows = 1,
-  maxRows = 5,
+  maxRows = 6,
 }: ChatInputTextareaProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea based on content
-  const rafRef = useRef<number>(0);
+  const resize = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    // Reset to single row to get accurate scrollHeight
+    textarea.style.height = "auto";
+
+    const style = getComputedStyle(textarea);
+    const lineHeight = parseFloat(style.lineHeight);
+    const paddingTop = parseFloat(style.paddingTop);
+    const paddingBottom = parseFloat(style.paddingBottom);
+    const maxHeight = lineHeight * maxRows + paddingTop + paddingBottom;
+
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+  }, [maxRows]);
+
+  // Reset height when value is cleared externally (e.g. after send)
   useEffect(() => {
-    cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      const textarea = textareaRef.current;
-      if (!textarea) return;
+    if (!value) resize();
+  }, [value, resize]);
 
-      const lineHeight = 24;
-      const verticalPadding = 16;
-      const minHeight = lineHeight * minRows + verticalPadding;
-      const maxHeight = lineHeight * maxRows + verticalPadding;
-
-      if (!value.trim()) {
-        textarea.style.height = `${minHeight}px`;
-        return;
-      }
-
-      // Reset to auto to get accurate scrollHeight, then clamp
-      textarea.style.height = "auto";
-      const newHeight = Math.min(
-        Math.max(textarea.scrollHeight, minHeight),
-        maxHeight,
-      );
-      textarea.style.height = `${newHeight}px`;
-    });
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [value, minRows, maxRows]);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      onChange(e.target.value);
+      resize();
+    },
+    [onChange, resize],
+  );
 
   return (
     <textarea
       ref={textareaRef}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={handleChange}
       onKeyDown={onKeyDown}
       placeholder={placeholder}
       disabled={disabled}
-      rows={minRows}
+      rows={1}
       className={cn(
-        "border-input bg-background w-full resize-none rounded-lg border px-3 py-2",
+        "border-input bg-background w-full resize-none overflow-y-auto rounded-lg border px-3 py-2",
         "placeholder:text-muted-foreground text-sm leading-relaxed",
         "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
         "disabled:cursor-not-allowed disabled:opacity-50",
