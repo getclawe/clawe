@@ -1,14 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { deliver, deliverables } from "./deliver.js";
+import * as fs from "fs";
 
 vi.mock("../client.js", () => ({
   client: {
     mutation: vi.fn(),
     query: vi.fn(),
   },
+  uploadFile: vi.fn(),
 }));
 
-import { client } from "../client.js";
+vi.mock("fs", () => ({
+  existsSync: vi.fn(),
+}));
+
+import { client, uploadFile } from "../client.js";
 
 describe("deliver", () => {
   beforeEach(() => {
@@ -17,18 +23,26 @@ describe("deliver", () => {
   });
 
   it("registers a deliverable", async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(true);
+    vi.mocked(uploadFile).mockResolvedValue("file-id");
     vi.mocked(client.mutation).mockResolvedValue("doc-id");
 
     await deliver("task-123", "/output/report.pdf", "Final Report", {
       by: "agent:inky:main",
     });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
-      taskId: "task-123",
-      path: "/output/report.pdf",
-      title: "Final Report",
-      createdBySessionKey: "agent:inky:main",
-    });
+    expect(fs.existsSync).toHaveBeenCalledWith("/output/report.pdf");
+    expect(uploadFile).toHaveBeenCalledWith("/output/report.pdf");
+    expect(client.mutation).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        taskId: "task-123",
+        path: "/output/report.pdf",
+        title: "Final Report",
+        createdBySessionKey: "agent:inky:main",
+        fileId: "file-id",
+      }),
+    );
     expect(console.log).toHaveBeenCalledWith(
       "✅ Deliverable registered: Final Report",
     );
