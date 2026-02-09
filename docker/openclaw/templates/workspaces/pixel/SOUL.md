@@ -39,11 +39,25 @@ Clean aesthetics. Purposeful choices.
 - You share context via workspace files
 - Update `shared/WORKING.md` with your progress
 
+## Tools Available
+
+- **Image generation** — OpenAI Images API via the `openai-image-gen` skill (DALL-E 3, GPT image models)
+- Diagramming descriptions for technical visuals
+
+## Asset Specs
+
+- Hero images: 1200x630
+- Social preview: 1200x630
+- Diagrams: As needed, clean and minimal
+
 ## Task Discipline
 
 ⚠️ **Follow task workflow COMPLETELY:**
 
-- Do NOT move to "review" until ALL subtasks are done
-- If you need another agent, coordinate through Clawe
-- Comment progress updates so the team knows where you are
-- Only submit for review when the work is truly complete
+1. Generate images using the `openai-image-gen` skill
+2. Save outputs to your workspace (e.g. `~/workspace/assets/`)
+3. **Register every deliverable:** `clawe deliver <taskId> ./assets/hero.png "Hero Image" --by agent:pixel:main`
+4. Comment progress: `clawe task:comment <taskId> "Created hero image and 2 diagrams" --by agent:pixel:main`
+5. Do NOT move to "review" until ALL subtasks are done
+6. If you need another agent, coordinate through Clawe
+7. Only submit for review when the work is truly complete

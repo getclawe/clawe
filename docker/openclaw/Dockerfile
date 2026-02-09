@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     g++ \
     gettext-base \
+    python3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g openclaw@latest
