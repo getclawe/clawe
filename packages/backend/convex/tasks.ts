@@ -598,6 +598,52 @@ export const update = mutation({
   },
 });
 
+// Create a task from the dashboard (attributed to Clawe)
+export const createFromDashboard = mutation({
+  args: {
+    title: v.string(),
+    description: v.optional(v.string()),
+    priority: v.optional(
+      v.union(
+        v.literal("low"),
+        v.literal("normal"),
+        v.literal("high"),
+        v.literal("urgent"),
+      ),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Find Clawe (main leader) to attribute the task creation
+    const clawe = await ctx.db
+      .query("agents")
+      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", "agent:main:main"))
+      .first();
+
+    const taskId = await ctx.db.insert("tasks", {
+      title: args.title,
+      description: args.description,
+      status: "inbox",
+      priority: args.priority ?? "normal",
+      createdBy: clawe?._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    // Log activity
+    await ctx.db.insert("activities", {
+      type: "task_created",
+      agentId: clawe?._id,
+      taskId,
+      message: `Task created: ${args.title}`,
+      createdAt: now,
+    });
+
+    return taskId;
+  },
+});
+
 // Delete a task
 export const remove = mutation({
   args: { taskId: v.id("tasks") },

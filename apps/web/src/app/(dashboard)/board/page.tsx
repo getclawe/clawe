@@ -25,6 +25,7 @@ import {
 import { LiveFeed, LiveFeedTitle } from "@/components/live-feed";
 import { useDrawer } from "@/providers/drawer-provider";
 import { AgentsPanel } from "./_components/agents-panel";
+import { NewTaskDialog } from "./_components/new-task-dialog";
 
 // Map priority from Convex to Kanban format
 function mapPriority(priority?: string): "low" | "medium" | "high" {
@@ -188,8 +189,9 @@ const BoardPage = () => {
             <PageHeaderRow>
               <PageHeaderTitle>Board</PageHeaderTitle>
               <PageHeaderActions>
+                <NewTaskDialog />
                 <Button variant="outline" size="sm" onClick={handleOpenFeed}>
-                  <Bell className="mr-2 h-4 w-4" />
+                  <Bell className="h-4 w-4" />
                   Live Feed
                 </Button>
               </PageHeaderActions>
