@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Montserrat } from "next/font/google";
+import { Montserrat, Space_Grotesk } from "next/font/google";
 import "@clawe/ui/globals.css";
 import "./globals.css";
 import { ConvexClientProvider } from "@/providers/convex-provider";
@@ -20,10 +20,14 @@ const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
 });
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+});
 
 export const metadata: Metadata = {
   title: "Clawe",
-  description: "Multi-agent orchestration for OpenClaw",
+  description: "AI Marketing Agency assistant.",
 };
 
 export default function RootLayout({
@@ -34,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable}`}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${spaceGrotesk.variable}`}
       >
         <QueryProvider>
           <ConvexClientProvider>

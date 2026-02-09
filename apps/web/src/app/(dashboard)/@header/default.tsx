@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Separator } from "@clawe/ui/components/separator";
 import { SidebarToggle } from "@dashboard/sidebar-toggle";
@@ -25,6 +26,15 @@ const DefaultHeaderContent = () => {
             />
           </>
         )}
+        <Link
+          href="https://www.clawe.ai"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-foreground text-base font-semibold"
+          style={{ fontFamily: "var(--font-space-grotesk)" }}
+        >
+          Clawe
+        </Link>
       </div>
       <div className="flex items-center gap-2">
         <AgencyStatus />
