@@ -89,12 +89,12 @@ The production stack starts:
 
 Clawe comes with 4 pre-configured agents:
 
-| Agent    | Role       | Heartbeat    |
-| -------- | ---------- | ------------ |
-| 🦞 Clawe | Squad Lead | Every 15 min |
-| ✍️ Inky  | Writer     | Every 15 min |
-| 🎨 Pixel | Designer   | Every 15 min |
-| 🔍 Scout | SEO        | Every 15 min |
+| Agent    | Role           | Heartbeat    |
+| -------- | -------------- | ------------ |
+| 🦞 Clawe | Squad Lead     | Every 15 min |
+| ✍️ Inky  | Content Editor | Every 15 min |
+| 🎨 Pixel | Designer       | Every 15 min |
+| 🔍 Scout | SEO            | Every 15 min |
 
 Heartbeats are staggered to avoid rate limits.
 
