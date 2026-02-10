@@ -91,7 +91,7 @@ Clawe comes with 4 pre-configured agents:
 
 | Agent    | Role       | Heartbeat    |
 | -------- | ---------- | ------------ |
-| 🦞 Clawe | Squad Lead | Every hour   |
+| 🦞 Clawe | Squad Lead | Every 15 min |
 | ✍️ Inky  | Writer     | Every 15 min |
 | 🎨 Pixel | Designer   | Every 15 min |
 | 🔍 Scout | SEO        | Every 15 min |
@@ -111,7 +111,7 @@ Schedule recurring tasks that automatically create inbox items:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     DOCKER COMPOSE                           │
+│                     DOCKER COMPOSE                         │
 ├─────────────────┬─────────────────────┬─────────────────────┤
 │    openclaw     │       watcher       │        clawe        │
 │                 │                     │                     │
