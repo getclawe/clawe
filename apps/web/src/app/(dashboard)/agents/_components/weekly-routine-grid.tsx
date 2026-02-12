@@ -12,56 +12,56 @@ import { Skeleton } from "@clawe/ui/components/skeleton";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Color mapping for routine cards - subtle, muted colors
+// Color mapping for routine cards - left accent bar style
 const colorMap: Record<
   string,
-  { bg: string; border: string; text: string; time: string }
+  { bg: string; accent: string; text: string; time: string }
 > = {
   emerald: {
-    bg: "bg-emerald-50 dark:bg-emerald-950/40",
-    border: "border-emerald-200 dark:border-emerald-800",
-    text: "text-emerald-700 dark:text-emerald-300",
-    time: "text-emerald-600/70 dark:text-emerald-400/70",
+    accent: "border-l-emerald-400 dark:border-l-emerald-500",
+    bg: "bg-emerald-50/70 dark:bg-emerald-950/25",
+    text: "text-emerald-800 dark:text-emerald-200",
+    time: "text-emerald-500/60 dark:text-emerald-400/50",
   },
   amber: {
-    bg: "bg-amber-50 dark:bg-amber-950/40",
-    border: "border-amber-200 dark:border-amber-800",
-    text: "text-amber-700 dark:text-amber-300",
-    time: "text-amber-600/70 dark:text-amber-400/70",
+    accent: "border-l-amber-400 dark:border-l-amber-500",
+    bg: "bg-amber-50/70 dark:bg-amber-950/25",
+    text: "text-amber-800 dark:text-amber-200",
+    time: "text-amber-500/60 dark:text-amber-400/50",
   },
   rose: {
-    bg: "bg-rose-50 dark:bg-rose-950/40",
-    border: "border-rose-200 dark:border-rose-800",
-    text: "text-rose-700 dark:text-rose-300",
-    time: "text-rose-600/70 dark:text-rose-400/70",
+    accent: "border-l-rose-400 dark:border-l-rose-500",
+    bg: "bg-rose-50/70 dark:bg-rose-950/25",
+    text: "text-rose-800 dark:text-rose-200",
+    time: "text-rose-500/60 dark:text-rose-400/50",
   },
   blue: {
-    bg: "bg-blue-50 dark:bg-blue-950/40",
-    border: "border-blue-200 dark:border-blue-800",
-    text: "text-blue-700 dark:text-blue-300",
-    time: "text-blue-600/70 dark:text-blue-400/70",
+    accent: "border-l-blue-400 dark:border-l-blue-500",
+    bg: "bg-blue-50/70 dark:bg-blue-950/25",
+    text: "text-blue-800 dark:text-blue-200",
+    time: "text-blue-500/60 dark:text-blue-400/50",
   },
   purple: {
-    bg: "bg-purple-50 dark:bg-purple-950/40",
-    border: "border-purple-200 dark:border-purple-800",
-    text: "text-purple-700 dark:text-purple-300",
-    time: "text-purple-600/70 dark:text-purple-400/70",
+    accent: "border-l-purple-400 dark:border-l-purple-500",
+    bg: "bg-purple-50/70 dark:bg-purple-950/25",
+    text: "text-purple-800 dark:text-purple-200",
+    time: "text-purple-500/60 dark:text-purple-400/50",
   },
   slate: {
-    bg: "bg-slate-100 dark:bg-slate-800/40",
-    border: "border-slate-200 dark:border-slate-700",
-    text: "text-slate-700 dark:text-slate-300",
-    time: "text-slate-500 dark:text-slate-400",
+    accent: "border-l-slate-300 dark:border-l-slate-600",
+    bg: "bg-slate-50/70 dark:bg-slate-800/25",
+    text: "text-slate-700 dark:text-slate-200",
+    time: "text-slate-400 dark:text-slate-500",
   },
 };
 
-type ColorScheme = { bg: string; border: string; text: string; time: string };
+type ColorScheme = { bg: string; accent: string; text: string; time: string };
 
 const defaultColors: ColorScheme = {
-  bg: "bg-slate-100 dark:bg-slate-800/40",
-  border: "border-slate-200 dark:border-slate-700",
-  text: "text-slate-700 dark:text-slate-300",
-  time: "text-slate-500 dark:text-slate-400",
+  accent: "border-l-slate-300 dark:border-l-slate-600",
+  bg: "bg-slate-50/70 dark:bg-slate-800/25",
+  text: "text-slate-700 dark:text-slate-200",
+  time: "text-slate-400 dark:text-slate-500",
 };
 
 const getColors = (color: string): ColorScheme =>
@@ -120,117 +120,107 @@ export const WeeklyRoutineGrid = () => {
   });
 
   return (
-    <div className="grid grid-cols-7 gap-3">
+    <div className="grid grid-cols-7 gap-2">
       {DAYS.map((day, dayIndex) => {
         const isToday = dayIndex === today;
 
         return (
-          <div key={day} className="flex flex-col">
-            {/* Today label above card */}
-            {isToday ? (
-              <div className="mb-2 text-center">
-                <span className="inline-block rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-semibold text-pink-600 dark:bg-pink-950/50 dark:text-pink-400">
-                  Today ·{" "}
-                  {new Date().toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-            ) : (
-              <div className="mb-2 h-5" />
-            )}
-
-            <div
-              className={cn(
-                "flex min-h-45 flex-1 flex-col rounded-lg border p-3",
-                isToday && "border-pink-600 dark:border-pink-400",
-              )}
-            >
-              {/* Day header */}
-              <div
+          <div
+            key={day}
+            className="flex min-h-44 flex-col rounded-xl border p-2.5"
+          >
+            {/* Day header */}
+            <div className="mb-2.5 flex items-center justify-between">
+              <span
                 className={cn(
-                  "mb-3 text-center text-sm font-medium",
+                  "text-xs font-medium tracking-wider uppercase",
                   isToday
                     ? "text-pink-600 dark:text-pink-400"
                     : "text-muted-foreground",
                 )}
               >
                 {day}
-              </div>
+              </span>
+              {isToday && (
+                <span className="rounded-full bg-pink-100 px-1.5 py-px text-[9px] font-semibold tracking-wide text-pink-600 uppercase dark:bg-pink-950/50 dark:text-pink-400">
+                  today
+                </span>
+              )}
+            </div>
 
-              {/* Routine cards for this day */}
-              <div className="flex flex-col gap-2">
-                {routinesByDay[dayIndex]?.map((routine) => {
-                  const colors = getColors(routine.color);
+            {/* Routine cards for this day */}
+            <div className="flex flex-col gap-1.5">
+              {routinesByDay[dayIndex]?.map((routine) => {
+                const colors = getColors(routine.color);
 
-                  return (
-                    <HoverCard
-                      key={`${routine._id}-${dayIndex}`}
-                      openDelay={200}
-                    >
-                      <HoverCardTrigger asChild>
-                        <div
-                          className={`cursor-pointer rounded-md border px-2.5 py-2 ${colors.bg} ${colors.border}`}
-                        >
-                          <p
-                            className={`truncate text-sm font-medium ${colors.text}`}
-                          >
-                            {routine.title}
-                          </p>
-                          <p className={`text-xs ${colors.time}`}>
-                            {formatTime(
-                              routine.schedule.hour,
-                              routine.schedule.minute,
-                            )}
-                          </p>
-                        </div>
-                      </HoverCardTrigger>
-                      <HoverCardContent
-                        className="w-72"
-                        side="right"
-                        align="start"
+                return (
+                  <HoverCard key={`${routine._id}-${dayIndex}`} openDelay={200}>
+                    <HoverCardTrigger asChild>
+                      <div
+                        className={cn(
+                          "cursor-pointer rounded-r-md border-l-[3px] py-1.5 pr-2 pl-2.5",
+                          colors.accent,
+                          colors.bg,
+                        )}
                       >
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-semibold">
-                            {routine.title}
-                          </h4>
-                          {routine.description && (
-                            <p className="text-muted-foreground text-sm">
-                              {routine.description}
-                            </p>
+                        <p
+                          className={cn(
+                            "truncate text-[13px] leading-snug font-medium",
+                            colors.text,
                           )}
-                          <div className="text-muted-foreground flex flex-col gap-1 text-xs">
-                            <div className="flex justify-between">
-                              <span>Schedule</span>
-                              <span className="text-foreground">
-                                {formatScheduleDays(
-                                  routine.schedule.daysOfWeek,
-                                )}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Time</span>
-                              <span className="text-foreground">
-                                {formatTime(
-                                  routine.schedule.hour,
-                                  routine.schedule.minute,
-                                )}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Priority</span>
-                              <span className="text-foreground">
-                                {formatPriority(routine.priority)}
-                              </span>
-                            </div>
+                        >
+                          {routine.title}
+                        </p>
+                        <p className={cn("mt-0.5 text-[11px]", colors.time)}>
+                          {formatTime(
+                            routine.schedule.hour,
+                            routine.schedule.minute,
+                          )}
+                        </p>
+                      </div>
+                    </HoverCardTrigger>
+                    <HoverCardContent
+                      className="w-72"
+                      side="right"
+                      align="start"
+                    >
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold">
+                          {routine.title}
+                        </h4>
+                        {routine.description && (
+                          <p className="text-muted-foreground text-sm">
+                            {routine.description}
+                          </p>
+                        )}
+                        <div className="text-muted-foreground flex flex-col gap-1 text-xs">
+                          <div className="flex justify-between">
+                            <span>Schedule</span>
+                            <span className="text-foreground">
+                              {formatScheduleDays(routine.schedule.daysOfWeek)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Time</span>
+                            <span className="text-foreground">
+                              {formatTime(
+                                routine.schedule.hour,
+                                routine.schedule.minute,
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Priority</span>
+                            <span className="text-foreground">
+                              {formatPriority(routine.priority)}
+                            </span>
                           </div>
                         </div>
-                      </HoverCardContent>
-                    </HoverCard>
-                  );
-                })}
-              </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                );
+              })}
             </div>
           </div>
         );
@@ -241,13 +231,16 @@ export const WeeklyRoutineGrid = () => {
 
 const WeeklyRoutineGridSkeleton = () => {
   return (
-    <div className="grid grid-cols-7 gap-3">
+    <div className="grid grid-cols-7 gap-2">
       {DAYS.map((day) => (
-        <div key={day} className="flex min-h-45 flex-col rounded-lg border p-3">
-          <Skeleton className="mx-auto mb-3 h-4 w-8" />
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-14 w-full rounded-md" />
-            <Skeleton className="h-14 w-full rounded-md" />
+        <div
+          key={day}
+          className="flex min-h-44 flex-col rounded-xl border p-2.5"
+        >
+          <Skeleton className="mx-auto mb-2.5 h-4 w-8" />
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-11 w-full rounded-md" />
+            <Skeleton className="h-11 w-full rounded-md" />
           </div>
         </div>
       ))}
