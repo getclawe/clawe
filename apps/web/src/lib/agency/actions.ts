@@ -6,14 +6,14 @@ import {
   saveTelegramBotToken as saveTelegramBotTokenClient,
   removeTelegramBotToken as removeTelegramBotTokenClient,
   probeTelegramToken,
-} from "@clawe/shared/openclaw";
-import { approveChannelPairingCode } from "@clawe/shared/openclaw";
+} from "@clawe/shared/agency";
+import { approveChannelPairingCode } from "@clawe/shared/agency";
 
-export async function checkOpenClawHealth() {
+export async function checkAgencyHealth() {
   return checkHealth();
 }
 
-export async function getOpenClawConfig() {
+export async function getAgencyConfig() {
   return getConfig();
 }
 

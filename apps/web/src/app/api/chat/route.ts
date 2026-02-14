@@ -4,12 +4,12 @@ import { streamText } from "ai";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const openclawUrl = process.env.OPENCLAW_URL || "http://localhost:18789";
-const openclawToken = process.env.OPENCLAW_TOKEN || "";
+const agencyUrl = process.env.AGENCY_URL || "http://localhost:18789";
+const agencyToken = process.env.AGENCY_TOKEN || "";
 
 /**
  * POST /api/chat
- * Proxy chat requests to OpenClaw's OpenAI-compatible endpoint.
+ * Proxy chat requests to the agency's OpenAI-compatible endpoint.
  */
 export async function POST(request: Request) {
   try {
@@ -30,16 +30,16 @@ export async function POST(request: Request) {
       });
     }
 
-    // Create OpenAI-compatible client pointing to OpenClaw
-    const openclaw = createOpenAI({
-      baseURL: `${openclawUrl}/v1`,
-      apiKey: openclawToken,
+    // Create OpenAI-compatible client pointing to agency gateway
+    const agency = createOpenAI({
+      baseURL: `${agencyUrl}/v1`,
+      apiKey: agencyToken,
     });
 
     // Stream response using Vercel AI SDK
     // Use .chat() to force Chat Completions API instead of Responses API
     const result = streamText({
-      model: openclaw.chat("openclaw"),
+      model: agency.chat("openclaw"),
       messages,
       headers: {
         "X-OpenClaw-Session-Key": sessionKey,

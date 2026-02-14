@@ -7,7 +7,7 @@ export default defineSchema({
     name: v.string(),
     role: v.string(), // "Squad Lead", "Content Writer", etc.
     emoji: v.optional(v.string()), // "🦞", "✍️", etc.
-    sessionKey: v.string(), // "agent:main:main" - OpenClaw session key
+    sessionKey: v.string(), // "agent:main:main" - agency session key
     status: v.union(v.literal("online"), v.literal("offline")),
     currentTaskId: v.optional(v.id("tasks")),
     config: v.optional(v.any()), // Agent-specific configuration

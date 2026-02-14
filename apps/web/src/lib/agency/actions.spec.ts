@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the shared package
-vi.mock("@clawe/shared/openclaw", () => ({
+vi.mock("@clawe/shared/agency", () => ({
   checkHealth: vi.fn(),
   getConfig: vi.fn(),
   saveTelegramBotToken: vi.fn(),
@@ -12,15 +12,15 @@ vi.mock("@clawe/shared/openclaw", () => ({
 import {
   saveTelegramBotToken,
   validateTelegramToken,
-  checkOpenClawHealth,
+  checkAgencyHealth,
 } from "./actions";
 import {
   checkHealth,
   saveTelegramBotToken as saveTelegramBotTokenClient,
   probeTelegramToken,
-} from "@clawe/shared/openclaw";
+} from "@clawe/shared/agency";
 
-describe("OpenClaw Actions", () => {
+describe("Agency Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -75,7 +75,7 @@ describe("OpenClaw Actions", () => {
     });
   });
 
-  describe("checkOpenClawHealth", () => {
+  describe("checkAgencyHealth", () => {
     it("returns health status", async () => {
       vi.mocked(checkHealth).mockResolvedValueOnce({
         ok: true,
@@ -85,7 +85,7 @@ describe("OpenClaw Actions", () => {
         },
       });
 
-      const result = await checkOpenClawHealth();
+      const result = await checkAgencyHealth();
       expect(result.ok).toBe(true);
     });
   });

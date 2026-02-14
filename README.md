@@ -38,7 +38,7 @@ Edit `.env`:
 ```bash
 # Required
 ANTHROPIC_API_KEY=sk-ant-...
-OPENCLAW_TOKEN=your-secure-token
+AGENCY_TOKEN=your-secure-token
 CONVEX_URL=https://your-deployment.convex.cloud
 
 # Optional
@@ -64,7 +64,7 @@ npx convex deploy
 This script will:
 
 - Create `.env` from `.env.example` if missing
-- Auto-generate a secure `OPENCLAW_TOKEN`
+- Auto-generate a secure `AGENCY_TOKEN`
 - Validate all required environment variables
 - Build necessary packages
 - Start the Docker containers
@@ -72,7 +72,7 @@ This script will:
 **Development:**
 
 ```bash
-# Start OpenClaw gateway only (use local web dev server)
+# Start agency gateway only (use local web dev server)
 pnpm dev:docker
 
 # In another terminal, start web + Convex
@@ -81,7 +81,7 @@ pnpm dev
 
 The production stack starts:
 
-- **openclaw**: Gateway running all agents
+- **agency**: Gateway running all agents
 - **watcher**: Notification delivery + cron setup
 - **clawe**: Web dashboard at http://localhost:3000
 
@@ -113,11 +113,11 @@ Schedule recurring tasks that automatically create inbox items:
 ┌─────────────────────────────────────────────────────────────┐
 │                     DOCKER COMPOSE                          │
 ├─────────────────┬─────────────────────┬─────────────────────┤
-│    openclaw     │       watcher       │        clawe        │
+│     agency      │       watcher       │        clawe        │
 │                 │                     │                     │
-│  OpenClaw       │  • Register agents  │  Web Dashboard      │
-│  Gateway with   │  • Setup crons      │  • Squad status     │
-│  4 agents       │  • Deliver notifs   │  • Task board       │
+│  Agent Gateway  │  • Register agents  │  Web Dashboard      │
+│  with 4 agents  │  • Setup crons      │  • Squad status     │
+│                 │  • Deliver notifs   │  • Task board       │
 │                 │                     │  • Agent chat       │
 └────────┬────────┴──────────┬──────────┴──────────┬──────────┘
          │                   │                     │
@@ -144,10 +144,10 @@ clawe/
 ├── packages/
 │   ├── backend/          # Convex schema & functions
 │   ├── cli/              # `clawe` CLI for agents
-│   ├── shared/           # Shared OpenClaw client
+│   ├── shared/           # Shared agency client
 │   └── ui/               # UI components
 └── docker/
-    └── openclaw/
+    └── agency/
         ├── Dockerfile
         ├── entrypoint.sh
         ├── scripts/      # init-agents.sh
@@ -214,8 +214,8 @@ Each agent has an isolated workspace with:
 
 ### Adding New Agents
 
-1. Create workspace template in `docker/openclaw/templates/workspaces/{name}/`
-2. Add agent to `docker/openclaw/templates/config.template.json`
+1. Create workspace template in `docker/agency/templates/workspaces/{name}/`
+2. Add agent to `docker/agency/templates/config.template.json`
 3. Add agent to watcher's `AGENTS` array in `apps/watcher/src/index.ts`
 4. Rebuild: `docker compose build && docker compose up -d`
 
@@ -245,13 +245,13 @@ pnpm install
 # Terminal 1: Start Convex dev server
 pnpm convex:dev
 
-# Terminal 2: Start OpenClaw gateway in Docker
+# Terminal 2: Start agency gateway in Docker
 pnpm dev:docker
 
 # Terminal 3: Start web dashboard
 pnpm dev:web
 
-# Or run everything together (Convex + web, but not OpenClaw)
+# Or run everything together (Convex + web, but not agency)
 pnpm dev
 ```
 
@@ -277,6 +277,6 @@ pnpm convex:deploy
 | Variable            | Required | Description                       |
 | ------------------- | -------- | --------------------------------- |
 | `ANTHROPIC_API_KEY` | Yes      | Anthropic API key for Claude      |
-| `OPENCLAW_TOKEN`    | Yes      | Auth token for OpenClaw gateway   |
+| `AGENCY_TOKEN`      | Yes      | Auth token for agency gateway     |
 | `CONVEX_URL`        | Yes      | Convex deployment URL             |
 | `OPENAI_API_KEY`    | No       | OpenAI key (for image generation) |

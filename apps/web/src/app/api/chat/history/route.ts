@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSharedClient } from "@clawe/shared/openclaw";
-import type { ChatHistoryResponse } from "@clawe/shared/openclaw";
+import { getSharedClient } from "@clawe/shared/agency";
+import type { ChatHistoryResponse } from "@clawe/shared/agency";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

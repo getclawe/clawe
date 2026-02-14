@@ -1,10 +1,10 @@
 services:
-  openclaw:
+  agency:
     ports:
       - "18790:18789"
     volumes:
-      - ./.openclaw:/data
-      - ./.openclaw/logs:/tmp/openclaw
+      - ./.agency:/data
+      - ./.agency/logs:/tmp/openclaw
       - .:/home/ubuntu/clawe
     extra_hosts:
       - "host.docker.internal:host-gateway"

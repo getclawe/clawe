@@ -8,29 +8,28 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_CONVEX_URL=${CONVEX_URL}
-      - OPENCLAW_URL=http://openclaw:18789
-      - OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
-      - OPENCLAW_STATE_DIR=/openclaw-data/config
+      - AGENCY_URL=http://agency:18789
+      - AGENCY_TOKEN=${AGENCY_TOKEN}
+      - AGENCY_STATE_DIR=/agency-data/config
     volumes:
-      - openclaw-data:/openclaw-data:ro
+      - agency-data:/agency-data:ro
     depends_on:
-      openclaw:
+      agency:
         condition: service_healthy
     restart: unless-stopped
 
-  openclaw:
+  agency:
     build:
       context: .
-      dockerfile: docker/openclaw/Dockerfile
+      dockerfile: docker/agency/Dockerfile
     user: "${UID:-1000}:${GID:-1000}"
     environment:
-      - OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
-      - OPENCLAW_PORT=18789
+      - AGENCY_TOKEN=${AGENCY_TOKEN}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - CONVEX_URL=${CONVEX_URL}
     volumes:
-      - openclaw-data:/data
+      - agency-data:/data
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:18789/health"]
       interval: 5s
@@ -44,13 +43,13 @@ services:
       dockerfile: apps/watcher/Dockerfile
     environment:
       - CONVEX_URL=${CONVEX_URL}
-      - OPENCLAW_URL=http://openclaw:18789
-      - OPENCLAW_TOKEN=${OPENCLAW_TOKEN}
+      - AGENCY_URL=http://agency:18789
+      - AGENCY_TOKEN=${AGENCY_TOKEN}
     depends_on:
-      openclaw:
+      agency:
         condition: service_healthy
     restart: unless-stopped
 
 volumes:
-  openclaw-data:
+  agency-data:
     driver: local

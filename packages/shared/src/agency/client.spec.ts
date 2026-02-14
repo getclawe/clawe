@@ -33,7 +33,7 @@ import {
   patchConfig,
 } from "./client";
 
-describe("OpenClaw Client", () => {
+describe("Agency Client", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

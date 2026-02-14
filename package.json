@@ -4,8 +4,8 @@
   "scripts": {
     "build": "dotenv -e .env -- turbo run build",
     "dev": "dotenv -e .env -- turbo run dev",
-    "dev:docker": "pnpm --filter @clawe/cli build && docker compose up --build openclaw",
-    "build:docker": "pnpm --filter @clawe/cli build && docker compose build --no-cache openclaw",
+    "dev:docker": "pnpm --filter @clawe/cli build && docker compose up --build agency",
+    "build:docker": "pnpm --filter @clawe/cli build && docker compose build --no-cache agency",
     "debug": "dotenv -e .env -- turbo run debug",
     "dev:web": "dotenv -e .env -- turbo run dev --filter=web",
     "convex:dev": "dotenv -e .env -- turbo run dev --filter=@clawe/backend",

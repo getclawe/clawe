@@ -6,8 +6,8 @@
  *
  * Environment variables:
  *   CONVEX_URL        - Convex deployment URL
- *   OPENCLAW_URL      - OpenClaw gateway URL
- *   OPENCLAW_TOKEN    - OpenClaw authentication token
+ *   AGENCY_URL        - Agency gateway URL
+ *   AGENCY_TOKEN      - Agency authentication token
  */
 
 import { ConvexHttpClient } from "convex/browser";
@@ -19,7 +19,7 @@ import {
   cronAdd,
   type CronAddJob,
   type CronJob,
-} from "@clawe/shared/openclaw";
+} from "@clawe/shared/agency";
 import { getTimeInZone, DEFAULT_TIMEZONE } from "@clawe/shared/timezone";
 import { validateEnv, config, POLL_INTERVAL_MS } from "./config.js";
 
@@ -202,14 +202,14 @@ async function registerAgents(): Promise<void> {
 async function setupCrons(): Promise<void> {
   console.log("[watcher] Checking heartbeat crons...");
 
-  // Retry getting cron list (waits for OpenClaw to be ready)
+  // Retry getting cron list (waits for agency to be ready)
   const result = await withRetry(async () => {
     const res = await cronList();
     if (!res.ok) {
       throw new Error(res.error?.message ?? "Failed to list crons");
     }
     return res;
-  }, "OpenClaw connection");
+  }, "Agency connection");
 
   const existingNames = new Set(
     result.result.details.jobs.map((j: CronJob) => j.name),
@@ -476,7 +476,7 @@ async function startDeliveryLoop(): Promise<void> {
 async function main(): Promise<void> {
   console.log("[watcher] 🦞 Clawe Watcher starting...");
   console.log(`[watcher] Convex: ${config.convexUrl}`);
-  console.log(`[watcher] OpenClaw: ${config.openclawUrl}`);
+  console.log(`[watcher] Agency: ${config.agencyUrl}`);
   console.log(`[watcher] Notification poll interval: ${POLL_INTERVAL_MS}ms`);
   console.log(
     `[watcher] Routine check interval: ${ROUTINE_CHECK_INTERVAL_MS}ms\n`,

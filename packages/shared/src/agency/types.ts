@@ -1,4 +1,4 @@
-// AgentToolResult matches OpenClaw's tool execution result structure
+// AgentToolResult matches agency's tool execution result structure
 export type AgentToolResult<T = unknown> = {
   content: Array<{
     type: string;
@@ -9,12 +9,12 @@ export type AgentToolResult<T = unknown> = {
   details: T;
 };
 
-// ToolResult for OpenClaw tool invocations (result contains content + details)
+// ToolResult for agency tool invocations (result contains content + details)
 export type ToolResult<T = unknown> =
   | { ok: true; result: AgentToolResult<T> }
   | { ok: false; error: { type: string; message: string } };
 
-// DirectResult for operations that don't go through OpenClaw tools
+// DirectResult for operations that don't go through agency tools
 export type DirectResult<T = unknown> =
   | { ok: true; result: T }
   | { ok: false; error: { type: string; message: string } };

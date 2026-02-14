@@ -24,8 +24,8 @@ export type GatewayClientOptions = {
 const PROTOCOL_VERSION = 3;
 
 /**
- * Server-side WebSocket client for OpenClaw Gateway.
- * Used by API routes to communicate with OpenClaw.
+ * Server-side WebSocket client for agency gateway.
+ * Used by API routes to communicate with the agency.
  */
 export class GatewayClient {
   private ws: WebSocket | null = null;
@@ -247,8 +247,8 @@ export class GatewayClient {
 export function createGatewayClient(
   options?: Partial<GatewayClientOptions>,
 ): GatewayClient {
-  const url = process.env.OPENCLAW_URL || "http://localhost:18789";
-  const token = process.env.OPENCLAW_TOKEN || "";
+  const url = process.env.AGENCY_URL || "http://localhost:18789";
+  const token = process.env.AGENCY_TOKEN || "";
 
   return new GatewayClient({
     url,

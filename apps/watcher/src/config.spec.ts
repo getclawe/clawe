@@ -15,8 +15,8 @@ describe("config", () => {
   describe("validateEnv", () => {
     it("exits when CONVEX_URL is missing", async () => {
       delete process.env.CONVEX_URL;
-      process.env.OPENCLAW_URL = "http://localhost:18789";
-      process.env.OPENCLAW_TOKEN = "test-token";
+      process.env.AGENCY_URL = "http://localhost:18789";
+      process.env.AGENCY_TOKEN = "test-token";
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -35,10 +35,10 @@ describe("config", () => {
       mockError.mockRestore();
     });
 
-    it("exits when OPENCLAW_URL is missing", async () => {
+    it("exits when AGENCY_URL is missing", async () => {
       process.env.CONVEX_URL = "https://test.convex.cloud";
-      delete process.env.OPENCLAW_URL;
-      process.env.OPENCLAW_TOKEN = "test-token";
+      delete process.env.AGENCY_URL;
+      process.env.AGENCY_TOKEN = "test-token";
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -49,7 +49,7 @@ describe("config", () => {
       validateEnv();
 
       expect(mockError).toHaveBeenCalledWith(
-        expect.stringContaining("OPENCLAW_URL"),
+        expect.stringContaining("AGENCY_URL"),
       );
       expect(mockExit).toHaveBeenCalledWith(1);
 
@@ -59,8 +59,8 @@ describe("config", () => {
 
     it("does not exit when all required vars are set", async () => {
       process.env.CONVEX_URL = "https://test.convex.cloud";
-      process.env.OPENCLAW_URL = "http://localhost:18789";
-      process.env.OPENCLAW_TOKEN = "test-token";
+      process.env.AGENCY_URL = "http://localhost:18789";
+      process.env.AGENCY_TOKEN = "test-token";
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -78,14 +78,14 @@ describe("config", () => {
   describe("config object", () => {
     it("has correct default values", async () => {
       process.env.CONVEX_URL = "https://test.convex.cloud";
-      process.env.OPENCLAW_URL = "http://custom:8080";
-      process.env.OPENCLAW_TOKEN = "my-token";
+      process.env.AGENCY_URL = "http://custom:8080";
+      process.env.AGENCY_TOKEN = "my-token";
 
       const { config } = await import("./config.js");
 
       expect(config.convexUrl).toBe("https://test.convex.cloud");
-      expect(config.openclawUrl).toBe("http://custom:8080");
-      expect(config.openclawToken).toBe("my-token");
+      expect(config.agencyUrl).toBe("http://custom:8080");
+      expect(config.agencyToken).toBe("my-token");
     });
   });
 

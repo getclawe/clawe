@@ -68,8 +68,8 @@ describe("createGatewayClient", () => {
   });
 
   it("creates client with default URL when env not set", () => {
-    delete process.env.OPENCLAW_URL;
-    delete process.env.OPENCLAW_TOKEN;
+    delete process.env.AGENCY_URL;
+    delete process.env.AGENCY_TOKEN;
 
     const client = createGatewayClient();
     expect(client).toBeInstanceOf(GatewayClient);
@@ -77,8 +77,8 @@ describe("createGatewayClient", () => {
   });
 
   it("creates client with env URL and token", () => {
-    process.env.OPENCLAW_URL = "http://custom:8080";
-    process.env.OPENCLAW_TOKEN = "custom-token";
+    process.env.AGENCY_URL = "http://custom:8080";
+    process.env.AGENCY_TOKEN = "custom-token";
 
     const client = createGatewayClient();
     expect(client).toBeInstanceOf(GatewayClient);

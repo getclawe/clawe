@@ -5,7 +5,7 @@ import { POST } from "./route";
 // Mock the shared client
 const mockRequest = vi.fn();
 
-vi.mock("@clawe/shared/openclaw", () => ({
+vi.mock("@clawe/shared/agency", () => ({
   getSharedClient: vi.fn(async () => ({
     request: mockRequest,
     isConnected: vi.fn().mockReturnValue(true),
@@ -95,7 +95,7 @@ describe("POST /api/chat/abort", () => {
   });
 
   it("returns 500 when getSharedClient fails", async () => {
-    const { getSharedClient } = await import("@clawe/shared/openclaw");
+    const { getSharedClient } = await import("@clawe/shared/agency");
     vi.mocked(getSharedClient).mockRejectedValueOnce(
       new Error("Connection failed"),
     );

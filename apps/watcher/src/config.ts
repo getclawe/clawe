@@ -4,7 +4,7 @@ export const POLL_INTERVAL_MS = 2000; // Check every 2 seconds
 
 // Environment validation
 export function validateEnv(): void {
-  const required = ["CONVEX_URL", "OPENCLAW_URL", "OPENCLAW_TOKEN"];
+  const required = ["CONVEX_URL", "AGENCY_URL", "AGENCY_TOKEN"];
   const missing = required.filter((key) => !process.env[key]);
 
   if (missing.length > 0) {
@@ -17,7 +17,7 @@ export function validateEnv(): void {
 
 export const config = {
   convexUrl: process.env.CONVEX_URL || "",
-  openclawUrl: process.env.OPENCLAW_URL || "http://localhost:18789",
-  openclawToken: process.env.OPENCLAW_TOKEN || "",
+  agencyUrl: process.env.AGENCY_URL || "http://localhost:18789",
+  agencyToken: process.env.AGENCY_TOKEN || "",
   pollIntervalMs: POLL_INTERVAL_MS,
 };

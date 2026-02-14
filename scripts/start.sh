@@ -31,7 +31,7 @@ if [ ! -f .env ]; then
         sed -i "s/your-secure-token-here/$TOKEN/" .env
     fi
 
-    echo_info "Generated OPENCLAW_TOKEN: ${TOKEN:0:8}..."
+    echo_info "Generated AGENCY_TOKEN: ${TOKEN:0:8}..."
     echo_warn "Please edit .env and set your ANTHROPIC_API_KEY and CONVEX_URL"
 fi
 
@@ -51,8 +51,8 @@ if [ -z "$CONVEX_URL" ] || [ "$CONVEX_URL" = "https://your-deployment.convex.clo
     MISSING_VARS+=("CONVEX_URL")
 fi
 
-if [ -z "$OPENCLAW_TOKEN" ] || [ "$OPENCLAW_TOKEN" = "your-secure-token-here" ]; then
-    MISSING_VARS+=("OPENCLAW_TOKEN")
+if [ -z "$AGENCY_TOKEN" ] || [ "$AGENCY_TOKEN" = "your-secure-token-here" ]; then
+    MISSING_VARS+=("AGENCY_TOKEN")
 fi
 
 if [ ${#MISSING_VARS[@]} -gt 0 ]; then

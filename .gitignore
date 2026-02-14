@@ -41,16 +41,16 @@ yarn-error.log*
 .DS_Store
 *.pem
 
-convex/_generated
+# Claude Code local settings (personal permissions)
+.claude/settings.local.json
 
-# Docker
-docker/openclaw/data/
+convex/_generated
 
 # Local data directory (Clawe config)
 .data/
 
-# OpenClaw state directory (shared with Docker in dev)
-.openclaw/*
-!.openclaw/.gitkeep
-.openclaw/logs/*
-!.openclaw/logs/.gitkeep
+# Agency state directory (shared with Docker in dev)
+.agency/*
+!.agency/.gitkeep
+.agency/logs/*
+!.agency/logs/.gitkeep

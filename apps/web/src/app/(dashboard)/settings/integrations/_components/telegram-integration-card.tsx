@@ -94,7 +94,7 @@ export const TelegramIntegrationCard = () => {
           )}
           {isOffline && (
             <p className="text-muted-foreground text-center text-xs">
-              OpenClaw is offline
+              Agency is offline
             </p>
           )}
         </div>

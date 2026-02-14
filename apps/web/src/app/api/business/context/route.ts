@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-const openclawToken = process.env.OPENCLAW_TOKEN;
+const agencyToken = process.env.AGENCY_TOKEN;
 
 /**
  * GET /api/business/context
@@ -14,14 +14,14 @@ const openclawToken = process.env.OPENCLAW_TOKEN;
  * Returns the current business context.
  * Used by agents to understand what business they're working for.
  *
- * Requires: Authorization header with OPENCLAW_TOKEN
+ * Requires: Authorization header with AGENCY_TOKEN
  */
 export const GET = async (request: Request) => {
   // Validate token
   const authHeader = request.headers.get("Authorization");
   const token = authHeader?.replace("Bearer ", "");
 
-  if (!token || token !== openclawToken) {
+  if (!token || token !== agencyToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -63,14 +63,14 @@ export const GET = async (request: Request) => {
  * Saves or updates the business context.
  * Used by Clawe CLI during onboarding.
  *
- * Requires: Authorization header with OPENCLAW_TOKEN
+ * Requires: Authorization header with AGENCY_TOKEN
  */
 export const POST = async (request: Request) => {
   // Validate token
   const authHeader = request.headers.get("Authorization");
   const token = authHeader?.replace("Bearer ", "");
 
-  if (!token || token !== openclawToken) {
+  if (!token || token !== agencyToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

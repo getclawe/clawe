@@ -24,7 +24,7 @@ import {
   validateTelegramToken,
   saveTelegramBotToken,
   approvePairingCode,
-} from "@/lib/openclaw/actions";
+} from "@/lib/agency/actions";
 
 type Step = "token" | "pairing" | "success";
 
@@ -214,10 +214,10 @@ export const TelegramSetupDialog = ({
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
                   <div>
                     <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                      OpenClaw is offline
+                      Agency is offline
                     </p>
                     <p className="text-xs text-red-600 dark:text-red-500">
-                      The agent service needs to be running to verify pairing.
+                      The agency service needs to be running to verify pairing.
                     </p>
                   </div>
                 </div>
@@ -354,10 +354,10 @@ export const TelegramSetupDialog = ({
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
                 <div>
                   <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                    OpenClaw is offline
+                    Agency is offline
                   </p>
                   <p className="text-xs text-red-600 dark:text-red-500">
-                    The agent service needs to be running to connect Telegram.
+                    The agency service needs to be running to connect Telegram.
                   </p>
                 </div>
               </div>

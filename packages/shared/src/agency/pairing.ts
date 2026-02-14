@@ -9,9 +9,9 @@ import type {
 } from "./types";
 import { getConfig, patchConfig } from "./client";
 
-const OPENCLAW_STATE_DIR =
-  process.env.OPENCLAW_STATE_DIR || path.join(os.homedir(), ".openclaw");
-const CREDENTIALS_DIR = path.join(OPENCLAW_STATE_DIR, "credentials");
+const AGENCY_STATE_DIR =
+  process.env.AGENCY_STATE_DIR || path.join(os.homedir(), ".agency");
+const CREDENTIALS_DIR = path.join(AGENCY_STATE_DIR, "credentials");
 
 type PairingStore = {
   version: 1;
@@ -98,7 +98,7 @@ export async function approveChannelPairingCode(
     const normalizedCode = code.trim().toUpperCase();
     const pairingPath = resolvePairingPath(channel);
 
-    // Read current pairing requests (file-based - OpenClaw writes these)
+    // Read current pairing requests (file-based - agency writes these)
     const store = await readJsonFile<PairingStore>(pairingPath, {
       version: 1,
       requests: [],

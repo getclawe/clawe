@@ -15,11 +15,11 @@ This enables:
 
 ## Environment Variables
 
-| Variable         | Required | Description                   |
-| ---------------- | -------- | ----------------------------- |
-| `CONVEX_URL`     | Yes      | Convex deployment URL         |
-| `OPENCLAW_URL`   | Yes      | OpenClaw gateway URL          |
-| `OPENCLAW_TOKEN` | Yes      | OpenClaw authentication token |
+| Variable       | Required | Description                 |
+| -------------- | -------- | --------------------------- |
+| `CONVEX_URL`   | Yes      | Convex deployment URL       |
+| `AGENCY_URL`   | Yes      | Agency gateway URL          |
+| `AGENCY_TOKEN` | Yes      | Agency authentication token |
 
 ## Running
 
@@ -53,7 +53,7 @@ Schedules are staggered to avoid rate limits.
 │                                                          │
 │   ┌─────────────┐                                        │
 │   │ On Startup  │──> Check/create heartbeat crons        │
-│   └─────────────┘    via OpenClaw cron API               │
+│   └─────────────┘    via agency cron API                 │
 │                                                          │
 │   ┌─────────────┐        ┌─────────────────────────┐    │
 │   │ Poll Loop   │───────>│ convex.query(           │    │
@@ -62,13 +62,13 @@ Schedules are staggered to avoid rate limits.
 │          │               └─────────────────────────┘    │
 │          │                                               │
 │          │               ┌─────────────────────────┐    │
-│          └──────────────>│ openclaw.sessionsSend() │    │
+│          └──────────────>│ agency.sessionsSend()   │    │
 │                          └─────────────────────────┘    │
 └─────────────────────────────────────────────────────────┘
             │                           │
             ▼                           ▼
      ┌───────────┐              ┌───────────────┐
-     │  CONVEX   │              │   OPENCLAW    │
+     │  CONVEX   │              │    AGENCY     │
      │  (data)   │              │  (delivery)   │
      └───────────┘              └───────────────┘
 ```

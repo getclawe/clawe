@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import {
   listChannelPairingRequests,
   approveChannelPairingCode,
-} from "@clawe/shared/openclaw";
+} from "@clawe/shared/agency";
 
 // GET /api/agency/pairing?channel=telegram - List pending pairing requests
 export async function GET(request: Request) {

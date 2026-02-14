@@ -59,10 +59,10 @@ export async function businessSet(
 
   // Remove BOOTSTRAP.md if requested
   if (options.removeBootstrap) {
-    const openclawStateDir =
-      process.env.OPENCLAW_STATE_DIR || path.join(os.homedir(), ".openclaw");
+    const agencyStateDir =
+      process.env.AGENCY_STATE_DIR || path.join(os.homedir(), ".agency");
     const bootstrapPath = path.join(
-      openclawStateDir,
+      agencyStateDir,
       "workspaces",
       "clawe",
       "BOOTSTRAP.md",

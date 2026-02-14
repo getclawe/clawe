@@ -8,16 +8,22 @@ import type {
   TelegramProbeResult,
 } from "./types";
 
-const OPENCLAW_URL = process.env.OPENCLAW_URL || "http://localhost:18789";
-const OPENCLAW_TOKEN = process.env.OPENCLAW_TOKEN || "";
+let _agencyClient: ReturnType<typeof axios.create> | null = null;
 
-const openclawClient = axios.create({
-  baseURL: OPENCLAW_URL,
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${OPENCLAW_TOKEN}`,
-  },
-});
+function getAgencyClient() {
+  if (!_agencyClient) {
+    const url = process.env.AGENCY_URL || "http://localhost:18789";
+    const token = process.env.AGENCY_TOKEN || "";
+    _agencyClient = axios.create({
+      baseURL: url,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+  return _agencyClient;
+}
 
 async function invokeTool<T>(
   tool: string,
@@ -25,7 +31,7 @@ async function invokeTool<T>(
   args?: Record<string, unknown>,
 ): Promise<ToolResult<T>> {
   try {
-    const { data } = await openclawClient.post("/tools/invoke", {
+    const { data } = await getAgencyClient().post("/tools/invoke", {
       tool,
       action,
       args,
@@ -51,12 +57,12 @@ async function invokeTool<T>(
   }
 }
 
-// Health check - uses /tools/invoke with gateway config.get to verify connectivity
+// Health check - uses sessions_list to verify gateway connectivity
 export async function checkHealth(): Promise<ToolResult<GatewayHealthResult>> {
   try {
-    const { data } = await openclawClient.post("/tools/invoke", {
-      tool: "gateway",
-      action: "config.get",
+    const { data } = await getAgencyClient().post("/tools/invoke", {
+      tool: "sessions_list",
+      action: "json",
     });
 
     if (data.ok) {
@@ -180,7 +186,7 @@ export async function sessionsSend(
   });
 }
 
-// Cron types (matching OpenClaw src/cron/types.ts)
+// Cron types (matching agency src/cron/types.ts)
 export type CronSchedule =
   | { kind: "at"; at: string }
   | { kind: "every"; everyMs: number; anchorMs?: number }

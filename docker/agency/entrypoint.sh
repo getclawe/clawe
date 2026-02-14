@@ -3,11 +3,14 @@ set -e
 
 CONFIG_FILE="${OPENCLAW_STATE_DIR}/openclaw.json"
 PORT="${OPENCLAW_PORT:-18789}"
-TOKEN="${OPENCLAW_TOKEN:-}"
+TOKEN="${AGENCY_TOKEN:-}"
 TEMPLATES_DIR="/opt/clawe/templates"
 
+# Map to OPENCLAW_TOKEN for the openclaw CLI
+export OPENCLAW_TOKEN="$TOKEN"
+
 if [ -z "$TOKEN" ]; then
-    echo "ERROR: OPENCLAW_TOKEN environment variable is required"
+    echo "ERROR: AGENCY_TOKEN environment variable is required"
     exit 1
 fi
 
@@ -41,7 +44,6 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # 3. Patch the config with our agent setup
     echo "==> Patching config with agent setup..."
     export OPENCLAW_PORT="${PORT}"
-    export OPENCLAW_TOKEN="${TOKEN}"
     export CONVEX_URL="${CONVEX_URL:-}"
     
     envsubst '$OPENCLAW_PORT $OPENCLAW_TOKEN $CONVEX_URL' < "$TEMPLATES_DIR/config.template.json" > "$CONFIG_FILE"
@@ -51,9 +53,15 @@ else
     echo "==> Config exists. Skipping initialization."
 fi
 
+# Ensure the local CLI device is paired with the gateway.
+# On container recreation the CLI generates a new keypair, but the old
+# paired.json from the volume is stale. Re-register every startup.
+node /opt/clawe/scripts/pair-device.js
+
 echo "==> Starting OpenClaw gateway on port $PORT..."
 
 exec openclaw gateway run \
     --port "$PORT" \
     --bind 0.0.0.0 \
-    --token "$TOKEN"
+    --token "$TOKEN" \
+    --allow-unconfigured

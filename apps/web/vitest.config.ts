@@ -17,6 +17,10 @@ export default defineConfig({
         __dirname,
         "../../packages/backend/convex/_generated/api",
       ),
+      "@clawe/shared/agency": path.resolve(
+        __dirname,
+        "../../packages/shared/src/agency/index.ts",
+      ),
     },
   },
 });

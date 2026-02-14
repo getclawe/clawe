@@ -6,10 +6,10 @@
     "CONVEX_URL",
     "ANTHROPIC_API_KEY",
     "OPENAI_API_KEY",
-    "OPENCLAW_URL",
-    "OPENCLAW_TOKEN",
+    "AGENCY_URL",
+    "AGENCY_TOKEN",
     "CLAWE_DATA_DIR",
-    "OPENCLAW_STATE_DIR"
+    "AGENCY_STATE_DIR"
   ],
   "tasks": {
     "build": {

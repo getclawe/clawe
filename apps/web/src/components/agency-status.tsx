@@ -40,8 +40,8 @@ export const AgencyStatus = ({ className }: AgencyStatusProps) => {
   const tooltipText = isLoading
     ? "Checking connection..."
     : status === "active"
-      ? "Agent service is online and ready"
-      : "Unable to connect to agent service";
+      ? "Agency service is online and ready"
+      : "Unable to connect to agency service";
 
   const shouldAnimate = isLoading || status === "active";
 
