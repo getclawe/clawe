@@ -8,10 +8,12 @@
  * moved to the provisioning API route (POST /api/tenant/provision).
  *
  * Multi-tenant ready: iterates over active tenants each loop iteration.
- * Currently falls back to single-tenant mode using SQUADHUB_URL/SQUADHUB_TOKEN env vars.
+ * When WATCHER_TOKEN is set, queries Convex for all active tenants.
+ * Falls back to single-tenant mode using SQUADHUB_URL/SQUADHUB_TOKEN env vars.
  *
  * Environment variables:
  *   CONVEX_URL        - Convex deployment URL
+ *   WATCHER_TOKEN     - System-level auth token for querying all tenants (optional)
  *   SQUADHUB_URL      - Squadhub gateway URL (single-tenant fallback)
  *   SQUADHUB_TOKEN    - Squadhub authentication token (single-tenant fallback)
  */
@@ -38,12 +40,28 @@ type TenantInfo = {
 /**
  * Get the list of active tenants to service.
  *
- * TODO (Phase 2): Query Convex `tenants.listActive` with WATCHER_TOKEN
- * to get all active tenants with their squadhubUrl + squadhubToken.
+ * When WATCHER_TOKEN is set, queries Convex `tenants.listActive` for all
+ * active tenants with their squadhub connection info.
  *
- * For now, falls back to single-tenant mode using env vars.
+ * Falls back to single-tenant mode using SQUADHUB_URL/SQUADHUB_TOKEN env vars.
  */
 async function getActiveTenants(): Promise<TenantInfo[]> {
+  if (config.watcherToken) {
+    const tenants = await convex.query(api.tenants.listActive, {
+      watcherToken: config.watcherToken,
+    });
+    return tenants.map(
+      (t: { id: string; squadhubUrl: string; squadhubToken: string }) => ({
+        id: t.id,
+        connection: {
+          squadhubUrl: t.squadhubUrl,
+          squadhubToken: t.squadhubToken,
+        },
+      }),
+    );
+  }
+
+  // Fallback: single-tenant mode from env vars
   return [
     {
       id: "default",
@@ -270,7 +288,12 @@ async function startDeliveryLoop(): Promise<void> {
 async function main(): Promise<void> {
   console.log("[watcher] 🦞 Clawe Watcher starting...");
   console.log(`[watcher] Convex: ${config.convexUrl}`);
-  console.log(`[watcher] Squadhub: ${config.squadhubUrl}`);
+  console.log(
+    `[watcher] Mode: ${config.watcherToken ? "multi-tenant (WATCHER_TOKEN)" : "single-tenant (env vars)"}`,
+  );
+  if (!config.watcherToken) {
+    console.log(`[watcher] Squadhub: ${config.squadhubUrl}`);
+  }
   console.log(`[watcher] Notification poll interval: ${POLL_INTERVAL_MS}ms`);
   console.log(
     `[watcher] Routine check interval: ${ROUTINE_CHECK_INTERVAL_MS}ms\n`,

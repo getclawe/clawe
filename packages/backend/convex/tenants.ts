@@ -1,6 +1,11 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
+import {
+  getUser,
+  resolveTenantId,
+  resolveTenantIdMut,
+  validateWatcherToken,
+} from "./lib/auth";
 
 const DEFAULT_TIMEZONE = "America/New_York";
 
@@ -64,5 +69,129 @@ export const completeOnboarding = mutation({
       },
       updatedAt: Date.now(),
     });
+  },
+});
+
+// Create a new tenant within an account
+export const create = mutation({
+  args: {
+    accountId: v.id("accounts"),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const tenantId = await ctx.db.insert("tenants", {
+      accountId: args.accountId,
+      status: "provisioning",
+      createdAt: now,
+      updatedAt: now,
+    });
+    return tenantId;
+  },
+});
+
+// Get tenant for the current authenticated user
+// Resolves: user → accountMembers → account → tenants
+export const getForCurrentUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getUser(ctx);
+
+    const membership = await ctx.db
+      .query("accountMembers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
+
+    if (!membership) {
+      return null;
+    }
+
+    return await ctx.db
+      .query("tenants")
+      .withIndex("by_account", (q) => q.eq("accountId", membership.accountId))
+      .first();
+  },
+});
+
+// Update tenant provisioning status
+export const updateStatus = mutation({
+  args: {
+    tenantId: v.id("tenants"),
+    status: v.union(
+      v.literal("provisioning"),
+      v.literal("active"),
+      v.literal("stopped"),
+      v.literal("error"),
+    ),
+    squadhubUrl: v.optional(v.string()),
+    squadhubToken: v.optional(v.string()),
+    squadhubServiceArn: v.optional(v.string()),
+    efsAccessPointId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const tenant = await ctx.db.get(args.tenantId);
+    if (!tenant) {
+      throw new Error("Tenant not found");
+    }
+
+    await ctx.db.patch(args.tenantId, {
+      status: args.status,
+      ...(args.squadhubUrl !== undefined && {
+        squadhubUrl: args.squadhubUrl,
+      }),
+      ...(args.squadhubToken !== undefined && {
+        squadhubToken: args.squadhubToken,
+      }),
+      ...(args.squadhubServiceArn !== undefined && {
+        squadhubServiceArn: args.squadhubServiceArn,
+      }),
+      ...(args.efsAccessPointId !== undefined && {
+        efsAccessPointId: args.efsAccessPointId,
+      }),
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Store Anthropic API key in tenant record
+export const setAnthropicKey = mutation({
+  args: {
+    machineToken: v.optional(v.string()),
+    apiKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenant = await ctx.db.get(tenantId);
+    if (!tenant) {
+      throw new Error("Tenant not found");
+    }
+
+    await ctx.db.patch(tenantId, {
+      anthropicApiKey: args.apiKey,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// List all active tenants with their squadhub connection info
+// Requires a valid WATCHER_TOKEN for system-level auth
+export const listActive = query({
+  args: {
+    watcherToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    validateWatcherToken(ctx, args.watcherToken);
+
+    const tenants = await ctx.db
+      .query("tenants")
+      .withIndex("by_status", (q) => q.eq("status", "active"))
+      .collect();
+
+    return tenants
+      .filter((t) => t.squadhubUrl && t.squadhubToken)
+      .map((t) => ({
+        id: t._id,
+        squadhubUrl: t.squadhubUrl!,
+        squadhubToken: t.squadhubToken!,
+      }));
   },
 });

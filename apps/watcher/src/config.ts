@@ -19,5 +19,6 @@ export const config = {
   convexUrl: process.env.CONVEX_URL || "",
   squadhubUrl: process.env.SQUADHUB_URL || "http://localhost:18789",
   squadhubToken: process.env.SQUADHUB_TOKEN || "",
+  watcherToken: process.env.WATCHER_TOKEN || "",
   pollIntervalMs: POLL_INTERVAL_MS,
 };
