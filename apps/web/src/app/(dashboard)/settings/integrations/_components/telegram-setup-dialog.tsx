@@ -217,7 +217,8 @@ export const TelegramSetupDialog = ({
                       Squadhub is offline
                     </p>
                     <p className="text-xs text-red-600 dark:text-red-500">
-                      The squadhub service needs to be running to verify pairing.
+                      The squadhub service needs to be running to verify
+                      pairing.
                     </p>
                   </div>
                 </div>
@@ -357,7 +358,8 @@ export const TelegramSetupDialog = ({
                     Squadhub is offline
                   </p>
                   <p className="text-xs text-red-600 dark:text-red-500">
-                    The squadhub service needs to be running to connect Telegram.
+                    The squadhub service needs to be running to connect
+                    Telegram.
                   </p>
                 </div>
               </div>

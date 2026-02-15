@@ -13,10 +13,34 @@ import {
  * Default agent definitions for new tenants.
  */
 const DEFAULT_AGENTS = [
-  { id: "main", name: "Clawe", emoji: "\u{1F99E}", role: "Squad Lead", cron: "0,15,30,45 * * * *" },
-  { id: "inky", name: "Inky", emoji: "\u270D\uFE0F", role: "Writer", cron: "3,18,33,48 * * * *" },
-  { id: "pixel", name: "Pixel", emoji: "\u{1F3A8}", role: "Designer", cron: "7,22,37,52 * * * *" },
-  { id: "scout", name: "Scout", emoji: "\u{1F50D}", role: "SEO", cron: "11,26,41,56 * * * *" },
+  {
+    id: "main",
+    name: "Clawe",
+    emoji: "\u{1F99E}",
+    role: "Squad Lead",
+    cron: "0,15,30,45 * * * *",
+  },
+  {
+    id: "inky",
+    name: "Inky",
+    emoji: "\u270D\uFE0F",
+    role: "Writer",
+    cron: "3,18,33,48 * * * *",
+  },
+  {
+    id: "pixel",
+    name: "Pixel",
+    emoji: "\u{1F3A8}",
+    role: "Designer",
+    cron: "7,22,37,52 * * * *",
+  },
+  {
+    id: "scout",
+    name: "Scout",
+    emoji: "\u{1F50D}",
+    role: "SEO",
+    cron: "11,26,41,56 * * * *",
+  },
 ];
 
 const HEARTBEAT_MESSAGE =
@@ -38,14 +62,24 @@ const SEED_ROUTINES = [
     title: "Morning Brief",
     description: "Prepare daily morning brief for the team",
     priority: "high" as const,
-    schedule: { type: "weekly" as const, daysOfWeek: [0, 1, 2, 3, 4, 5, 6], hour: 8, minute: 0 },
+    schedule: {
+      type: "weekly" as const,
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      hour: 8,
+      minute: 0,
+    },
     color: "amber",
   },
   {
     title: "Competitor Scan",
     description: "Scan competitor activities and updates",
     priority: "normal" as const,
-    schedule: { type: "weekly" as const, daysOfWeek: [1, 4], hour: 10, minute: 0 },
+    schedule: {
+      type: "weekly" as const,
+      daysOfWeek: [1, 4],
+      hour: 10,
+      minute: 0,
+    },
     color: "rose",
   },
 ];
@@ -99,7 +133,10 @@ async function setupCrons(connection: SquadhubConnection): Promise<{
 
   const result = await cronList(connection);
   if (!result.ok) {
-    return { count: 0, errors: [`Failed to list crons: ${result.error?.message}`] };
+    return {
+      count: 0,
+      errors: [`Failed to list crons: ${result.error?.message}`],
+    };
   }
 
   const existingNames = new Set(

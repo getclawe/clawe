@@ -56,7 +56,10 @@ describe("Squadhub Actions", () => {
 
       expect(probeTelegramToken).toHaveBeenCalledWith("123456:ABC-DEF");
       expect(saveTelegramBotTokenClient).toHaveBeenCalledWith(
-        expect.objectContaining({ squadhubUrl: expect.any(String), squadhubToken: expect.any(String) }),
+        expect.objectContaining({
+          squadhubUrl: expect.any(String),
+          squadhubToken: expect.any(String),
+        }),
         "123456:ABC-DEF",
       );
       expect(result.ok).toBe(true);

@@ -15,9 +15,9 @@ This enables:
 
 ## Environment Variables
 
-| Variable       | Required | Description                 |
-| -------------- | -------- | --------------------------- |
-| `CONVEX_URL`   | Yes      | Convex deployment URL       |
+| Variable         | Required | Description                   |
+| ---------------- | -------- | ----------------------------- |
+| `CONVEX_URL`     | Yes      | Convex deployment URL         |
 | `SQUADHUB_URL`   | Yes      | Squadhub gateway URL          |
 | `SQUADHUB_TOKEN` | Yes      | Squadhub authentication token |
 

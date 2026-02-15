@@ -222,9 +222,7 @@ export const sendToMany = mutation({
     }
 
     for (const targetSessionKey of args.targetSessionKeys) {
-      const targetAgent = agents.find(
-        (a) => a.sessionKey === targetSessionKey,
-      );
+      const targetAgent = agents.find((a) => a.sessionKey === targetSessionKey);
 
       if (targetAgent) {
         const id = await ctx.db.insert("notifications", {

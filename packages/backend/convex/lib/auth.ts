@@ -65,9 +65,7 @@ async function getTenantIdFromUser(
  * Browser path: resolve tenantId from the JWT identity.
  * Gets the user, then looks up: accountMembers → account → tenants.
  */
-export async function getTenantIdFromJwt(
-  ctx: ReadCtx,
-): Promise<Id<"tenants">> {
+export async function getTenantIdFromJwt(ctx: ReadCtx): Promise<Id<"tenants">> {
   const user = await getUser(ctx);
 
   const tenantId = await getTenantIdFromUser(ctx, user._id);
@@ -116,9 +114,7 @@ export function validateWatcherToken(
 /**
  * Dev-only: get or create a default dev tenant (used when AUTH_ENABLED=false).
  */
-async function getOrCreateDevTenant(
-  ctx: MutationCtx,
-): Promise<Id<"tenants">> {
+async function getOrCreateDevTenant(ctx: MutationCtx): Promise<Id<"tenants">> {
   // Look for existing dev user
   let user = await ctx.db
     .query("users")
@@ -205,7 +201,9 @@ export async function resolveTenantId(
     }
   }
 
-  throw new Error("No dev tenant found. Run a mutation first to auto-create it.");
+  throw new Error(
+    "No dev tenant found. Run a mutation first to auto-create it.",
+  );
 }
 
 /**

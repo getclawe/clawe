@@ -18,10 +18,7 @@
 
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@clawe/backend";
-import {
-  sessionsSend,
-  type SquadhubConnection,
-} from "@clawe/shared/squadhub";
+import { sessionsSend, type SquadhubConnection } from "@clawe/shared/squadhub";
 import { getTimeInZone, DEFAULT_TIMEZONE } from "@clawe/shared/timezone";
 import { validateEnv, config, POLL_INTERVAL_MS } from "./config.js";
 

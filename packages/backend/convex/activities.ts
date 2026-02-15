@@ -91,9 +91,7 @@ export const byType = query({
       .order("desc")
       .collect();
 
-    return allActivities
-      .filter((a) => a.type === filters.type)
-      .slice(0, limit);
+    return allActivities.filter((a) => a.type === filters.type).slice(0, limit);
   },
 });
 

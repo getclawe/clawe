@@ -6,7 +6,7 @@ import { GET } from "./route";
 const mockRequest = vi.fn();
 
 vi.mock("@clawe/shared/squadhub", () => ({
-  getSharedClient: vi.fn(async (_connection: unknown) => ({
+  getSharedClient: vi.fn(async () => ({
     request: mockRequest,
     isConnected: vi.fn().mockReturnValue(true),
   })),
