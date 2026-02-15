@@ -1,15 +1,13 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { getConnection } from "@/lib/squadhub/connection";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const agencyUrl = process.env.AGENCY_URL || "http://localhost:18789";
-const agencyToken = process.env.AGENCY_TOKEN || "";
-
 /**
  * POST /api/chat
- * Proxy chat requests to the agency's OpenAI-compatible endpoint.
+ * Proxy chat requests to the squadhub's OpenAI-compatible endpoint.
  */
 export async function POST(request: Request) {
   try {
@@ -30,16 +28,18 @@ export async function POST(request: Request) {
       });
     }
 
-    // Create OpenAI-compatible client pointing to agency gateway
-    const agency = createOpenAI({
-      baseURL: `${agencyUrl}/v1`,
-      apiKey: agencyToken,
+    const { squadhubUrl, squadhubToken } = getConnection();
+
+    // Create OpenAI-compatible client pointing to squadhub gateway
+    const squadhub = createOpenAI({
+      baseURL: `${squadhubUrl}/v1`,
+      apiKey: squadhubToken,
     });
 
     // Stream response using Vercel AI SDK
     // Use .chat() to force Chat Completions API instead of Responses API
     const result = streamText({
-      model: agency.chat("openclaw"),
+      model: squadhub.chat("openclaw"),
       messages,
       headers: {
         "X-OpenClaw-Session-Key": sessionKey,

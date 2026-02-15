@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { taskStatus } from "./task-status.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    mutation: vi.fn(),
-  },
+  mutation: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 
 describe("taskStatus", () => {
   beforeEach(() => {
@@ -16,11 +14,11 @@ describe("taskStatus", () => {
   });
 
   it("updates task status", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(undefined);
+    vi.mocked(mutation).mockResolvedValue(undefined);
 
     await taskStatus("task-123", "in_progress", {});
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-123",
       status: "in_progress",
       bySessionKey: undefined,
@@ -31,11 +29,11 @@ describe("taskStatus", () => {
   });
 
   it("updates task status with agent attribution", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(undefined);
+    vi.mocked(mutation).mockResolvedValue(undefined);
 
     await taskStatus("task-456", "done", { by: "agent:main:main" });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-456",
       status: "done",
       bySessionKey: "agent:main:main",

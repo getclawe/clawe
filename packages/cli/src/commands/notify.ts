@@ -1,4 +1,4 @@
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 import { api } from "@clawe/backend";
 
 interface NotifyOptions {
@@ -10,7 +10,7 @@ export async function notify(
   message: string,
   options: NotifyOptions,
 ): Promise<void> {
-  await client.mutation(api.notifications.send, {
+  await mutation(api.notifications.send, {
     targetSessionKey,
     sourceSessionKey: options.from,
     type: "custom",

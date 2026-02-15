@@ -76,9 +76,9 @@ Or infer from query results (preferred when using the data directly).
 **Environment variables:**
 
 - `NEXT_PUBLIC_CONVEX_URL` → Convex deployment URL (required)
-- `ANTHROPIC_API_KEY` → Anthropic API key (passed to agency container)
-- `AGENCY_URL` → Agency gateway URL
-- `AGENCY_TOKEN` → Agency authentication token (from root `.env`)
+- `ANTHROPIC_API_KEY` → Anthropic API key (passed to squadhub container)
+- `SQUADHUB_URL` → SquadHub gateway URL
+- `SQUADHUB_TOKEN` → SquadHub authentication token (from root `.env`)
 
 ## Adding Routes
 
@@ -173,7 +173,7 @@ Dark:  text-pink-400, hover bg-pink-400/5
 ```
 src/
 ├── lib/
-│   └── agency/
+│   └── squadhub/
 │       ├── client.ts
 │       ├── client.spec.ts      # Unit tests for client
 │       ├── actions.ts

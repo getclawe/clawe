@@ -1,4 +1,4 @@
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 import { api } from "@clawe/backend";
 import type { Id } from "@clawe/backend/dataModel";
 
@@ -12,7 +12,7 @@ export async function subtaskAdd(
   title: string,
   options: SubtaskAddOptions,
 ): Promise<void> {
-  const index = await client.mutation(api.tasks.addSubtask, {
+  const index = await mutation(api.tasks.addSubtask, {
     taskId: taskId as Id<"tasks">,
     title,
     description: options.description,

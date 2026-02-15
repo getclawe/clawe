@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { subtaskCheck, subtaskUncheck } from "./subtask-check.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    mutation: vi.fn(),
-  },
+  mutation: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 
 describe("subtaskCheck", () => {
   beforeEach(() => {
@@ -16,11 +14,11 @@ describe("subtaskCheck", () => {
   });
 
   it("marks subtask as done", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(undefined);
+    vi.mocked(mutation).mockResolvedValue(undefined);
 
     await subtaskCheck("task-123", "0", {});
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-123",
       subtaskIndex: 0,
       done: true,
@@ -31,11 +29,11 @@ describe("subtaskCheck", () => {
   });
 
   it("marks subtask as done with agent attribution", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(undefined);
+    vi.mocked(mutation).mockResolvedValue(undefined);
 
     await subtaskCheck("task-456", "2", { by: "agent:inky:main" });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-456",
       subtaskIndex: 2,
       done: true,
@@ -45,11 +43,11 @@ describe("subtaskCheck", () => {
   });
 
   it("parses string index correctly", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(undefined);
+    vi.mocked(mutation).mockResolvedValue(undefined);
 
     await subtaskCheck("task-789", "5", {});
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-789",
       subtaskIndex: 5,
       done: true,
@@ -66,11 +64,11 @@ describe("subtaskUncheck", () => {
   });
 
   it("marks subtask as not done", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(undefined);
+    vi.mocked(mutation).mockResolvedValue(undefined);
 
     await subtaskUncheck("task-123", "1", {});
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-123",
       subtaskIndex: 1,
       done: false,
@@ -81,11 +79,11 @@ describe("subtaskUncheck", () => {
   });
 
   it("marks subtask as not done with agent attribution", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(undefined);
+    vi.mocked(mutation).mockResolvedValue(undefined);
 
     await subtaskUncheck("task-456", "0", { by: "agent:main:main" });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-456",
       subtaskIndex: 0,
       done: false,

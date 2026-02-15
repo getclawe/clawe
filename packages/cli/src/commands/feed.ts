@@ -1,4 +1,4 @@
-import { client } from "../client.js";
+import { query } from "../client.js";
 import { api } from "@clawe/backend";
 
 interface FeedOptions {
@@ -6,7 +6,7 @@ interface FeedOptions {
 }
 
 export async function feed(options: FeedOptions): Promise<void> {
-  const activities = await client.query(api.activities.feed, {
+  const activities = await query(api.activities.feed, {
     limit: options.limit ?? 20,
   });
 

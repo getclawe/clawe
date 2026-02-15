@@ -3,14 +3,14 @@ set -e
 
 CONFIG_FILE="${OPENCLAW_STATE_DIR}/openclaw.json"
 PORT="${OPENCLAW_PORT:-18789}"
-TOKEN="${AGENCY_TOKEN:-}"
+TOKEN="${SQUADHUB_TOKEN:-}"
 TEMPLATES_DIR="/opt/clawe/templates"
 
 # Map to OPENCLAW_TOKEN for the openclaw CLI
 export OPENCLAW_TOKEN="$TOKEN"
 
 if [ -z "$TOKEN" ]; then
-    echo "ERROR: AGENCY_TOKEN environment variable is required"
+    echo "ERROR: SQUADHUB_TOKEN environment variable is required"
     exit 1
 fi
 

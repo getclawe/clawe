@@ -1,4 +1,4 @@
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 import { api } from "@clawe/backend";
 import type { Id } from "@clawe/backend/dataModel";
 
@@ -27,7 +27,7 @@ export async function taskStatus(
     process.exit(1);
   }
 
-  await client.mutation(api.tasks.updateStatus, {
+  await mutation(api.tasks.updateStatus, {
     taskId: taskId as Id<"tasks">,
     status: status as TaskStatus,
     bySessionKey: options.by,

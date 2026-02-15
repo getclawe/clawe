@@ -44,7 +44,7 @@ const formatLastSeen = (timestamp?: number): string => {
 };
 
 const AgentsPage = () => {
-  const agents = useQuery(api.agents.squad);
+  const agents = useQuery(api.agents.squad, {});
 
   return (
     <>

@@ -1,42 +1,59 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
 
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("channels").collect();
+  args: { machineToken: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const tenantId = await resolveTenantId(ctx, args);
+    return await ctx.db
+      .query("channels")
+      .withIndex("by_tenant_type", (q) => q.eq("tenantId", tenantId))
+      .collect();
   },
 });
 
 export const getByType = query({
-  args: { type: v.string() },
+  args: {
+    machineToken: v.optional(v.string()),
+    type: v.string(),
+  },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantId(ctx, args);
     return await ctx.db
       .query("channels")
-      .withIndex("by_type", (q) => q.eq("type", args.type))
+      .withIndex("by_tenant_type", (q) =>
+        q.eq("tenantId", tenantId).eq("type", args.type),
+      )
       .first();
   },
 });
 
 export const upsert = mutation({
   args: {
+    machineToken: v.optional(v.string()),
     type: v.string(),
     status: v.union(v.literal("connected"), v.literal("disconnected")),
     accountId: v.optional(v.string()),
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
+    const { machineToken: _, ...rest } = args;
+
     const existing = await ctx.db
       .query("channels")
-      .withIndex("by_type", (q) => q.eq("type", args.type))
+      .withIndex("by_tenant_type", (q) =>
+        q.eq("tenantId", tenantId).eq("type", rest.type),
+      )
       .first();
 
     const data = {
-      type: args.type,
-      status: args.status,
-      accountId: args.accountId,
-      metadata: args.metadata,
-      connectedAt: args.status === "connected" ? Date.now() : undefined,
+      type: rest.type,
+      status: rest.status,
+      accountId: rest.accountId,
+      metadata: rest.metadata,
+      connectedAt: rest.status === "connected" ? Date.now() : undefined,
     };
 
     if (existing) {
@@ -44,16 +61,26 @@ export const upsert = mutation({
       return existing._id;
     }
 
-    return await ctx.db.insert("channels", data);
+    return await ctx.db.insert("channels", {
+      ...data,
+      tenantId,
+    });
   },
 });
 
 export const disconnect = mutation({
-  args: { type: v.string() },
+  args: {
+    machineToken: v.optional(v.string()),
+    type: v.string(),
+  },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
+
     const existing = await ctx.db
       .query("channels")
-      .withIndex("by_type", (q) => q.eq("type", args.type))
+      .withIndex("by_tenant_type", (q) =>
+        q.eq("tenantId", tenantId).eq("type", args.type),
+      )
       .first();
 
     if (existing) {

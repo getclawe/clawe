@@ -14,7 +14,7 @@ const CURRENT_STEP = 4;
 
 export default function CompletePage() {
   const router = useRouter();
-  const completeOnboarding = useMutation(api.settings.completeOnboarding);
+  const completeOnboarding = useMutation(api.tenants.completeOnboarding);
   const [isCompleting, setIsCompleting] = useState(false);
 
   const handleFinish = async () => {

@@ -1,4 +1,4 @@
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 import { api } from "@clawe/backend";
 
 interface TaskPlan {
@@ -64,7 +64,7 @@ export async function taskPlan(planJson: string): Promise<void> {
   console.log("");
 
   try {
-    const taskId = await client.mutation(api.tasks.createWithPlan, {
+    const taskId = await mutation(api.tasks.createWithPlan, {
       title: plan.title,
       description: plan.description,
       priority: plan.priority,

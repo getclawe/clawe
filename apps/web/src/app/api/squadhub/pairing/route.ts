@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import {
   listChannelPairingRequests,
   approveChannelPairingCode,
-} from "@clawe/shared/agency";
+} from "@clawe/shared/squadhub";
+import { getConnection } from "@/lib/squadhub/connection";
 
-// GET /api/agency/pairing?channel=telegram - List pending pairing requests
+// GET /api/squadhub/pairing?channel=telegram - List pending pairing requests
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const channel = searchParams.get("channel") || "telegram";
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
   return NextResponse.json(result.result);
 }
 
-// POST /api/agency/pairing - Approve a pairing code
+// POST /api/squadhub/pairing - Approve a pairing code
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -31,7 +32,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Code is required" }, { status: 400 });
     }
 
-    const result = await approveChannelPairingCode(channel, code);
+    const result = await approveChannelPairingCode(
+      getConnection(),
+      channel,
+      code,
+    );
 
     if (!result.ok) {
       const status = result.error.type === "not_found" ? 404 : 500;

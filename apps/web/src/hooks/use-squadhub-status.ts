@@ -3,12 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-type AgencyStatus = "active" | "down" | "idle";
+type SquadhubStatus = "active" | "down" | "idle";
 
-const checkAgencyHealth = async (): Promise<boolean> => {
+const checkSquadhubHealth = async (): Promise<boolean> => {
   try {
     const { data } = await axios.post(
-      "/api/agency/health",
+      "/api/squadhub/health",
       {},
       { timeout: 5000 },
     );
@@ -18,16 +18,16 @@ const checkAgencyHealth = async (): Promise<boolean> => {
   }
 };
 
-export const useAgencyStatus = () => {
+export const useSquadhubStatus = () => {
   const { data: isHealthy, isLoading } = useQuery({
-    queryKey: ["agency-health"],
-    queryFn: checkAgencyHealth,
+    queryKey: ["squadhub-health"],
+    queryFn: checkSquadhubHealth,
     refetchInterval: 30000, // Check every 30 seconds
     staleTime: 10000,
     retry: false,
   });
 
-  const status: AgencyStatus = isLoading
+  const status: SquadhubStatus = isLoading
     ? "idle"
     : isHealthy
       ? "active"

@@ -16,8 +16,8 @@ RUN npm install -g openclaw@latest
 RUN mkdir -p /data/config /data/workspace
 
 # Copy templates and scripts
-COPY docker/agency/templates/ /opt/clawe/templates/
-COPY docker/agency/scripts/ /opt/clawe/scripts/
+COPY docker/squadhub/templates/ /opt/clawe/templates/
+COPY docker/squadhub/scripts/ /opt/clawe/scripts/
 RUN chmod +x /opt/clawe/scripts/*.sh
 
 # Copy bundled CLI (single file with all deps included)
@@ -28,7 +28,7 @@ ENV OPENCLAW_STATE_DIR=/data/config
 ENV OPENCLAW_PORT=18789
 ENV OPENCLAW_SKIP_GMAIL_WATCHER=1
 
-COPY docker/agency/entrypoint.sh /entrypoint.sh
+COPY docker/squadhub/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 HEALTHCHECK --interval=5s --timeout=3s --retries=10 \

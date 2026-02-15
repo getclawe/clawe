@@ -3,10 +3,8 @@ import { deliver, deliverables } from "./deliver.js";
 import * as fs from "fs";
 
 vi.mock("../client.js", () => ({
-  client: {
-    mutation: vi.fn(),
-    query: vi.fn(),
-  },
+  mutation: vi.fn(),
+  query: vi.fn(),
   uploadFile: vi.fn(),
 }));
 
@@ -14,7 +12,7 @@ vi.mock("fs", () => ({
   existsSync: vi.fn(),
 }));
 
-import { client, uploadFile } from "../client.js";
+import { mutation, query, uploadFile } from "../client.js";
 
 describe("deliver", () => {
   beforeEach(() => {
@@ -25,7 +23,7 @@ describe("deliver", () => {
   it("registers a deliverable", async () => {
     vi.mocked(fs.existsSync).mockReturnValue(true);
     vi.mocked(uploadFile).mockResolvedValue("file-id");
-    vi.mocked(client.mutation).mockResolvedValue("doc-id");
+    vi.mocked(mutation).mockResolvedValue("doc-id");
 
     await deliver("task-123", "/output/report.pdf", "Final Report", {
       by: "agent:inky:main",
@@ -33,7 +31,7 @@ describe("deliver", () => {
 
     expect(fs.existsSync).toHaveBeenCalledWith("/output/report.pdf");
     expect(uploadFile).toHaveBeenCalledWith("/output/report.pdf");
-    expect(client.mutation).toHaveBeenCalledWith(
+    expect(mutation).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
         taskId: "task-123",
@@ -56,7 +54,7 @@ describe("deliverables", () => {
   });
 
   it("shows message when no deliverables", async () => {
-    vi.mocked(client.query).mockResolvedValue([]);
+    vi.mocked(query).mockResolvedValue([]);
 
     await deliverables("task-123");
 
@@ -65,7 +63,7 @@ describe("deliverables", () => {
 
   it("lists deliverables with details", async () => {
     const now = Date.now();
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "doc-1",
         title: "Logo Design",

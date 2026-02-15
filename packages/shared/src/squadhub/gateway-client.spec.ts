@@ -13,6 +13,11 @@ vi.mock("ws", () => {
   };
 });
 
+const connection = {
+  squadhubUrl: "http://localhost:18789",
+  squadhubToken: "test-token",
+};
+
 describe("GatewayClient", () => {
   let client: GatewayClient;
 
@@ -56,38 +61,15 @@ describe("GatewayClient", () => {
 });
 
 describe("createGatewayClient", () => {
-  const originalEnv = process.env;
-
-  beforeEach(() => {
-    vi.resetModules();
-    process.env = { ...originalEnv };
-  });
-
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-
-  it("creates client with default URL when env not set", () => {
-    delete process.env.AGENCY_URL;
-    delete process.env.AGENCY_TOKEN;
-
-    const client = createGatewayClient();
+  it("creates client with connection params", () => {
+    const client = createGatewayClient(connection);
     expect(client).toBeInstanceOf(GatewayClient);
     client.close();
   });
 
-  it("creates client with env URL and token", () => {
-    process.env.AGENCY_URL = "http://custom:8080";
-    process.env.AGENCY_TOKEN = "custom-token";
-
-    const client = createGatewayClient();
-    expect(client).toBeInstanceOf(GatewayClient);
-    client.close();
-  });
-
-  it("merges custom options with env config", () => {
+  it("merges custom options with connection", () => {
     const onEvent = vi.fn();
-    const client = createGatewayClient({ onEvent });
+    const client = createGatewayClient(connection, { onEvent });
     expect(client).toBeInstanceOf(GatewayClient);
     client.close();
   });

@@ -1,51 +1,65 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
 
 const agentStatusValidator = v.union(v.literal("online"), v.literal("offline"));
 
 // List all agents
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("agents").collect();
+  args: { machineToken: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const tenantId = await resolveTenantId(ctx, args);
+    return await ctx.db
+      .query("agents")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
   },
 });
 
 // Get agent by ID
 export const get = query({
-  args: { id: v.id("agents") },
+  args: { id: v.id("agents"), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
+    await resolveTenantId(ctx, args);
     return await ctx.db.get(args.id);
   },
 });
 
 // Get agent by session key
 export const getBySessionKey = query({
-  args: { sessionKey: v.string() },
+  args: { sessionKey: v.string(), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const tenantId = await resolveTenantId(ctx, args);
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
-      .first();
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+    return agents.find((a) => a.sessionKey === args.sessionKey) ?? null;
   },
 });
 
 // List agents by status
 export const listByStatus = query({
-  args: { status: agentStatusValidator },
+  args: { status: agentStatusValidator, machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const tenantId = await resolveTenantId(ctx, args);
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_status", (q) => q.eq("status", args.status))
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
       .collect();
+    return agents.filter((a) => a.status === args.status);
   },
 });
 
 // Squad status - get all agents with their current state
 export const squad = query({
-  args: {},
-  handler: async (ctx) => {
-    const agents = await ctx.db.query("agents").collect();
+  args: { machineToken: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const tenantId = await resolveTenantId(ctx, args);
+    const agents = await ctx.db
+      .query("agents")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
 
     return Promise.all(
       agents.map(async (agent) => {
@@ -76,32 +90,37 @@ export const upsert = mutation({
     sessionKey: v.string(),
     emoji: v.optional(v.string()),
     config: v.optional(v.any()),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
+    const { machineToken: _, ...rest } = args;
     const now = Date.now();
 
-    const existing = await ctx.db
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
-      .first();
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+    const existing = agents.find((a) => a.sessionKey === rest.sessionKey);
 
     if (existing) {
       await ctx.db.patch(existing._id, {
-        name: args.name,
-        role: args.role,
-        emoji: args.emoji,
-        config: args.config,
+        name: rest.name,
+        role: rest.role,
+        emoji: rest.emoji,
+        config: rest.config,
         updatedAt: now,
       });
       return existing._id;
     } else {
       return await ctx.db.insert("agents", {
-        name: args.name,
-        role: args.role,
-        sessionKey: args.sessionKey,
-        emoji: args.emoji,
-        config: args.config,
+        name: rest.name,
+        role: rest.role,
+        sessionKey: rest.sessionKey,
+        emoji: rest.emoji,
+        config: rest.config,
         status: "offline",
+        tenantId,
         createdAt: now,
         updatedAt: now,
       });
@@ -117,16 +136,20 @@ export const create = mutation({
     sessionKey: v.string(),
     emoji: v.optional(v.string()),
     config: v.optional(v.any()),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
+    const { machineToken: _, ...rest } = args;
     const now = Date.now();
     return await ctx.db.insert("agents", {
-      name: args.name,
-      role: args.role,
-      sessionKey: args.sessionKey,
-      emoji: args.emoji,
-      config: args.config,
+      name: rest.name,
+      role: rest.role,
+      sessionKey: rest.sessionKey,
+      emoji: rest.emoji,
+      config: rest.config,
       status: "offline",
+      tenantId,
       createdAt: now,
       updatedAt: now,
     });
@@ -138,8 +161,10 @@ export const updateStatus = mutation({
   args: {
     id: v.id("agents"),
     status: agentStatusValidator,
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await resolveTenantIdMut(ctx, args);
     await ctx.db.patch(args.id, {
       status: args.status,
       updatedAt: Date.now(),
@@ -149,14 +174,16 @@ export const updateStatus = mutation({
 
 // Record agent heartbeat
 export const heartbeat = mutation({
-  args: { sessionKey: v.string() },
+  args: { sessionKey: v.string(), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
     const now = Date.now();
 
-    const agent = await ctx.db
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
-      .first();
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
 
     if (!agent) {
       throw new Error(`Agent not found: ${args.sessionKey}`);
@@ -178,6 +205,7 @@ export const heartbeat = mutation({
         type: "agent_heartbeat",
         agentId: agent._id,
         message: `${agent.name} is online`,
+        tenantId: agent.tenantId,
         createdAt: now,
       });
     }
@@ -191,12 +219,15 @@ export const setCurrentTask = mutation({
   args: {
     sessionKey: v.string(),
     taskId: v.optional(v.id("tasks")),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const agent = await ctx.db
+    const tenantId = await resolveTenantIdMut(ctx, args);
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
-      .first();
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
 
     if (!agent) {
       throw new Error(`Agent not found: ${args.sessionKey}`);
@@ -214,12 +245,15 @@ export const setActivity = mutation({
   args: {
     sessionKey: v.string(),
     activity: v.optional(v.string()),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const agent = await ctx.db
+    const tenantId = await resolveTenantIdMut(ctx, args);
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
-      .first();
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
 
     if (!agent) {
       throw new Error(`Agent not found: ${args.sessionKey}`);
@@ -241,9 +275,11 @@ export const update = mutation({
     role: v.optional(v.string()),
     emoji: v.optional(v.string()),
     config: v.optional(v.any()),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { id, ...updates } = args;
+    await resolveTenantIdMut(ctx, args);
+    const { id, machineToken: _, ...updates } = args;
     const filteredUpdates = Object.fromEntries(
       Object.entries(updates).filter(([, value]) => value !== undefined),
     );
@@ -256,8 +292,9 @@ export const update = mutation({
 
 // Remove agent
 export const remove = mutation({
-  args: { id: v.id("agents") },
+  args: { id: v.id("agents"), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
+    await resolveTenantIdMut(ctx, args);
     await ctx.db.delete(args.id);
   },
 });

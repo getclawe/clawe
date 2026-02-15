@@ -19,12 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@clawe/ui/components/dialog";
-import { useAgencyStatus } from "@/hooks/use-agency-status";
+import { useSquadhubStatus } from "@/hooks/use-squadhub-status";
 import {
   validateTelegramToken,
   saveTelegramBotToken,
   approvePairingCode,
-} from "@/lib/agency/actions";
+} from "@/lib/squadhub/actions";
 
 type Step = "token" | "pairing" | "success";
 
@@ -37,8 +37,8 @@ export const TelegramSetupDialog = ({
   open,
   onOpenChange,
 }: TelegramSetupDialogProps) => {
-  const { status, isLoading: isAgencyLoading } = useAgencyStatus();
-  const isOffline = !isAgencyLoading && status === "down";
+  const { status, isLoading: isSquadhubLoading } = useSquadhubStatus();
+  const isOffline = !isSquadhubLoading && status === "down";
 
   const [step, setStep] = useState<Step>("token");
   const [botToken, setBotToken] = useState("");
@@ -214,10 +214,10 @@ export const TelegramSetupDialog = ({
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
                   <div>
                     <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                      Agency is offline
+                      Squadhub is offline
                     </p>
                     <p className="text-xs text-red-600 dark:text-red-500">
-                      The agency service needs to be running to verify pairing.
+                      The squadhub service needs to be running to verify pairing.
                     </p>
                   </div>
                 </div>
@@ -354,10 +354,10 @@ export const TelegramSetupDialog = ({
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
                 <div>
                   <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                    Agency is offline
+                    Squadhub is offline
                   </p>
                   <p className="text-xs text-red-600 dark:text-red-500">
-                    The agency service needs to be running to connect Telegram.
+                    The squadhub service needs to be running to connect Telegram.
                   </p>
                 </div>
               </div>

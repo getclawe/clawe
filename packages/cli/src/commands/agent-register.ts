@@ -1,4 +1,4 @@
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 import { api } from "@clawe/backend";
 
 interface AgentRegisterOptions {
@@ -11,7 +11,7 @@ export async function agentRegister(
   sessionKey: string,
   options: AgentRegisterOptions,
 ): Promise<void> {
-  const agentId = await client.mutation(api.agents.upsert, {
+  const agentId = await mutation(api.agents.upsert, {
     name,
     role,
     sessionKey,

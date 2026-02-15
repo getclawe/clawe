@@ -8,28 +8,28 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_CONVEX_URL=${CONVEX_URL}
-      - AGENCY_URL=http://agency:18789
-      - AGENCY_TOKEN=${AGENCY_TOKEN}
-      - AGENCY_STATE_DIR=/agency-data/config
+      - SQUADHUB_URL=http://squadhub:18789
+      - SQUADHUB_TOKEN=${SQUADHUB_TOKEN}
+      - SQUADHUB_STATE_DIR=/squadhub-data/config
     volumes:
-      - agency-data:/agency-data:ro
+      - squadhub-data:/squadhub-data:ro
     depends_on:
-      agency:
+      squadhub:
         condition: service_healthy
     restart: unless-stopped
 
-  agency:
+  squadhub:
     build:
       context: .
-      dockerfile: docker/agency/Dockerfile
+      dockerfile: docker/squadhub/Dockerfile
     user: "${UID:-1000}:${GID:-1000}"
     environment:
-      - AGENCY_TOKEN=${AGENCY_TOKEN}
+      - SQUADHUB_TOKEN=${SQUADHUB_TOKEN}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - CONVEX_URL=${CONVEX_URL}
     volumes:
-      - agency-data:/data
+      - squadhub-data:/data
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:18789/health"]
       interval: 5s
@@ -43,13 +43,13 @@ services:
       dockerfile: apps/watcher/Dockerfile
     environment:
       - CONVEX_URL=${CONVEX_URL}
-      - AGENCY_URL=http://agency:18789
-      - AGENCY_TOKEN=${AGENCY_TOKEN}
+      - SQUADHUB_URL=http://squadhub:18789
+      - SQUADHUB_TOKEN=${SQUADHUB_TOKEN}
     depends_on:
-      agency:
+      squadhub:
         condition: service_healthy
     restart: unless-stopped
 
 volumes:
-  agency-data:
+  squadhub-data:
     driver: local

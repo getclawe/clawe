@@ -1,5 +1,6 @@
 import { GatewayClient, createGatewayClient } from "./gateway-client";
 import type { GatewayClientOptions } from "./gateway-client";
+import type { SquadhubConnection } from "./client";
 
 let sharedClient: GatewayClient | null = null;
 let connectingPromise: Promise<void> | null = null;
@@ -9,7 +10,8 @@ let connectingPromise: Promise<void> | null = null;
  * Reconnects automatically if the connection drops.
  */
 export async function getSharedClient(
-  options?: Partial<GatewayClientOptions>,
+  connection: SquadhubConnection,
+  options?: Partial<Omit<GatewayClientOptions, "url" | "token">>,
 ): Promise<GatewayClient> {
   if (sharedClient?.isConnected()) {
     return sharedClient;
@@ -26,7 +28,7 @@ export async function getSharedClient(
   // Create new client
   connectingPromise = (async () => {
     sharedClient?.close();
-    sharedClient = createGatewayClient({
+    sharedClient = createGatewayClient(connection, {
       ...options,
       onClose: (_code, _reason) => {
         // Mark as disconnected; next call will reconnect

@@ -13,6 +13,7 @@ export {
   cronAdd,
 } from "./client";
 export type {
+  SquadhubConnection,
   CronJob,
   CronListResult,
   CronAddJob,

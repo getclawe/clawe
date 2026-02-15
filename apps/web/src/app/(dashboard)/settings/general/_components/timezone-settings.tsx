@@ -18,8 +18,8 @@ import {
 import { Skeleton } from "@clawe/ui/components/skeleton";
 
 export const TimezoneSettings = () => {
-  const timezone = useQuery(api.settings.getTimezone);
-  const setTimezone = useMutation(api.settings.setTimezone);
+  const timezone = useQuery(api.tenants.getTimezone, {});
+  const setTimezone = useMutation(api.tenants.setTimezone);
   const [search, setSearch] = useState("");
 
   // Filter and group timezones

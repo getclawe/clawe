@@ -11,7 +11,7 @@ import { api } from "@clawe/backend";
  */
 export const useRequireOnboarding = () => {
   const router = useRouter();
-  const isComplete = useQuery(api.settings.isOnboardingComplete);
+  const isComplete = useQuery(api.tenants.isOnboardingComplete, {});
 
   useEffect(() => {
     if (isComplete === false) {
@@ -28,7 +28,7 @@ export const useRequireOnboarding = () => {
  */
 export const useRedirectIfOnboarded = () => {
   const router = useRouter();
-  const isComplete = useQuery(api.settings.isOnboardingComplete);
+  const isComplete = useQuery(api.tenants.isOnboardingComplete, {});
 
   useEffect(() => {
     if (isComplete === true) {

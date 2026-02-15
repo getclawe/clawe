@@ -20,7 +20,7 @@ export const AgentsPanel = ({
   selectedAgentIds = [],
   onSelectionChange,
 }: AgentsPanelProps) => {
-  const agents = useQuery(api.agents.squad);
+  const agents = useQuery(api.agents.squad, {});
 
   const total = agents?.length ?? 0;
 

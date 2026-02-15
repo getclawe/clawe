@@ -1,4 +1,4 @@
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 import { api } from "@clawe/backend";
 
 interface TaskCreateOptions {
@@ -12,7 +12,7 @@ export async function taskCreate(
   title: string,
   options: TaskCreateOptions,
 ): Promise<void> {
-  const taskId = await client.mutation(api.tasks.create, {
+  const taskId = await mutation(api.tasks.create, {
     title,
     description: options.description,
     assigneeSessionKey: options.assign,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSharedClient } from "@clawe/shared/agency";
+import { getSharedClient } from "@clawe/shared/squadhub";
+import { getConnection } from "@/lib/squadhub/connection";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const client = await getSharedClient();
+    const client = await getSharedClient(getConnection());
 
     await client.request("chat.abort", {
       sessionKey,

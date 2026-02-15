@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { squad } from "./squad.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    query: vi.fn(),
-  },
+  query: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { query } from "../client.js";
 
 describe("squad", () => {
   beforeEach(() => {
@@ -16,7 +14,7 @@ describe("squad", () => {
   });
 
   it("displays squad status header", async () => {
-    vi.mocked(client.query).mockResolvedValue([]);
+    vi.mocked(query).mockResolvedValue([]);
 
     await squad();
 
@@ -24,7 +22,7 @@ describe("squad", () => {
   });
 
   it("displays agent details with online status", async () => {
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "agent-1",
         name: "Clawe",
@@ -46,7 +44,7 @@ describe("squad", () => {
   });
 
   it("displays offline status when no heartbeat", async () => {
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "agent-2",
         name: "Inky",
@@ -62,7 +60,7 @@ describe("squad", () => {
   });
 
   it("displays offline status when heartbeat is stale", async () => {
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "agent-3",
         name: "Pixel",

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
 
 // Schedule validator (reusable)
 const scheduleValidator = v.object({
@@ -21,22 +22,32 @@ const priorityValidator = v.optional(
 
 // List all routines (or only enabled ones)
 export const list = query({
-  args: { enabledOnly: v.optional(v.boolean()) },
+  args: {
+    machineToken: v.optional(v.string()),
+    enabledOnly: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantId(ctx, args);
+    const routines = await ctx.db
+      .query("routines")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+
     if (args.enabledOnly) {
-      return await ctx.db
-        .query("routines")
-        .withIndex("by_enabled", (q) => q.eq("enabled", true))
-        .collect();
+      return routines.filter((r) => r.enabled);
     }
-    return await ctx.db.query("routines").collect();
+    return routines;
   },
 });
 
 // Get a single routine by ID
 export const get = query({
-  args: { routineId: v.id("routines") },
+  args: {
+    machineToken: v.optional(v.string()),
+    routineId: v.id("routines"),
+  },
   handler: async (ctx, args) => {
+    await resolveTenantId(ctx, args);
     return await ctx.db.get(args.routineId);
   },
 });
@@ -44,6 +55,7 @@ export const get = query({
 // Create a new routine
 export const create = mutation({
   args: {
+    machineToken: v.optional(v.string()),
     title: v.string(),
     description: v.optional(v.string()),
     priority: priorityValidator,
@@ -51,13 +63,16 @@ export const create = mutation({
     color: v.string(),
   },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
+    const { machineToken: _, ...rest } = args;
     const now = Date.now();
     return await ctx.db.insert("routines", {
-      title: args.title,
-      description: args.description,
-      priority: args.priority,
-      schedule: args.schedule,
-      color: args.color,
+      tenantId,
+      title: rest.title,
+      description: rest.description,
+      priority: rest.priority,
+      schedule: rest.schedule,
+      color: rest.color,
       enabled: true,
       createdAt: now,
       updatedAt: now,
@@ -68,6 +83,7 @@ export const create = mutation({
 // Update routine details
 export const update = mutation({
   args: {
+    machineToken: v.optional(v.string()),
     routineId: v.id("routines"),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
@@ -77,7 +93,8 @@ export const update = mutation({
     enabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { routineId, ...updates } = args;
+    await resolveTenantIdMut(ctx, args);
+    const { routineId, machineToken: _, ...updates } = args;
 
     // Filter out undefined values
     const filteredUpdates = Object.fromEntries(
@@ -93,16 +110,24 @@ export const update = mutation({
 
 // Delete a routine
 export const remove = mutation({
-  args: { routineId: v.id("routines") },
+  args: {
+    machineToken: v.optional(v.string()),
+    routineId: v.id("routines"),
+  },
   handler: async (ctx, args) => {
+    await resolveTenantIdMut(ctx, args);
     await ctx.db.delete(args.routineId);
   },
 });
 
 // Trigger a routine - create a task from the routine template
 export const trigger = mutation({
-  args: { routineId: v.id("routines") },
+  args: {
+    machineToken: v.optional(v.string()),
+    routineId: v.id("routines"),
+  },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
     const routine = await ctx.db.get(args.routineId);
     if (!routine) {
       throw new Error("Routine not found");
@@ -136,6 +161,7 @@ export const trigger = mutation({
 
     // Create task from routine template
     const taskId = await ctx.db.insert("tasks", {
+      tenantId,
       title: routine.title,
       description: routine.description,
       priority: routine.priority ?? "normal",
@@ -153,6 +179,7 @@ export const trigger = mutation({
 
     // Log activity
     await ctx.db.insert("activities", {
+      tenantId,
       type: "task_created",
       agentId: clawe?._id,
       taskId,
@@ -177,19 +204,23 @@ export const trigger = mutation({
  */
 export const getDueRoutines = query({
   args: {
+    machineToken: v.optional(v.string()),
     currentTimestamp: v.number(), // Current UTC timestamp from watcher
     dayOfWeek: v.number(), // Current day in user's timezone (0-6)
     hour: v.number(), // Current hour in user's timezone (0-23)
     minute: v.number(), // Current minute in user's timezone (0-59)
   },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantId(ctx, args);
     const { currentTimestamp, dayOfWeek, hour, minute } = args;
 
-    // Get all enabled routines
+    // Get all enabled routines for this tenant
     const routines = await ctx.db
       .query("routines")
-      .withIndex("by_enabled", (q) => q.eq("enabled", true))
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
       .collect();
+
+    const enabledRoutines = routines.filter((r) => r.enabled);
 
     // Current time as minutes since midnight (in user's timezone)
     const currentMinuteOfDay = hour * 60 + minute;
@@ -200,7 +231,7 @@ export const getDueRoutines = query({
       cycleStart: number;
     }> = [];
 
-    for (const routine of routines) {
+    for (const routine of enabledRoutines) {
       // Check if today is a scheduled day
       if (!routine.schedule.daysOfWeek.includes(dayOfWeek)) {
         continue;

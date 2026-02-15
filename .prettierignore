@@ -1,2 +1,2 @@
 # Template files with shell variable substitution
-docker/agency/templates/*.json
+docker/squadhub/templates/*.json

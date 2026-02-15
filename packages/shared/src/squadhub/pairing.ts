@@ -7,11 +7,11 @@ import type {
   PairingApproveResult,
   DirectResult,
 } from "./types";
-import { getConfig, patchConfig } from "./client";
+import { getConfig, patchConfig, type SquadhubConnection } from "./client";
 
-const AGENCY_STATE_DIR =
-  process.env.AGENCY_STATE_DIR || path.join(os.homedir(), ".agency");
-const CREDENTIALS_DIR = path.join(AGENCY_STATE_DIR, "credentials");
+const SQUADHUB_STATE_DIR =
+  process.env.SQUADHUB_STATE_DIR || path.join(os.homedir(), ".squadhub");
+const CREDENTIALS_DIR = path.join(SQUADHUB_STATE_DIR, "credentials");
 
 type PairingStore = {
   version: 1;
@@ -84,6 +84,7 @@ export async function listChannelPairingRequests(
 }
 
 export async function approveChannelPairingCode(
+  connection: SquadhubConnection,
   channel: string,
   code: string,
 ): Promise<DirectResult<PairingApproveResult>> {
@@ -98,7 +99,7 @@ export async function approveChannelPairingCode(
     const normalizedCode = code.trim().toUpperCase();
     const pairingPath = resolvePairingPath(channel);
 
-    // Read current pairing requests (file-based - agency writes these)
+    // Read current pairing requests (file-based - squadhub writes these)
     const store = await readJsonFile<PairingStore>(pairingPath, {
       version: 1,
       requests: [],
@@ -121,7 +122,7 @@ export async function approveChannelPairingCode(
     }
 
     // Get current config to read existing allowFrom list
-    const configResult = await getConfig();
+    const configResult = await getConfig(connection);
     if (!configResult.ok) {
       return {
         ok: false,
@@ -145,6 +146,7 @@ export async function approveChannelPairingCode(
     // Add user ID to allowFrom if not already present
     if (!existingAllowFrom.includes(entry.id)) {
       const patchResult = await patchConfig(
+        connection,
         {
           channels: {
             [channel]: {

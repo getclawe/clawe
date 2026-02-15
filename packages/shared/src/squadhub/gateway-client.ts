@@ -24,8 +24,8 @@ export type GatewayClientOptions = {
 const PROTOCOL_VERSION = 3;
 
 /**
- * Server-side WebSocket client for agency gateway.
- * Used by API routes to communicate with the agency.
+ * Server-side WebSocket client for squadhub gateway.
+ * Used by API routes to communicate with squadhub.
  */
 export class GatewayClient {
   private ws: WebSocket | null = null;
@@ -242,17 +242,15 @@ export class GatewayClient {
 }
 
 /**
- * Create a gateway client with environment config.
+ * Create a gateway client with explicit connection params.
  */
 export function createGatewayClient(
-  options?: Partial<GatewayClientOptions>,
+  connection: { squadhubUrl: string; squadhubToken: string },
+  options?: Partial<Omit<GatewayClientOptions, "url" | "token">>,
 ): GatewayClient {
-  const url = process.env.AGENCY_URL || "http://localhost:18789";
-  const token = process.env.AGENCY_TOKEN || "";
-
   return new GatewayClient({
-    url,
-    token,
+    url: connection.squadhubUrl,
+    token: connection.squadhubToken,
     ...options,
   });
 }

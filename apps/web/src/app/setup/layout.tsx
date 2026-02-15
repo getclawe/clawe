@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 
-import { AgencyStatus } from "@/components/agency-status";
+import { SquadhubStatus } from "@/components/squadhub-status";
 import { useRedirectIfOnboarded } from "@/hooks/use-onboarding-guard";
 import { SetupUserMenu } from "./_components/setup-user-menu";
 import {
@@ -47,7 +47,7 @@ export default function SetupLayout({ children }: { children: ReactNode }) {
 
         {/* User menu and status - top right (on illustration side) */}
         <div className="absolute top-4 right-4 z-10 hidden items-center gap-3 lg:flex">
-          <AgencyStatus />
+          <SquadhubStatus />
           <SetupUserMenu />
         </div>
 
@@ -58,7 +58,7 @@ export default function SetupLayout({ children }: { children: ReactNode }) {
             <span className="text-xl font-semibold">Clawe</span>
             {/* User menu and status on mobile */}
             <div className="flex items-center gap-3 lg:hidden">
-              <AgencyStatus />
+              <SquadhubStatus />
               <SetupUserMenu />
             </div>
           </div>

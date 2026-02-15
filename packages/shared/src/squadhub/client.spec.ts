@@ -32,8 +32,14 @@ import {
   probeTelegramToken,
   patchConfig,
 } from "./client";
+import type { SquadhubConnection } from "./client";
 
-describe("Agency Client", () => {
+const connection: SquadhubConnection = {
+  squadhubUrl: "http://localhost:18789",
+  squadhubToken: "test-token",
+};
+
+describe("Squadhub Client", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -47,7 +53,7 @@ describe("Agency Client", () => {
         },
       });
 
-      const result = await checkHealth();
+      const result = await checkHealth(connection);
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.result.hash).toBe("abc123");
@@ -57,7 +63,7 @@ describe("Agency Client", () => {
     it("returns error when gateway is unreachable", async () => {
       mockPost.mockRejectedValueOnce(new Error("Network error"));
 
-      const result = await checkHealth();
+      const result = await checkHealth(connection);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.type).toBe("unreachable");
@@ -72,7 +78,7 @@ describe("Agency Client", () => {
         },
       });
 
-      const result = await checkHealth();
+      const result = await checkHealth(connection);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.type).toBe("unhealthy");
@@ -133,7 +139,7 @@ describe("Agency Client", () => {
         },
       });
 
-      const result = await saveTelegramBotToken("123456:ABC-DEF");
+      const result = await saveTelegramBotToken(connection, "123456:ABC-DEF");
       expect(result.ok).toBe(true);
 
       expect(mockPost).toHaveBeenCalledWith("/tools/invoke", {
@@ -156,7 +162,7 @@ describe("Agency Client", () => {
         },
       });
 
-      const result = await patchConfig({
+      const result = await patchConfig(connection, {
         models: { providers: { anthropic: { apiKey: "sk-test" } } },
       });
 
@@ -182,7 +188,7 @@ describe("Agency Client", () => {
 
       mockPost.mockRejectedValueOnce(axiosError);
 
-      const result = await patchConfig({ test: true });
+      const result = await patchConfig(connection, { test: true });
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.type).toBe("http_error");
@@ -193,7 +199,7 @@ describe("Agency Client", () => {
     it("returns error on network error", async () => {
       mockPost.mockRejectedValueOnce(new Error("Network error"));
 
-      const result = await patchConfig({ test: true });
+      const result = await patchConfig(connection, { test: true });
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.type).toBe("network_error");

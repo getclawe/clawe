@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm";
 import type { Message } from "@/hooks/use-chat";
 
 /**
- * Context message patterns - messages injected by agency for context.
+ * Context message patterns - messages injected by squadhub for context.
  */
 const CONTEXT_MESSAGE_PATTERNS = [
   /^\[Chat messages since your last reply/i,

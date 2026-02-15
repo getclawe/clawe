@@ -54,9 +54,9 @@ Core models: `agents`, `tasks`, `messages` (see `packages/backend/convex/schema.
 ## Environment Variables
 
 - `NEXT_PUBLIC_CONVEX_URL`: Convex deployment URL (required)
-- `ANTHROPIC_API_KEY`: Anthropic API key for AI operations (required, passed to agency)
-- `AGENCY_TOKEN`: Authentication token for agency gateway (required)
-- `AGENCY_URL`: Agency gateway URL (set in `.env.development` / `.env.production`)
+- `ANTHROPIC_API_KEY`: Anthropic API key for AI operations (required, passed to squadhub)
+- `SQUADHUB_TOKEN`: Authentication token for squadhub gateway (required)
+- `SQUADHUB_URL`: SquadHub gateway URL (set in `.env.development` / `.env.production`)
 - `NODE_ENV`: local (`development`) vs deployed (`production`) — controls dev tooling
 - `ENVIRONMENT`: deployment target (`dev` / `prod`) — controls feature flags
 

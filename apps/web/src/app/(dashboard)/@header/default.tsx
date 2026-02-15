@@ -6,7 +6,7 @@ import { Separator } from "@clawe/ui/components/separator";
 import { SidebarToggle } from "@dashboard/sidebar-toggle";
 import { ChatPanelToggle } from "@dashboard/chat-panel-toggle";
 import { isLockedSidebarRoute } from "@dashboard/sidebar-config";
-import { AgencyStatus } from "@/components/agency-status";
+import { SquadhubStatus } from "@/components/squadhub-status";
 
 const DefaultHeaderContent = () => {
   const pathname = usePathname();
@@ -37,7 +37,7 @@ const DefaultHeaderContent = () => {
         </Link>
       </div>
       <div className="flex items-center gap-2">
-        <AgencyStatus />
+        <SquadhubStatus />
         <Separator
           orientation="vertical"
           className="data-[orientation=vertical]:h-4"

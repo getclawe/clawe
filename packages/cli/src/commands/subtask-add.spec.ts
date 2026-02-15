@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { subtaskAdd } from "./subtask-add.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    mutation: vi.fn(),
-  },
+  mutation: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 
 describe("subtaskAdd", () => {
   beforeEach(() => {
@@ -16,11 +14,11 @@ describe("subtaskAdd", () => {
   });
 
   it("adds a subtask with title only", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(0);
+    vi.mocked(mutation).mockResolvedValue(0);
 
     await subtaskAdd("task-123", "Write unit tests", {});
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-123",
       title: "Write unit tests",
       description: undefined,
@@ -32,13 +30,13 @@ describe("subtaskAdd", () => {
   });
 
   it("adds a subtask with description", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(1);
+    vi.mocked(mutation).mockResolvedValue(1);
 
     await subtaskAdd("task-456", "Review code", {
       description: "Check for edge cases",
     });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-456",
       title: "Review code",
       description: "Check for edge cases",
@@ -47,13 +45,13 @@ describe("subtaskAdd", () => {
   });
 
   it("adds a subtask with assignee", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(2);
+    vi.mocked(mutation).mockResolvedValue(2);
 
     await subtaskAdd("task-789", "Design mockup", {
       assign: "agent:pixel:main",
     });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-789",
       title: "Design mockup",
       description: undefined,
@@ -62,14 +60,14 @@ describe("subtaskAdd", () => {
   });
 
   it("adds a subtask with all options", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(3);
+    vi.mocked(mutation).mockResolvedValue(3);
 
     await subtaskAdd("task-full", "Complete task", {
       description: "Full details here",
       assign: "agent:inky:main",
     });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-full",
       title: "Complete task",
       description: "Full details here",

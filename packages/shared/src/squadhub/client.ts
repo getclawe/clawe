@@ -8,30 +8,30 @@ import type {
   TelegramProbeResult,
 } from "./types";
 
-let _agencyClient: ReturnType<typeof axios.create> | null = null;
+export type SquadhubConnection = {
+  squadhubUrl: string;
+  squadhubToken: string;
+};
 
-function getAgencyClient() {
-  if (!_agencyClient) {
-    const url = process.env.AGENCY_URL || "http://localhost:18789";
-    const token = process.env.AGENCY_TOKEN || "";
-    _agencyClient = axios.create({
-      baseURL: url,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
-  return _agencyClient;
+function createClient(connection: SquadhubConnection) {
+  return axios.create({
+    baseURL: connection.squadhubUrl,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${connection.squadhubToken}`,
+    },
+  });
 }
 
 async function invokeTool<T>(
+  connection: SquadhubConnection,
   tool: string,
   action?: string,
   args?: Record<string, unknown>,
 ): Promise<ToolResult<T>> {
   try {
-    const { data } = await getAgencyClient().post("/tools/invoke", {
+    const client = createClient(connection);
+    const { data } = await client.post("/tools/invoke", {
       tool,
       action,
       args,
@@ -57,10 +57,12 @@ async function invokeTool<T>(
   }
 }
 
-// Health check - uses sessions_list to verify gateway connectivity
-export async function checkHealth(): Promise<ToolResult<GatewayHealthResult>> {
+export async function checkHealth(
+  connection: SquadhubConnection,
+): Promise<ToolResult<GatewayHealthResult>> {
   try {
-    const { data } = await getAgencyClient().post("/tools/invoke", {
+    const client = createClient(connection);
+    const { data } = await client.post("/tools/invoke", {
       tool: "sessions_list",
       action: "json",
     });
@@ -83,9 +85,10 @@ export async function checkHealth(): Promise<ToolResult<GatewayHealthResult>> {
 
 // Telegram Configuration
 export async function saveTelegramBotToken(
+  connection: SquadhubConnection,
   botToken: string,
 ): Promise<ToolResult<ConfigPatchResult>> {
-  return patchConfig({
+  return patchConfig(connection, {
     channels: {
       telegram: {
         enabled: true,
@@ -96,10 +99,10 @@ export async function saveTelegramBotToken(
   });
 }
 
-export async function removeTelegramBotToken(): Promise<
-  ToolResult<ConfigPatchResult>
-> {
-  return patchConfig({
+export async function removeTelegramBotToken(
+  connection: SquadhubConnection,
+): Promise<ToolResult<ConfigPatchResult>> {
+  return patchConfig(connection, {
     channels: {
       telegram: {
         enabled: false,
@@ -143,15 +146,18 @@ export async function probeTelegramToken(
 }
 
 // Configuration
-export async function getConfig(): Promise<ToolResult<ConfigGetResult>> {
-  return invokeTool("gateway", "config.get");
+export async function getConfig(
+  connection: SquadhubConnection,
+): Promise<ToolResult<ConfigGetResult>> {
+  return invokeTool(connection, "gateway", "config.get");
 }
 
 export async function patchConfig(
+  connection: SquadhubConnection,
   config: Record<string, unknown>,
   baseHash?: string,
 ): Promise<ToolResult<ConfigPatchResult>> {
-  return invokeTool("gateway", "config.patch", {
+  return invokeTool(connection, "gateway", "config.patch", {
     raw: JSON.stringify(config),
     baseHash,
   });
@@ -159,34 +165,41 @@ export async function patchConfig(
 
 // Sessions
 export async function listSessions(
+  connection: SquadhubConnection,
   activeMinutes?: number,
 ): Promise<ToolResult<SessionsListResult>> {
-  return invokeTool("sessions_list", "json", { activeMinutes });
+  return invokeTool(connection, "sessions_list", "json", { activeMinutes });
 }
 
 // Messages
 export async function sendMessage(
+  connection: SquadhubConnection,
   channel: string,
   target: string,
   message: string,
 ): Promise<ToolResult<{ messageId: string }>> {
-  return invokeTool("message", undefined, { channel, target, message });
+  return invokeTool(connection, "message", undefined, {
+    channel,
+    target,
+    message,
+  });
 }
 
 // Sessions - Send message to an agent session
 export async function sessionsSend(
+  connection: SquadhubConnection,
   sessionKey: string,
   message: string,
   timeoutSeconds?: number,
 ): Promise<ToolResult<{ response: string }>> {
-  return invokeTool("sessions_send", undefined, {
+  return invokeTool(connection, "sessions_send", undefined, {
     sessionKey,
     message,
     timeoutSeconds: timeoutSeconds ?? 10,
   });
 }
 
-// Cron types (matching agency src/cron/types.ts)
+// Cron types (matching squadhub src/cron/types.ts)
 export type CronSchedule =
   | { kind: "at"; at: string }
   | { kind: "every"; everyMs: number; anchorMs?: number }
@@ -263,13 +276,16 @@ export interface CronAddJob {
 }
 
 // Cron - List jobs
-export async function cronList(): Promise<ToolResult<CronListResult>> {
-  return invokeTool("cron", undefined, { action: "list" });
+export async function cronList(
+  connection: SquadhubConnection,
+): Promise<ToolResult<CronListResult>> {
+  return invokeTool(connection, "cron", undefined, { action: "list" });
 }
 
 // Cron - Add job
 export async function cronAdd(
+  connection: SquadhubConnection,
   job: CronAddJob,
 ): Promise<ToolResult<{ id: string }>> {
-  return invokeTool("cron", undefined, { action: "add", job });
+  return invokeTool(connection, "cron", undefined, { action: "add", job });
 }

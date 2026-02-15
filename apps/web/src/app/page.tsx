@@ -7,7 +7,7 @@ import { api } from "@clawe/backend";
 
 export default function Home() {
   const router = useRouter();
-  const isOnboardingComplete = useQuery(api.settings.isOnboardingComplete);
+  const isOnboardingComplete = useQuery(api.tenants.isOnboardingComplete, {});
 
   useEffect(() => {
     // Wait for query to load

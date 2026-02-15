@@ -1,4 +1,4 @@
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 import { api } from "@clawe/backend";
 import type { Id } from "@clawe/backend/dataModel";
 
@@ -11,7 +11,7 @@ export async function subtaskCheck(
   index: string,
   options: SubtaskCheckOptions,
 ): Promise<void> {
-  await client.mutation(api.tasks.updateSubtask, {
+  await mutation(api.tasks.updateSubtask, {
     taskId: taskId as Id<"tasks">,
     subtaskIndex: parseInt(index, 10),
     done: true,
@@ -27,7 +27,7 @@ export async function subtaskUncheck(
   index: string,
   options: SubtaskCheckOptions,
 ): Promise<void> {
-  await client.mutation(api.tasks.updateSubtask, {
+  await mutation(api.tasks.updateSubtask, {
     taskId: taskId as Id<"tasks">,
     subtaskIndex: parseInt(index, 10),
     done: false,
@@ -48,7 +48,7 @@ export async function subtaskBlock(
   index: string,
   options: SubtaskBlockOptions,
 ): Promise<void> {
-  await client.mutation(api.tasks.updateSubtask, {
+  await mutation(api.tasks.updateSubtask, {
     taskId: taskId as Id<"tasks">,
     subtaskIndex: parseInt(index, 10),
     status: "blocked",
@@ -70,7 +70,7 @@ export async function subtaskProgress(
   index: string,
   options: SubtaskProgressOptions,
 ): Promise<void> {
-  await client.mutation(api.tasks.updateSubtask, {
+  await mutation(api.tasks.updateSubtask, {
     taskId: taskId as Id<"tasks">,
     subtaskIndex: parseInt(index, 10),
     status: "in_progress",

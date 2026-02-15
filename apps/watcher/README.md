@@ -18,8 +18,8 @@ This enables:
 | Variable       | Required | Description                 |
 | -------------- | -------- | --------------------------- |
 | `CONVEX_URL`   | Yes      | Convex deployment URL       |
-| `AGENCY_URL`   | Yes      | Agency gateway URL          |
-| `AGENCY_TOKEN` | Yes      | Agency authentication token |
+| `SQUADHUB_URL`   | Yes      | Squadhub gateway URL          |
+| `SQUADHUB_TOKEN` | Yes      | Squadhub authentication token |
 
 ## Running
 
@@ -53,7 +53,7 @@ Schedules are staggered to avoid rate limits.
 │                                                          │
 │   ┌─────────────┐                                        │
 │   │ On Startup  │──> Check/create heartbeat crons        │
-│   └─────────────┘    via agency cron API                 │
+│   └─────────────┘    via squadhub cron API                 │
 │                                                          │
 │   ┌─────────────┐        ┌─────────────────────────┐    │
 │   │ Poll Loop   │───────>│ convex.query(           │    │
@@ -62,13 +62,13 @@ Schedules are staggered to avoid rate limits.
 │          │               └─────────────────────────┘    │
 │          │                                               │
 │          │               ┌─────────────────────────┐    │
-│          └──────────────>│ agency.sessionsSend()   │    │
+│          └──────────────>│ squadhub.sessionsSend()   │    │
 │                          └─────────────────────────┘    │
 └─────────────────────────────────────────────────────────┘
             │                           │
             ▼                           ▼
      ┌───────────┐              ┌───────────────┐
-     │  CONVEX   │              │    AGENCY     │
+     │  CONVEX   │              │    SQUADHUB     │
      │  (data)   │              │  (delivery)   │
      └───────────┘              └───────────────┘
 ```

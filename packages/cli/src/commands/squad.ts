@@ -1,9 +1,9 @@
-import { client } from "../client.js";
+import { query } from "../client.js";
 import { api } from "@clawe/backend";
 import { deriveStatus } from "@clawe/shared/agents";
 
 export async function squad(): Promise<void> {
-  const agents = await client.query(api.agents.squad, {});
+  const agents = await query(api.agents.squad, {});
 
   console.log("🤖 Squad Status:\n");
   for (const agent of agents) {

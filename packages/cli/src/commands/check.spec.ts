@@ -2,13 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { check } from "./check.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    mutation: vi.fn(),
-    query: vi.fn(),
-  },
+  mutation: vi.fn(),
+  query: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { mutation, query } from "../client.js";
 
 describe("check", () => {
   beforeEach(() => {
@@ -17,19 +15,19 @@ describe("check", () => {
   });
 
   it("outputs HEARTBEAT_OK when no notifications", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("agent-id");
-    vi.mocked(client.query).mockResolvedValue([]);
+    vi.mocked(mutation).mockResolvedValue("agent-id");
+    vi.mocked(query).mockResolvedValue([]);
 
     await check("agent:main:main");
 
-    expect(client.mutation).toHaveBeenCalled();
-    expect(client.query).toHaveBeenCalled();
+    expect(mutation).toHaveBeenCalled();
+    expect(query).toHaveBeenCalled();
     expect(console.log).toHaveBeenCalledWith("HEARTBEAT_OK");
   });
 
   it("displays notifications when present", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("agent-id");
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(mutation).mockResolvedValue("agent-id");
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "notif-1",
         type: "task_assigned",
@@ -48,8 +46,8 @@ describe("check", () => {
   });
 
   it("marks notifications as delivered", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("agent-id");
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(mutation).mockResolvedValue("agent-id");
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "notif-1",
         type: "custom",
@@ -61,6 +59,6 @@ describe("check", () => {
 
     await check("agent:main:main");
 
-    expect(client.mutation).toHaveBeenCalledTimes(2);
+    expect(mutation).toHaveBeenCalledTimes(2);
   });
 });

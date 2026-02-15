@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { notify } from "./notify.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    mutation: vi.fn(),
-  },
+  mutation: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 
 describe("notify", () => {
   beforeEach(() => {
@@ -16,11 +14,11 @@ describe("notify", () => {
   });
 
   it("sends notification to target agent", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("notif-id");
+    vi.mocked(mutation).mockResolvedValue("notif-id");
 
     await notify("agent:inky:main", "Please review the draft", {});
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       targetSessionKey: "agent:inky:main",
       sourceSessionKey: undefined,
       type: "custom",
@@ -29,13 +27,13 @@ describe("notify", () => {
   });
 
   it("includes source agent when from option provided", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("notif-id");
+    vi.mocked(mutation).mockResolvedValue("notif-id");
 
     await notify("agent:inky:main", "Task completed", {
       from: "agent:main:main",
     });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       targetSessionKey: "agent:inky:main",
       sourceSessionKey: "agent:main:main",
       type: "custom",
@@ -44,7 +42,7 @@ describe("notify", () => {
   });
 
   it("logs success message", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("notif-id");
+    vi.mocked(mutation).mockResolvedValue("notif-id");
 
     await notify("agent:inky:main", "Hello", {});
 

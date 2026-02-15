@@ -1,4 +1,4 @@
-import { client, uploadFile } from "../client.js";
+import { query, mutation, uploadFile } from "../client.js";
 import { api } from "@clawe/backend";
 import type { Id } from "@clawe/backend/dataModel";
 import * as fs from "fs";
@@ -26,7 +26,7 @@ export async function deliver(
   console.log(`✅ File uploaded`);
 
   // Register deliverable with fileId
-  await client.mutation(api.documents.registerDeliverable, {
+  await mutation(api.documents.registerDeliverable, {
     taskId: taskId as Id<"tasks">,
     path,
     fileId: fileId as Id<"_storage">,
@@ -38,7 +38,7 @@ export async function deliver(
 }
 
 export async function deliverables(taskId: string): Promise<void> {
-  const docs = await client.query(api.documents.getForTask, {
+  const docs = await query(api.documents.getForTask, {
     taskId: taskId as Id<"tasks">,
   });
 

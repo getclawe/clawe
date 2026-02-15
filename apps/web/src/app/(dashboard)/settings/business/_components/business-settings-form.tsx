@@ -11,7 +11,7 @@ import { Spinner } from "@clawe/ui/components/spinner";
 import { Globe, Building2, Users, Palette } from "lucide-react";
 
 export const BusinessSettingsForm = () => {
-  const businessContext = useQuery(api.businessContext.get);
+  const businessContext = useQuery(api.businessContext.get, {});
   const saveBusinessContext = useMutation(api.businessContext.save);
 
   const [url, setUrl] = useState("");

@@ -22,13 +22,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@clawe/ui/components/tooltip";
-import { useAgencyStatus } from "@/hooks/use-agency-status";
+import { useSquadhubStatus } from "@/hooks/use-squadhub-status";
 import { api } from "@clawe/backend";
 import {
   validateTelegramToken,
   saveTelegramBotToken,
   approvePairingCode,
-} from "@/lib/agency/actions";
+} from "@/lib/squadhub/actions";
 import { SetupRightPanelContent } from "../_components/setup-right-panel";
 import { DemoVideo } from "./_components/demo-video";
 
@@ -57,7 +57,7 @@ const DemoVideoPanel = () => {
 
 export default function TelegramPage() {
   const router = useRouter();
-  const { status, isLoading } = useAgencyStatus();
+  const { status, isLoading } = useSquadhubStatus();
   const isOffline = !isLoading && status === "down";
   const [step, setStep] = useState<Step>("token");
   const [botToken, setBotToken] = useState("");
@@ -252,10 +252,10 @@ export default function TelegramPage() {
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
                 <div>
                   <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                    Agency is offline
+                    Squadhub is offline
                   </p>
                   <p className="text-xs text-red-600 dark:text-red-500">
-                    The agency service needs to be running to verify pairing.
+                    The squadhub service needs to be running to verify pairing.
                   </p>
                 </div>
               </div>
@@ -322,7 +322,7 @@ export default function TelegramPage() {
             </TooltipTrigger>
             {isOffline && (
               <TooltipContent>
-                <p>Start agency to continue</p>
+                <p>Start squadhub to continue</p>
               </TooltipContent>
             )}
           </Tooltip>
@@ -424,10 +424,10 @@ export default function TelegramPage() {
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
               <div>
                 <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                  Agency is offline
+                  Squadhub is offline
                 </p>
                 <p className="text-xs text-red-600 dark:text-red-500">
-                  The agency service needs to be running to connect Telegram.
+                  The squadhub service needs to be running to connect Telegram.
                 </p>
               </div>
             </div>
@@ -488,7 +488,7 @@ export default function TelegramPage() {
           </TooltipTrigger>
           {isOffline && (
             <TooltipContent>
-              <p>Start agency to continue</p>
+              <p>Start squadhub to continue</p>
             </TooltipContent>
           )}
         </Tooltip>

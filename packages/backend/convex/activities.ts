@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
 
 // Get activity feed (most recent first)
 export const feed = query({
@@ -7,33 +8,32 @@ export const feed = query({
     limit: v.optional(v.number()),
     agentId: v.optional(v.id("agents")),
     taskId: v.optional(v.id("tasks")),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const limit = args.limit ?? 50;
+    const tenantId = await resolveTenantId(ctx, args);
+    const { machineToken: _, ...filters } = args;
+    const limit = filters.limit ?? 50;
+
+    // Always query by tenant first, then filter in JS
+    const allActivities = await ctx.db
+      .query("activities")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .order("desc")
+      .collect();
 
     let activities;
 
-    if (args.taskId) {
-      // Filter by task
-      activities = await ctx.db
-        .query("activities")
-        .withIndex("by_task", (q) => q.eq("taskId", args.taskId))
-        .order("desc")
-        .take(limit);
-    } else if (args.agentId) {
-      // Filter by agent
-      activities = await ctx.db
-        .query("activities")
-        .withIndex("by_agent", (q) => q.eq("agentId", args.agentId))
-        .order("desc")
-        .take(limit);
+    if (filters.taskId) {
+      activities = allActivities
+        .filter((a) => a.taskId === filters.taskId)
+        .slice(0, limit);
+    } else if (filters.agentId) {
+      activities = allActivities
+        .filter((a) => a.agentId === filters.agentId)
+        .slice(0, limit);
     } else {
-      // All activities
-      activities = await ctx.db
-        .query("activities")
-        .withIndex("by_createdAt")
-        .order("desc")
-        .take(limit);
+      activities = allActivities.slice(0, limit);
     }
 
     // Enrich with agent and task info
@@ -77,15 +77,23 @@ export const byType = query({
       v.literal("notification_sent"),
     ),
     limit: v.optional(v.number()),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const limit = args.limit ?? 50;
+    const tenantId = await resolveTenantId(ctx, args);
+    const { machineToken: _, ...filters } = args;
+    const limit = filters.limit ?? 50;
 
-    return await ctx.db
+    // Query by tenant first, then filter by type in JS
+    const allActivities = await ctx.db
       .query("activities")
-      .withIndex("by_type", (q) => q.eq("type", args.type))
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
       .order("desc")
-      .take(limit);
+      .collect();
+
+    return allActivities
+      .filter((a) => a.type === filters.type)
+      .slice(0, limit);
   },
 });
 
@@ -106,14 +114,19 @@ export const log = mutation({
     taskId: v.optional(v.id("tasks")),
     message: v.string(),
     metadata: v.optional(v.any()),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
+    const { machineToken: _, ...fields } = args;
+
     return await ctx.db.insert("activities", {
-      type: args.type,
-      agentId: args.agentId,
-      taskId: args.taskId,
-      message: args.message,
-      metadata: args.metadata,
+      tenantId,
+      type: fields.type,
+      agentId: fields.agentId,
+      taskId: fields.taskId,
+      message: fields.message,
+      metadata: fields.metadata,
       createdAt: Date.now(),
     });
   },
@@ -136,12 +149,16 @@ export const logBySession = mutation({
     taskId: v.optional(v.id("tasks")),
     message: v.string(),
     metadata: v.optional(v.any()),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
+    const { machineToken: _, ...fields } = args;
+
     let agentId = undefined;
 
-    if (args.sessionKey) {
-      const sessionKey = args.sessionKey;
+    if (fields.sessionKey) {
+      const sessionKey = fields.sessionKey;
       const agent = await ctx.db
         .query("agents")
         .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
@@ -152,11 +169,12 @@ export const logBySession = mutation({
     }
 
     return await ctx.db.insert("activities", {
-      type: args.type,
+      tenantId,
+      type: fields.type,
       agentId,
-      taskId: args.taskId,
-      message: args.message,
-      metadata: args.metadata,
+      taskId: fields.taskId,
+      message: fields.message,
+      metadata: fields.metadata,
       createdAt: Date.now(),
     });
   },

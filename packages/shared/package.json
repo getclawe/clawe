@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./agency": {
-      "types": "./dist/agency/index.d.ts",
-      "default": "./dist/agency/index.js"
+    "./squadhub": {
+      "types": "./dist/squadhub/index.d.ts",
+      "default": "./dist/squadhub/index.js"
     },
     "./agents": {
       "types": "./dist/agents/index.d.ts",

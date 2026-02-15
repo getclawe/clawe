@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { taskPlan } from "./task-plan.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    mutation: vi.fn(),
-  },
+  mutation: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 
 describe("taskPlan", () => {
   beforeEach(() => {
@@ -20,7 +18,7 @@ describe("taskPlan", () => {
   });
 
   it("creates a task plan with all fields", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("task-plan-1");
+    vi.mocked(mutation).mockResolvedValue("task-plan-1");
 
     const plan = JSON.stringify({
       title: "Blog Post: AI Teams",
@@ -37,7 +35,7 @@ describe("taskPlan", () => {
 
     await taskPlan(plan);
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       title: "Blog Post: AI Teams",
       description: "Write a 2000-word post",
       priority: "high",
@@ -65,7 +63,7 @@ describe("taskPlan", () => {
   });
 
   it("creates a minimal task plan", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("task-plan-2");
+    vi.mocked(mutation).mockResolvedValue("task-plan-2");
 
     const plan = JSON.stringify({
       title: "Quick task",
@@ -75,7 +73,7 @@ describe("taskPlan", () => {
 
     await taskPlan(plan);
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       title: "Quick task",
       description: "Do something simple",
       priority: undefined,
@@ -92,7 +90,7 @@ describe("taskPlan", () => {
   });
 
   it("maps subtask descriptions correctly", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("task-plan-3");
+    vi.mocked(mutation).mockResolvedValue("task-plan-3");
 
     const plan = JSON.stringify({
       title: "Detailed task",
@@ -105,7 +103,7 @@ describe("taskPlan", () => {
 
     await taskPlan(plan);
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       title: "Detailed task",
       description: "Task with subtask descriptions",
       priority: undefined,
@@ -132,7 +130,7 @@ describe("taskPlan", () => {
     expect(console.error).toHaveBeenCalledWith(
       "Error: Invalid JSON. Expected a task plan object.",
     );
-    expect(client.mutation).not.toHaveBeenCalled();
+    expect(mutation).not.toHaveBeenCalled();
   });
 
   it("exits when title is missing", async () => {
@@ -146,7 +144,7 @@ describe("taskPlan", () => {
     expect(console.error).toHaveBeenCalledWith(
       "Error: Plan must include 'title'",
     );
-    expect(client.mutation).not.toHaveBeenCalled();
+    expect(mutation).not.toHaveBeenCalled();
   });
 
   it("exits when description is missing", async () => {
@@ -160,7 +158,7 @@ describe("taskPlan", () => {
     expect(console.error).toHaveBeenCalledWith(
       "Error: Plan must include 'description'",
     );
-    expect(client.mutation).not.toHaveBeenCalled();
+    expect(mutation).not.toHaveBeenCalled();
   });
 
   it("exits when subtasks are missing", async () => {
@@ -174,7 +172,7 @@ describe("taskPlan", () => {
     expect(console.error).toHaveBeenCalledWith(
       "Error: Plan must include at least one subtask",
     );
-    expect(client.mutation).not.toHaveBeenCalled();
+    expect(mutation).not.toHaveBeenCalled();
   });
 
   it("exits when subtasks array is empty", async () => {
@@ -189,11 +187,11 @@ describe("taskPlan", () => {
     expect(console.error).toHaveBeenCalledWith(
       "Error: Plan must include at least one subtask",
     );
-    expect(client.mutation).not.toHaveBeenCalled();
+    expect(mutation).not.toHaveBeenCalled();
   });
 
   it("handles mutation error", async () => {
-    vi.mocked(client.mutation).mockRejectedValue(new Error("Convex error"));
+    vi.mocked(mutation).mockRejectedValue(new Error("Convex error"));
 
     const plan = JSON.stringify({
       title: "Failing task",
@@ -207,7 +205,7 @@ describe("taskPlan", () => {
   });
 
   it("prints subtask listing on success", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("task-plan-list");
+    vi.mocked(mutation).mockResolvedValue("task-plan-list");
 
     const plan = JSON.stringify({
       title: "Task with listing",

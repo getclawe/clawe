@@ -6,10 +6,10 @@
     "CONVEX_URL",
     "ANTHROPIC_API_KEY",
     "OPENAI_API_KEY",
-    "AGENCY_URL",
-    "AGENCY_TOKEN",
+    "SQUADHUB_URL",
+    "SQUADHUB_TOKEN",
     "CLAWE_DATA_DIR",
-    "AGENCY_STATE_DIR"
+    "SQUADHUB_STATE_DIR"
   ],
   "tasks": {
     "build": {

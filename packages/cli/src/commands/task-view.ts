@@ -1,9 +1,9 @@
-import { client } from "../client.js";
+import { query } from "../client.js";
 import { api } from "@clawe/backend";
 import type { Id } from "@clawe/backend/dataModel";
 
 export async function taskView(taskId: string): Promise<void> {
-  const task = await client.query(api.tasks.get, {
+  const task = await query(api.tasks.get, {
     taskId: taskId as Id<"tasks">,
   });
 

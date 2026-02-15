@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { tasks } from "./tasks.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    query: vi.fn(),
-  },
+  query: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { query } from "../client.js";
 
 describe("tasks", () => {
   beforeEach(() => {
@@ -16,7 +14,7 @@ describe("tasks", () => {
   });
 
   it("displays message when no tasks", async () => {
-    vi.mocked(client.query).mockResolvedValue([]);
+    vi.mocked(query).mockResolvedValue([]);
 
     await tasks("agent:main:main");
 
@@ -24,7 +22,7 @@ describe("tasks", () => {
   });
 
   it("lists active tasks with details", async () => {
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "task-1",
         title: "Write tests",
@@ -47,7 +45,7 @@ describe("tasks", () => {
   });
 
   it("handles tasks without priority", async () => {
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "task-2",
         title: "Simple task",

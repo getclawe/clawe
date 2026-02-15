@@ -6,9 +6,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@clawe/ui/components/tooltip";
-import { useAgencyStatus } from "@/hooks/use-agency-status";
+import { useSquadhubStatus } from "@/hooks/use-squadhub-status";
 
-type AgencyStatusProps = {
+type SquadhubStatusProps = {
   className?: string;
 };
 
@@ -30,8 +30,8 @@ const statusConfig = {
   },
 };
 
-export const AgencyStatus = ({ className }: AgencyStatusProps) => {
-  const { status, isLoading } = useAgencyStatus();
+export const SquadhubStatus = ({ className }: SquadhubStatusProps) => {
+  const { status, isLoading } = useSquadhubStatus();
 
   const config = isLoading
     ? { label: "Connecting", dot: "bg-yellow-500", ping: "bg-yellow-400" }
@@ -40,8 +40,8 @@ export const AgencyStatus = ({ className }: AgencyStatusProps) => {
   const tooltipText = isLoading
     ? "Checking connection..."
     : status === "active"
-      ? "Agency service is online and ready"
-      : "Unable to connect to agency service";
+      ? "Squadhub service is online and ready"
+      : "Unable to connect to squadhub service";
 
   const shouldAnimate = isLoading || status === "active";
 

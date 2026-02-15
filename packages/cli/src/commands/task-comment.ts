@@ -1,4 +1,4 @@
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 import { api } from "@clawe/backend";
 import type { Id } from "@clawe/backend/dataModel";
 
@@ -11,7 +11,7 @@ export async function taskComment(
   message: string,
   options: TaskCommentOptions,
 ): Promise<void> {
-  await client.mutation(api.tasks.addComment, {
+  await mutation(api.tasks.addComment, {
     taskId: taskId as Id<"tasks">,
     content: message,
     bySessionKey: options.by,

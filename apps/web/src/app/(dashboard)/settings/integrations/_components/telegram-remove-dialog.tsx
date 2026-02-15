@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@clawe/ui/components/alert-dialog";
-import { removeTelegramBot } from "@/lib/agency/actions";
+import { removeTelegramBot } from "@/lib/squadhub/actions";
 
 export interface TelegramRemoveDialogProps {
   open: boolean;
@@ -33,7 +33,7 @@ export const TelegramRemoveDialog = ({
   const handleRemove = async () => {
     setIsRemoving(true);
     try {
-      // Remove token from agency config
+      // Remove token from squadhub config
       const result = await removeTelegramBot();
       if (!result.ok) {
         throw new Error("Failed to remove bot token");

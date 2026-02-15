@@ -12,12 +12,33 @@ describe("client", () => {
     process.env = originalEnv;
   });
 
-  it("exports a ConvexHttpClient when CONVEX_URL is set", async () => {
+  it("exports query, mutation, action wrappers when CONVEX_URL is set", async () => {
     process.env.CONVEX_URL = "https://test.convex.cloud";
 
-    const { client } = await import("./client.js");
+    const mod = await import("./client.js");
 
-    expect(client).toBeDefined();
+    expect(mod.query).toBeTypeOf("function");
+    expect(mod.mutation).toBeTypeOf("function");
+    expect(mod.action).toBeTypeOf("function");
+    expect(mod.uploadFile).toBeTypeOf("function");
+  });
+
+  it("exports machineToken from SQUADHUB_TOKEN env var", async () => {
+    process.env.CONVEX_URL = "https://test.convex.cloud";
+    process.env.SQUADHUB_TOKEN = "test-machine-token";
+
+    const { machineToken } = await import("./client.js");
+
+    expect(machineToken).toBe("test-machine-token");
+  });
+
+  it("defaults machineToken to empty string when SQUADHUB_TOKEN is not set", async () => {
+    process.env.CONVEX_URL = "https://test.convex.cloud";
+    delete process.env.SQUADHUB_TOKEN;
+
+    const { machineToken } = await import("./client.js");
+
+    expect(machineToken).toBe("");
   });
 
   it("exits with error when CONVEX_URL is not set", async () => {

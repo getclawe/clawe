@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { feed } from "./feed.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    query: vi.fn(),
-  },
+  query: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { query } from "../client.js";
 
 describe("feed", () => {
   beforeEach(() => {
@@ -16,7 +14,7 @@ describe("feed", () => {
   });
 
   it("displays message when no activity", async () => {
-    vi.mocked(client.query).mockResolvedValue([]);
+    vi.mocked(query).mockResolvedValue([]);
 
     await feed({});
 
@@ -25,7 +23,7 @@ describe("feed", () => {
 
   it("displays activity feed with agent names", async () => {
     const now = Date.now();
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "activity-1",
         type: "task_created",
@@ -44,7 +42,7 @@ describe("feed", () => {
   });
 
   it("shows System for activities without agent", async () => {
-    vi.mocked(client.query).mockResolvedValue([
+    vi.mocked(query).mockResolvedValue([
       {
         _id: "activity-2",
         type: "system",
@@ -62,18 +60,18 @@ describe("feed", () => {
   });
 
   it("uses default limit of 20", async () => {
-    vi.mocked(client.query).mockResolvedValue([]);
+    vi.mocked(query).mockResolvedValue([]);
 
     await feed({});
 
-    expect(client.query).toHaveBeenCalledWith(expect.anything(), { limit: 20 });
+    expect(query).toHaveBeenCalledWith(expect.anything(), { limit: 20 });
   });
 
   it("uses custom limit when provided", async () => {
-    vi.mocked(client.query).mockResolvedValue([]);
+    vi.mocked(query).mockResolvedValue([]);
 
     await feed({ limit: 50 });
 
-    expect(client.query).toHaveBeenCalledWith(expect.anything(), { limit: 50 });
+    expect(query).toHaveBeenCalledWith(expect.anything(), { limit: 50 });
   });
 });

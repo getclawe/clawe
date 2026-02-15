@@ -6,15 +6,16 @@ import {
   saveTelegramBotToken as saveTelegramBotTokenClient,
   removeTelegramBotToken as removeTelegramBotTokenClient,
   probeTelegramToken,
-} from "@clawe/shared/agency";
-import { approveChannelPairingCode } from "@clawe/shared/agency";
+  approveChannelPairingCode,
+} from "@clawe/shared/squadhub";
+import { getConnection } from "./connection";
 
-export async function checkAgencyHealth() {
-  return checkHealth();
+export async function checkSquadhubHealth() {
+  return checkHealth(getConnection());
 }
 
-export async function getAgencyConfig() {
-  return getConfig();
+export async function getSquadhubConfig() {
+  return getConfig(getConnection());
 }
 
 export async function validateTelegramToken(botToken: string) {
@@ -32,16 +33,16 @@ export async function saveTelegramBotToken(botToken: string) {
       },
     };
   }
-  return saveTelegramBotTokenClient(botToken);
+  return saveTelegramBotTokenClient(getConnection(), botToken);
 }
 
 export async function approvePairingCode(
   code: string,
   channel: string = "telegram",
 ) {
-  return approveChannelPairingCode(channel, code);
+  return approveChannelPairingCode(getConnection(), channel, code);
 }
 
 export async function removeTelegramBot() {
-  return removeTelegramBotTokenClient();
+  return removeTelegramBotTokenClient(getConnection());
 }

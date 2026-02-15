@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { agentRegister } from "./agent-register.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    mutation: vi.fn(),
-  },
+  mutation: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 
 describe("agentRegister", () => {
   beforeEach(() => {
@@ -16,11 +14,11 @@ describe("agentRegister", () => {
   });
 
   it("registers an agent with basic info", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("agent-123");
+    vi.mocked(mutation).mockResolvedValue("agent-123");
 
     await agentRegister("Scout", "SEO Analyst", "agent:scout:main", {});
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       name: "Scout",
       role: "SEO Analyst",
       sessionKey: "agent:scout:main",
@@ -32,13 +30,13 @@ describe("agentRegister", () => {
   });
 
   it("registers an agent with emoji", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("agent-456");
+    vi.mocked(mutation).mockResolvedValue("agent-456");
 
     await agentRegister("Pixel", "Designer", "agent:pixel:main", {
       emoji: "🎨",
     });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       name: "Pixel",
       role: "Designer",
       sessionKey: "agent:pixel:main",
@@ -50,13 +48,13 @@ describe("agentRegister", () => {
   });
 
   it("handles upsert (update existing agent)", async () => {
-    vi.mocked(client.mutation).mockResolvedValue("existing-agent-id");
+    vi.mocked(mutation).mockResolvedValue("existing-agent-id");
 
     await agentRegister("Clawe", "Squad Lead", "agent:main:main", {
       emoji: "🦞",
     });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       name: "Clawe",
       role: "Squad Lead",
       sessionKey: "agent:main:main",

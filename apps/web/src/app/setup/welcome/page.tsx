@@ -9,14 +9,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@clawe/ui/components/tooltip";
-import { useAgencyStatus } from "@/hooks/use-agency-status";
+import { useSquadhubStatus } from "@/hooks/use-squadhub-status";
 
 const TOTAL_STEPS = 4;
 const CURRENT_STEP = 1;
 
 export default function WelcomePage() {
   const router = useRouter();
-  const { status, isLoading } = useAgencyStatus();
+  const { status, isLoading } = useSquadhubStatus();
 
   const isOffline = !isLoading && status === "down";
 
@@ -71,14 +71,14 @@ export default function WelcomePage() {
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
               <div className="space-y-2">
                 <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                  Agency service is offline
+                  Squadhub service is offline
                 </p>
                 <p className="text-sm text-red-700 dark:text-red-400">
-                  The agency service needs to be running before you can
+                  The squadhub service needs to be running before you can
                   continue. Start it with:
                 </p>
                 <pre className="rounded-md bg-red-100 px-3 py-2 text-xs text-red-900 dark:bg-red-950/50 dark:text-red-300">
-                  sudo docker compose up -d agency
+                  sudo docker compose up -d squadhub
                 </pre>
                 <p className="text-xs text-red-600 dark:text-red-500">
                   This status will update automatically once the service is
@@ -107,7 +107,7 @@ export default function WelcomePage() {
           </TooltipTrigger>
           {isOffline && (
             <TooltipContent>
-              <p>Start agency to continue</p>
+              <p>Start squadhub to continue</p>
             </TooltipContent>
           )}
         </Tooltip>

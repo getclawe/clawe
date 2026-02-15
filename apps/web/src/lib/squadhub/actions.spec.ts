@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the shared package
-vi.mock("@clawe/shared/agency", () => ({
+vi.mock("@clawe/shared/squadhub", () => ({
   checkHealth: vi.fn(),
   getConfig: vi.fn(),
   saveTelegramBotToken: vi.fn(),
@@ -12,15 +12,15 @@ vi.mock("@clawe/shared/agency", () => ({
 import {
   saveTelegramBotToken,
   validateTelegramToken,
-  checkAgencyHealth,
+  checkSquadhubHealth,
 } from "./actions";
 import {
   checkHealth,
   saveTelegramBotToken as saveTelegramBotTokenClient,
   probeTelegramToken,
-} from "@clawe/shared/agency";
+} from "@clawe/shared/squadhub";
 
-describe("Agency Actions", () => {
+describe("Squadhub Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -55,7 +55,10 @@ describe("Agency Actions", () => {
       const result = await saveTelegramBotToken("123456:ABC-DEF");
 
       expect(probeTelegramToken).toHaveBeenCalledWith("123456:ABC-DEF");
-      expect(saveTelegramBotTokenClient).toHaveBeenCalledWith("123456:ABC-DEF");
+      expect(saveTelegramBotTokenClient).toHaveBeenCalledWith(
+        expect.objectContaining({ squadhubUrl: expect.any(String), squadhubToken: expect.any(String) }),
+        "123456:ABC-DEF",
+      );
       expect(result.ok).toBe(true);
     });
 
@@ -75,7 +78,7 @@ describe("Agency Actions", () => {
     });
   });
 
-  describe("checkAgencyHealth", () => {
+  describe("checkSquadhubHealth", () => {
     it("returns health status", async () => {
       vi.mocked(checkHealth).mockResolvedValueOnce({
         ok: true,
@@ -85,7 +88,7 @@ describe("Agency Actions", () => {
         },
       });
 
-      const result = await checkAgencyHealth();
+      const result = await checkSquadhubHealth();
       expect(result.ok).toBe(true);
     });
   });

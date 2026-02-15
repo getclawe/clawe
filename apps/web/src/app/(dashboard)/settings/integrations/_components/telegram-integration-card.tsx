@@ -7,15 +7,15 @@ import { api } from "@clawe/backend";
 import { Button } from "@clawe/ui/components/button";
 import { Badge } from "@clawe/ui/components/badge";
 import { Skeleton } from "@clawe/ui/components/skeleton";
-import { useAgencyStatus } from "@/hooks/use-agency-status";
+import { useSquadhubStatus } from "@/hooks/use-squadhub-status";
 import { TelegramSetupDialog } from "./telegram-setup-dialog";
 import { TelegramDisconnectDialog } from "./telegram-disconnect-dialog";
 import { TelegramRemoveDialog } from "./telegram-remove-dialog";
 
 export const TelegramIntegrationCard = () => {
   const channel = useQuery(api.channels.getByType, { type: "telegram" });
-  const { status: agencyStatus, isLoading: isAgencyLoading } =
-    useAgencyStatus();
+  const { status: squadhubStatus, isLoading: isSquadhubLoading } =
+    useSquadhubStatus();
 
   const [setupOpen, setSetupOpen] = useState(false);
   const [disconnectOpen, setDisconnectOpen] = useState(false);
@@ -23,7 +23,7 @@ export const TelegramIntegrationCard = () => {
 
   const isLoading = channel === undefined;
   const isConnected = channel?.status === "connected";
-  const isOffline = !isAgencyLoading && agencyStatus === "down";
+  const isOffline = !isSquadhubLoading && squadhubStatus === "down";
 
   if (isLoading) {
     return <TelegramCardSkeleton />;
@@ -94,7 +94,7 @@ export const TelegramIntegrationCard = () => {
           )}
           {isOffline && (
             <p className="text-muted-foreground text-center text-xs">
-              Agency is offline
+              Squadhub is offline
             </p>
           )}
         </div>

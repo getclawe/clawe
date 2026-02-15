@@ -17,9 +17,9 @@ export default defineConfig({
         __dirname,
         "../../packages/backend/convex/_generated/api",
       ),
-      "@clawe/shared/agency": path.resolve(
+      "@clawe/shared/squadhub": path.resolve(
         __dirname,
-        "../../packages/shared/src/agency/index.ts",
+        "../../packages/shared/src/squadhub/index.ts",
       ),
     },
   },

@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { taskView } from "./task-view.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    query: vi.fn(),
-  },
+  query: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { query } from "../client.js";
 
 describe("taskView", () => {
   beforeEach(() => {
@@ -17,7 +15,7 @@ describe("taskView", () => {
   });
 
   it("displays task not found error", async () => {
-    vi.mocked(client.query).mockResolvedValue(null);
+    vi.mocked(query).mockResolvedValue(null);
     const mockExit = vi.spyOn(process, "exit").mockImplementation((code) => {
       throw new Error(`process.exit(${code})`);
     });
@@ -33,7 +31,7 @@ describe("taskView", () => {
   });
 
   it("displays basic task info", async () => {
-    vi.mocked(client.query).mockResolvedValue({
+    vi.mocked(query).mockResolvedValue({
       _id: "task-123",
       title: "Write documentation",
       status: "in_progress",
@@ -49,7 +47,7 @@ describe("taskView", () => {
   });
 
   it("displays description when present", async () => {
-    vi.mocked(client.query).mockResolvedValue({
+    vi.mocked(query).mockResolvedValue({
       _id: "task-456",
       title: "Task with desc",
       status: "assigned",
@@ -63,7 +61,7 @@ describe("taskView", () => {
   });
 
   it("displays subtasks with progress", async () => {
-    vi.mocked(client.query).mockResolvedValue({
+    vi.mocked(query).mockResolvedValue({
       _id: "task-789",
       title: "Task with subtasks",
       status: "in_progress",
@@ -85,7 +83,7 @@ describe("taskView", () => {
   });
 
   it("displays deliverables", async () => {
-    vi.mocked(client.query).mockResolvedValue({
+    vi.mocked(query).mockResolvedValue({
       _id: "task-del",
       title: "Task with deliverables",
       status: "done",
@@ -102,7 +100,7 @@ describe("taskView", () => {
 
   it("displays comments", async () => {
     const now = Date.now();
-    vi.mocked(client.query).mockResolvedValue({
+    vi.mocked(query).mockResolvedValue({
       _id: "task-comments",
       title: "Task with comments",
       status: "review",

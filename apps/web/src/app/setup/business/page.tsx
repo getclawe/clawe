@@ -17,7 +17,7 @@ export default function BusinessPage() {
   const router = useRouter();
 
   // Real-time subscription - auto-updates when CLI saves
-  const businessContext = useQuery(api.businessContext.get);
+  const businessContext = useQuery(api.businessContext.get, {});
   const canContinue = businessContext?.approved === true;
 
   return (

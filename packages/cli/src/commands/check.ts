@@ -1,12 +1,12 @@
-import { client } from "../client.js";
+import { query, mutation } from "../client.js";
 import { api } from "@clawe/backend";
 
 export async function check(sessionKey: string): Promise<void> {
   // Record heartbeat
-  await client.mutation(api.agents.heartbeat, { sessionKey });
+  await mutation(api.agents.heartbeat, { sessionKey });
 
   // Get undelivered notifications
-  const notifications = await client.query(api.notifications.getUndelivered, {
+  const notifications = await query(api.notifications.getUndelivered, {
     sessionKey,
   });
 
@@ -16,7 +16,7 @@ export async function check(sessionKey: string): Promise<void> {
   }
 
   // Mark as delivered
-  await client.mutation(api.notifications.markDelivered, {
+  await mutation(api.notifications.markDelivered, {
     notificationIds: notifications.map((n) => n._id),
   });
 

@@ -1,15 +1,19 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
 
 // Get undelivered notifications for an agent (by session key)
 export const getUndelivered = query({
-  args: { sessionKey: v.string() },
+  args: { sessionKey: v.string(), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    // Find the agent
-    const agent = await ctx.db
+    const tenantId = await resolveTenantId(ctx, args);
+
+    // Find the agent within this tenant
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
-      .first();
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
 
     if (!agent) {
       return [];
@@ -59,12 +63,16 @@ export const getForAgent = query({
   args: {
     sessionKey: v.string(),
     limit: v.optional(v.number()),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const agent = await ctx.db
+    const tenantId = await resolveTenantId(ctx, args);
+
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
-      .first();
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
 
     if (!agent) {
       return [];
@@ -87,8 +95,10 @@ export const getForAgent = query({
 export const markDelivered = mutation({
   args: {
     notificationIds: v.array(v.id("notifications")),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await resolveTenantIdMut(ctx, args);
     const now = Date.now();
 
     for (const id of args.notificationIds) {
@@ -116,16 +126,19 @@ export const send = mutation({
     ),
     taskId: v.optional(v.id("tasks")),
     content: v.string(),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
     const now = Date.now();
     const targetKey = args.targetSessionKey;
 
-    // Find target agent
-    const targetAgent = await ctx.db
+    // Find target agent within this tenant
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", targetKey))
-      .first();
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+    const targetAgent = agents.find((a) => a.sessionKey === targetKey);
 
     if (!targetAgent) {
       throw new Error(`Target agent not found: ${args.targetSessionKey}`);
@@ -134,11 +147,9 @@ export const send = mutation({
     // Find source agent if provided
     let sourceAgentId = undefined;
     if (args.sourceSessionKey) {
-      const sourceKey = args.sourceSessionKey;
-      const sourceAgent = await ctx.db
-        .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sourceKey))
-        .first();
+      const sourceAgent = agents.find(
+        (a) => a.sessionKey === args.sourceSessionKey,
+      );
       if (sourceAgent) {
         sourceAgentId = sourceAgent._id;
       }
@@ -146,6 +157,7 @@ export const send = mutation({
 
     // Create notification
     const notificationId = await ctx.db.insert("notifications", {
+      tenantId,
       targetAgentId: targetAgent._id,
       sourceAgentId,
       type: args.type,
@@ -157,6 +169,7 @@ export const send = mutation({
 
     // Log activity
     await ctx.db.insert("activities", {
+      tenantId,
       type: "notification_sent",
       agentId: sourceAgentId,
       taskId: args.taskId,
@@ -184,32 +197,38 @@ export const sendToMany = mutation({
     ),
     taskId: v.optional(v.id("tasks")),
     content: v.string(),
+    machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const tenantId = await resolveTenantIdMut(ctx, args);
     const now = Date.now();
     const notificationIds: string[] = [];
+
+    // Load all agents for this tenant once
+    const agents = await ctx.db
+      .query("agents")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
 
     // Find source agent if provided
     let sourceAgentId = undefined;
     if (args.sourceSessionKey) {
-      const sourceKey = args.sourceSessionKey;
-      const sourceAgent = await ctx.db
-        .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sourceKey))
-        .first();
+      const sourceAgent = agents.find(
+        (a) => a.sessionKey === args.sourceSessionKey,
+      );
       if (sourceAgent) {
         sourceAgentId = sourceAgent._id;
       }
     }
 
     for (const targetSessionKey of args.targetSessionKeys) {
-      const targetAgent = await ctx.db
-        .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", targetSessionKey))
-        .first();
+      const targetAgent = agents.find(
+        (a) => a.sessionKey === targetSessionKey,
+      );
 
       if (targetAgent) {
         const id = await ctx.db.insert("notifications", {
+          tenantId,
           targetAgentId: targetAgent._id,
           sourceAgentId,
           type: args.type,
@@ -228,12 +247,15 @@ export const sendToMany = mutation({
 
 // Clear all notifications for an agent (mark all as delivered)
 export const clearAll = mutation({
-  args: { sessionKey: v.string() },
+  args: { sessionKey: v.string(), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const agent = await ctx.db
+    const tenantId = await resolveTenantIdMut(ctx, args);
+
+    const agents = await ctx.db
       .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", args.sessionKey))
-      .first();
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .collect();
+    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
 
     if (!agent) {
       return 0;

@@ -8,7 +8,7 @@ WORKDIR /app
 # Watcher
 COPY apps/watcher/dist/ ./dist/
 
-# Shared package (agency client)
+# Shared package (squadhub client)
 COPY packages/shared/package.json ./node_modules/@clawe/shared/package.json
 COPY packages/shared/dist/ ./node_modules/@clawe/shared/dist/
 

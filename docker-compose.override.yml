@@ -1,10 +1,10 @@
 services:
-  agency:
+  squadhub:
     ports:
       - "18790:18789"
     volumes:
-      - ./.agency:/data
-      - ./.agency/logs:/tmp/openclaw
+      - ./.squadhub:/data
+      - ./.squadhub/logs:/tmp/openclaw
       - .:/home/ubuntu/clawe
     extra_hosts:
       - "host.docker.internal:host-gateway"

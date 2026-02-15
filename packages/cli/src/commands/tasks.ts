@@ -1,8 +1,8 @@
-import { client } from "../client.js";
+import { query } from "../client.js";
 import { api } from "@clawe/backend";
 
 export async function tasks(sessionKey: string): Promise<void> {
-  const taskList = await client.query(api.tasks.getForAgent, { sessionKey });
+  const taskList = await query(api.tasks.getForAgent, { sessionKey });
 
   if (taskList.length === 0) {
     console.log("No active tasks.");

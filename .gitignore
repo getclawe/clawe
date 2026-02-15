@@ -49,8 +49,8 @@ convex/_generated
 # Local data directory (Clawe config)
 .data/
 
-# Agency state directory (shared with Docker in dev)
-.agency/*
-!.agency/.gitkeep
-.agency/logs/*
-!.agency/logs/.gitkeep
+# SquadHub state directory (shared with Docker in dev)
+.squadhub/*
+!.squadhub/.gitkeep
+.squadhub/logs/*
+!.squadhub/logs/.gitkeep

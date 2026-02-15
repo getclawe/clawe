@@ -2,12 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { taskAssign } from "./task-assign.js";
 
 vi.mock("../client.js", () => ({
-  client: {
-    mutation: vi.fn(),
-  },
+  mutation: vi.fn(),
 }));
 
-import { client } from "../client.js";
+import { mutation } from "../client.js";
 
 describe("taskAssign", () => {
   beforeEach(() => {
@@ -16,11 +14,11 @@ describe("taskAssign", () => {
   });
 
   it("assigns task to an agent", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(undefined);
+    vi.mocked(mutation).mockResolvedValue(undefined);
 
     await taskAssign("task-123", "agent:inky:main", {});
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-123",
       assigneeSessionKeys: ["agent:inky:main"],
       bySessionKey: undefined,
@@ -31,11 +29,11 @@ describe("taskAssign", () => {
   });
 
   it("assigns task with assigner attribution", async () => {
-    vi.mocked(client.mutation).mockResolvedValue(undefined);
+    vi.mocked(mutation).mockResolvedValue(undefined);
 
     await taskAssign("task-456", "agent:pixel:main", { by: "agent:main:main" });
 
-    expect(client.mutation).toHaveBeenCalledWith(expect.anything(), {
+    expect(mutation).toHaveBeenCalledWith(expect.anything(), {
       taskId: "task-456",
       assigneeSessionKeys: ["agent:pixel:main"],
       bySessionKey: "agent:main:main",
