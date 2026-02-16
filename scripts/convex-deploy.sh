@@ -35,6 +35,11 @@ else
     pnpm --filter @clawe/backend exec convex env set NEXTAUTH_JWKS_URL "$NEXTAUTH_JWKS_URL"
 fi
 
+# Set watcher token in Convex
+if [ -n "$WATCHER_TOKEN" ]; then
+    pnpm --filter @clawe/backend exec convex env set WATCHER_TOKEN "$WATCHER_TOKEN"
+fi
+
 # Deploy Convex functions and schema
 pnpm --filter @clawe/backend deploy
 

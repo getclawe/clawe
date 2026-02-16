@@ -7,6 +7,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { ConvexClientProvider } from "@/providers/convex-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { ApiClientProvider } from "@/providers/api-client-provider";
 import { Toaster } from "@clawe/ui/components/sonner";
 
 const geistSans = localFont({
@@ -43,17 +44,19 @@ export default function RootLayout({
       >
         <QueryProvider>
           <AuthProvider>
-            <ConvexClientProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {children}
-                <Toaster />
-              </ThemeProvider>
-            </ConvexClientProvider>
+            <ApiClientProvider>
+              <ConvexClientProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  {children}
+                  <Toaster />
+                </ThemeProvider>
+              </ConvexClientProvider>
+            </ApiClientProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

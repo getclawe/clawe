@@ -216,8 +216,12 @@ async function seedRoutines(convex: ConvexHttpClient): Promise<{
 export async function provisionTenant(
   connection: SquadhubConnection,
   convexUrl: string,
+  authToken?: string,
 ): Promise<ProvisionResult> {
   const convex = new ConvexHttpClient(convexUrl);
+  if (authToken) {
+    convex.setAuth(authToken);
+  }
   const allErrors: string[] = [];
 
   // Check squadhub is reachable

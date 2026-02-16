@@ -1,12 +1,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useChat } from "./use-chat";
-import axios from "axios";
 
-// Mock axios
-vi.mock("axios");
+// Mock useApiClient
 const mockAxiosGet = vi.fn();
-(axios.get as unknown) = mockAxiosGet;
+vi.mock("@/hooks/use-api-client", () => ({
+  useApiClient: () => ({
+    get: mockAxiosGet,
+  }),
+}));
+
+// Mock fetchAuthToken
+import { fetchAuthToken } from "@/lib/api/client";
+vi.mock("@/lib/api/client", () => ({
+  fetchAuthToken: vi.fn(),
+}));
+const mockFetchAuthToken = vi.mocked(fetchAuthToken);
 
 // Mock fetch for streaming (sendMessage still uses fetch)
 const mockFetch = vi.fn();
@@ -15,6 +24,7 @@ global.fetch = mockFetch;
 describe("useChat", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetchAuthToken.mockResolvedValue("mock-token");
   });
 
   afterEach(() => {
@@ -146,6 +156,38 @@ describe("useChat", () => {
         expect(result.current.messages.length).toBeGreaterThanOrEqual(1);
         expect(result.current.messages[0]?.role).toBe("user");
       });
+    });
+
+    it("includes Authorization header in fetch", async () => {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode("Hello"));
+          controller.close();
+        },
+      });
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        body: stream,
+      });
+
+      const { result } = renderHook(() =>
+        useChat({ sessionKey: "test-session" }),
+      );
+
+      await act(async () => {
+        await result.current.sendMessage("Hello");
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/chat",
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: "Bearer mock-token",
+          }),
+        }),
+      );
     });
   });
 

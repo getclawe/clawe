@@ -15,8 +15,7 @@ describe("config", () => {
   describe("validateEnv", () => {
     it("exits when CONVEX_URL is missing", async () => {
       delete process.env.CONVEX_URL;
-      process.env.SQUADHUB_URL = "http://localhost:18789";
-      process.env.SQUADHUB_TOKEN = "test-token";
+      process.env.WATCHER_TOKEN = "test-token";
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -35,10 +34,9 @@ describe("config", () => {
       mockError.mockRestore();
     });
 
-    it("exits when SQUADHUB_URL is missing", async () => {
+    it("exits when WATCHER_TOKEN is missing", async () => {
       process.env.CONVEX_URL = "https://test.convex.cloud";
-      delete process.env.SQUADHUB_URL;
-      process.env.SQUADHUB_TOKEN = "test-token";
+      delete process.env.WATCHER_TOKEN;
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -49,7 +47,7 @@ describe("config", () => {
       validateEnv();
 
       expect(mockError).toHaveBeenCalledWith(
-        expect.stringContaining("SQUADHUB_URL"),
+        expect.stringContaining("WATCHER_TOKEN"),
       );
       expect(mockExit).toHaveBeenCalledWith(1);
 
@@ -59,8 +57,7 @@ describe("config", () => {
 
     it("does not exit when all required vars are set", async () => {
       process.env.CONVEX_URL = "https://test.convex.cloud";
-      process.env.SQUADHUB_URL = "http://localhost:18789";
-      process.env.SQUADHUB_TOKEN = "test-token";
+      process.env.WATCHER_TOKEN = "test-token";
 
       const mockExit = vi
         .spyOn(process, "exit")
@@ -76,16 +73,14 @@ describe("config", () => {
   });
 
   describe("config object", () => {
-    it("has correct default values", async () => {
+    it("has correct values from env", async () => {
       process.env.CONVEX_URL = "https://test.convex.cloud";
-      process.env.SQUADHUB_URL = "http://custom:8080";
-      process.env.SQUADHUB_TOKEN = "my-token";
+      process.env.WATCHER_TOKEN = "my-watcher-token";
 
       const { config } = await import("./config.js");
 
       expect(config.convexUrl).toBe("https://test.convex.cloud");
-      expect(config.squadhubUrl).toBe("http://custom:8080");
-      expect(config.squadhubToken).toBe("my-token");
+      expect(config.watcherToken).toBe("my-watcher-token");
     });
   });
 

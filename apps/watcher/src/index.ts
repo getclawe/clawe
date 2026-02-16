@@ -7,15 +7,12 @@
  * Setup logic (agent registration, cron setup, routine seeding) has been
  * moved to the provisioning API route (POST /api/tenant/provision).
  *
- * Multi-tenant ready: iterates over active tenants each loop iteration.
- * When WATCHER_TOKEN is set, queries Convex for all active tenants.
- * Falls back to single-tenant mode using SQUADHUB_URL/SQUADHUB_TOKEN env vars.
+ * Multi-tenant: iterates over active tenants each loop iteration.
+ * Queries Convex for all active tenants using WATCHER_TOKEN.
  *
  * Environment variables:
  *   CONVEX_URL        - Convex deployment URL
- *   WATCHER_TOKEN     - System-level auth token for querying all tenants (optional)
- *   SQUADHUB_URL      - Squadhub gateway URL (single-tenant fallback)
- *   SQUADHUB_TOKEN    - Squadhub authentication token (single-tenant fallback)
+ *   WATCHER_TOKEN     - System-level auth token for querying all tenants
  */
 
 import { ConvexHttpClient } from "convex/browser";
@@ -40,37 +37,22 @@ type TenantInfo = {
 /**
  * Get the list of active tenants to service.
  *
- * When WATCHER_TOKEN is set, queries Convex `tenants.listActive` for all
- * active tenants with their squadhub connection info.
- *
- * Falls back to single-tenant mode using SQUADHUB_URL/SQUADHUB_TOKEN env vars.
+ * Queries Convex `tenants.listActive` for all active tenants
+ * with their squadhub connection info.
  */
 async function getActiveTenants(): Promise<TenantInfo[]> {
-  if (config.watcherToken) {
-    const tenants = await convex.query(api.tenants.listActive, {
-      watcherToken: config.watcherToken,
-    });
-    return tenants.map(
-      (t: { id: string; squadhubUrl: string; squadhubToken: string }) => ({
-        id: t.id,
-        connection: {
-          squadhubUrl: t.squadhubUrl,
-          squadhubToken: t.squadhubToken,
-        },
-      }),
-    );
-  }
-
-  // Fallback: single-tenant mode from env vars
-  return [
-    {
-      id: "default",
+  const tenants = await convex.query(api.tenants.listActive, {
+    watcherToken: config.watcherToken,
+  });
+  return tenants.map(
+    (t: { id: string; squadhubUrl: string; squadhubToken: string }) => ({
+      id: t.id,
       connection: {
-        squadhubUrl: config.squadhubUrl,
-        squadhubToken: config.squadhubToken,
+        squadhubUrl: t.squadhubUrl,
+        squadhubToken: t.squadhubToken,
       },
-    },
-  ];
+    }),
+  );
 }
 
 const ROUTINE_CHECK_INTERVAL_MS = 10_000; // Check routines every 10 seconds
@@ -83,56 +65,66 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Check for due routines and trigger them.
+ * Check for due routines and trigger them for a single tenant.
  *
  * Uses a 1-hour window for crash tolerance: if a routine is scheduled
  * for 6:00 AM, it can trigger anytime between 6:00 AM and 6:59 AM.
- *
+ */
+async function checkRoutinesForTenant(machineToken: string): Promise<void> {
+  // Get tenant's timezone from tenant settings
+  const timezone =
+    (await convex.query(api.tenants.getTimezone, {
+      machineToken,
+    })) ?? DEFAULT_TIMEZONE;
+
+  // Get current timestamp and time in user's timezone
+  const now = new Date();
+  const currentTimestamp = now.getTime();
+  const { dayOfWeek, hour, minute } = getTimeInZone(now, timezone);
+
+  // Query for due routines (with 1-hour window tolerance)
+  const dueRoutines = await convex.query(api.routines.getDueRoutines, {
+    machineToken,
+    currentTimestamp,
+    dayOfWeek,
+    hour,
+    minute,
+  });
+
+  // Trigger each due routine
+  for (const routine of dueRoutines) {
+    try {
+      const taskId = await convex.mutation(api.routines.trigger, {
+        machineToken,
+        routineId: routine._id,
+      });
+      console.log(
+        `[watcher] ✓ Triggered routine "${routine.title}" → task ${taskId}`,
+      );
+    } catch (err) {
+      console.error(
+        `[watcher] Failed to trigger routine "${routine.title}":`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+}
+
+/**
+ * Check routines for all active tenants.
  */
 async function checkRoutines(): Promise<void> {
-  try {
-    // Get tenant's timezone from tenant settings
-    const timezone =
-      (await convex.query(api.tenants.getTimezone, {
-        machineToken: config.squadhubToken,
-      })) ?? DEFAULT_TIMEZONE;
+  const tenants = await getActiveTenants();
 
-    // Get current timestamp and time in user's timezone
-    const now = new Date();
-    const currentTimestamp = now.getTime();
-    const { dayOfWeek, hour, minute } = getTimeInZone(now, timezone);
-
-    // Query for due routines (with 1-hour window tolerance)
-    const dueRoutines = await convex.query(api.routines.getDueRoutines, {
-      machineToken: config.squadhubToken,
-      currentTimestamp,
-      dayOfWeek,
-      hour,
-      minute,
-    });
-
-    // Trigger each due routine
-    for (const routine of dueRoutines) {
-      try {
-        const taskId = await convex.mutation(api.routines.trigger, {
-          machineToken: config.squadhubToken,
-          routineId: routine._id,
-        });
-        console.log(
-          `[watcher] ✓ Triggered routine "${routine.title}" → task ${taskId}`,
-        );
-      } catch (err) {
-        console.error(
-          `[watcher] Failed to trigger routine "${routine.title}":`,
-          err instanceof Error ? err.message : err,
-        );
-      }
+  for (const tenant of tenants) {
+    try {
+      await checkRoutinesForTenant(tenant.connection.squadhubToken);
+    } catch (err) {
+      console.error(
+        `[watcher] Error checking routines for tenant ${tenant.id}:`,
+        err instanceof Error ? err.message : err,
+      );
     }
-  } catch (err) {
-    console.error(
-      "[watcher] Error checking routines:",
-      err instanceof Error ? err.message : err,
-    );
   }
 }
 
@@ -170,10 +162,12 @@ async function deliverToAgent(
   connection: SquadhubConnection,
   sessionKey: string,
 ): Promise<void> {
+  const { squadhubToken: machineToken } = connection;
+
   try {
     // Get undelivered notifications for this agent
     const notifications = await convex.query(api.notifications.getUndelivered, {
-      machineToken: config.squadhubToken,
+      machineToken,
       sessionKey,
     });
 
@@ -196,7 +190,7 @@ async function deliverToAgent(
         if (result.ok) {
           // Mark as delivered in Convex
           await convex.mutation(api.notifications.markDelivered, {
-            machineToken: config.squadhubToken,
+            machineToken,
             notificationIds: [notification._id],
           });
 
@@ -288,12 +282,6 @@ async function startDeliveryLoop(): Promise<void> {
 async function main(): Promise<void> {
   console.log("[watcher] 🦞 Clawe Watcher starting...");
   console.log(`[watcher] Convex: ${config.convexUrl}`);
-  console.log(
-    `[watcher] Mode: ${config.watcherToken ? "multi-tenant (WATCHER_TOKEN)" : "single-tenant (env vars)"}`,
-  );
-  if (!config.watcherToken) {
-    console.log(`[watcher] Squadhub: ${config.squadhubUrl}`);
-  }
   console.log(`[watcher] Notification poll interval: ${POLL_INTERVAL_MS}ms`);
   console.log(
     `[watcher] Routine check interval: ${ROUTINE_CHECK_INTERVAL_MS}ms\n`,

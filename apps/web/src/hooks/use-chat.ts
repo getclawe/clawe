@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import axios from "axios";
 import type { ChatAttachment } from "@/components/chat/types";
+import { useApiClient } from "@/hooks/use-api-client";
+import { fetchAuthToken } from "@/lib/api/client";
 
 export type Message = {
   id: string;
@@ -110,6 +111,7 @@ export const useChat = ({
   onError,
   onFinish,
 }: UseChatOptions): UseChatReturn => {
+  const apiClient = useApiClient();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState<
@@ -163,9 +165,13 @@ export const useChat = ({
           { role: "user" as const, content: trimmed },
         ];
 
+        const token = await fetchAuthToken();
         const response = await fetch("/api/chat", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({ sessionKey, messages: apiMessages }),
           signal: abortRef.current.signal,
         });
@@ -232,7 +238,7 @@ export const useChat = ({
     setStatus("loading");
 
     try {
-      const response = await axios.get<{ messages?: unknown[] }>(
+      const response = await apiClient.get<{ messages?: unknown[] }>(
         `/api/chat/history?sessionKey=${encodeURIComponent(sessionKey)}&limit=50`,
       );
 
@@ -260,7 +266,7 @@ export const useChat = ({
       console.warn("[chat] Failed to load history:", err);
       setStatus("idle");
     }
-  }, [sessionKey]);
+  }, [sessionKey, apiClient]);
 
   const abort = useCallback(() => {
     abortRef.current?.abort();

@@ -8,12 +8,14 @@ import { api } from "@clawe/backend";
 import { Button } from "@clawe/ui/components/button";
 import { Spinner } from "@clawe/ui/components/spinner";
 import { useAuth } from "@/providers/auth-provider";
+import { useApiClient } from "@/hooks/use-api-client";
 
 const AUTO_LOGIN_EMAIL = process.env.NEXT_PUBLIC_AUTO_LOGIN_EMAIL;
 
 export default function LoginPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading, signIn } = useAuth();
+  const apiClient = useApiClient();
   const getOrCreateUser = useMutation(api.users.getOrCreateFromAuth);
   const [autoLoginAttempted, setAutoLoginAttempted] = useState(false);
 
@@ -32,15 +34,17 @@ export default function LoginPage() {
     const ensureUser = async () => {
       try {
         await getOrCreateUser();
+        // Provision tenant (idempotent — fast for dev, creates tenant if needed)
+        await apiClient.post("/api/tenant/provision");
       } catch {
-        // User creation may fail if Convex auth isn't ready yet — that's ok,
-        // the onboarding guard will handle it on the next page load.
+        // User creation or provisioning may fail if auth isn't ready yet.
+        // The onboarding guard handles this on the next page load.
       }
       router.replace("/");
     };
 
     ensureUser();
-  }, [isAuthenticated, getOrCreateUser, router]);
+  }, [isAuthenticated, getOrCreateUser, apiClient, router]);
 
   return (
     <div className="relative flex h-svh">

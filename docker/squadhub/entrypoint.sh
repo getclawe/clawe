@@ -53,10 +53,12 @@ else
     echo "==> Config exists. Skipping initialization."
 fi
 
-# Ensure the local CLI device is paired with the gateway.
-# On container recreation the CLI generates a new keypair, but the old
-# paired.json from the volume is stale. Re-register every startup.
+# Pre-pair: write paired.json from identity BEFORE gateway starts.
+# This ensures the local CLI device is recognized on boot.
 node /opt/clawe/scripts/pair-device.js
+
+# Background: watch for new pending requests every 60s.
+node /opt/clawe/scripts/pair-device.js --watch &
 
 echo "==> Starting OpenClaw gateway on port $PORT..."
 

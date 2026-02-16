@@ -15,7 +15,8 @@
     "NEXTAUTH_URL",
     "AUTO_LOGIN_EMAIL",
     "GOOGLE_CLIENT_ID",
-    "GOOGLE_CLIENT_SECRET"
+    "GOOGLE_CLIENT_SECRET",
+    "WATCHER_TOKEN"
   ],
   "tasks": {
     "build": {

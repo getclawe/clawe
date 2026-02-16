@@ -9,6 +9,15 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
+import { Amplify } from "aws-amplify";
+import {
+  getCurrentUser,
+  fetchUserAttributes,
+  signInWithRedirect,
+  signOut as amplifySignOut,
+} from "aws-amplify/auth";
+import { Hub } from "aws-amplify/utils";
+import { fetchAuthToken } from "@/lib/api/client";
 
 const AUTH_PROVIDER = process.env.NEXT_PUBLIC_AUTH_PROVIDER ?? "nextauth";
 
@@ -115,8 +124,6 @@ const CognitoProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAuthState = useCallback(async () => {
     try {
-      const { getCurrentUser, fetchUserAttributes } =
-        await import("aws-amplify/auth");
       await getCurrentUser();
       const attributes = await fetchUserAttributes();
       setUser({
@@ -133,54 +140,46 @@ const CognitoProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    const configure = async () => {
-      const { Amplify } = await import("aws-amplify");
-      Amplify.configure({
-        Auth: {
-          Cognito: {
-            userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
-            userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!,
-            loginWith: {
-              oauth: {
-                domain: process.env.NEXT_PUBLIC_COGNITO_DOMAIN!,
-                scopes: ["openid", "email", "profile"],
-                redirectSignIn: [window.location.origin],
-                redirectSignOut: [window.location.origin],
-                responseType: "code",
-              },
+    Amplify.configure({
+      Auth: {
+        Cognito: {
+          userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
+          userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!,
+          loginWith: {
+            oauth: {
+              domain: process.env.NEXT_PUBLIC_COGNITO_DOMAIN!,
+              scopes: ["openid", "email", "profile"],
+              redirectSignIn: [window.location.origin],
+              redirectSignOut: [window.location.origin],
+              responseType: "code",
             },
           },
         },
-      });
+      },
+    });
 
-      const { Hub } = await import("aws-amplify/utils");
-      Hub.listen("auth", ({ payload }) => {
-        switch (payload.event) {
-          case "signedIn":
-          case "signInWithRedirect":
-            checkAuthState();
-            break;
-          case "signedOut":
-            setUser(null);
-            setIsAuthenticated(false);
-            setIsLoading(false);
-            break;
-        }
-      });
+    Hub.listen("auth", ({ payload }) => {
+      switch (payload.event) {
+        case "signedIn":
+        case "signInWithRedirect":
+          checkAuthState();
+          break;
+        case "signedOut":
+          setUser(null);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          break;
+      }
+    });
 
-      checkAuthState();
-    };
-
-    configure();
+    checkAuthState();
   }, [checkAuthState]);
 
   const signIn = useCallback(async () => {
-    const { signInWithRedirect } = await import("aws-amplify/auth");
     await signInWithRedirect({ provider: "Google" });
   }, []);
 
   const signOut = useCallback(async () => {
-    const { signOut: amplifySignOut } = await import("aws-amplify/auth");
     await amplifySignOut();
     setUser(null);
     setIsAuthenticated(false);
@@ -220,30 +219,12 @@ export const useAuth = () => {
 export const useConvexAuth = () => {
   const { isLoading, isAuthenticated } = useAuth();
 
-  const fetchAccessToken = useCallback(
-    async ({
-      forceRefreshToken,
-    }: {
-      forceRefreshToken: boolean;
-    }): Promise<string | null> => {
-      if (!isAuthenticated) return null;
-
-      if (AUTH_PROVIDER === "cognito") {
-        const { fetchAuthSession } = await import("aws-amplify/auth");
-        const session = await fetchAuthSession({
-          forceRefresh: forceRefreshToken,
-        });
-        return session.tokens?.idToken?.toString() ?? null;
-      }
-
-      // NextAuth: fetch the JWT via server endpoint (cookie is HttpOnly).
-      const res = await fetch("/api/auth/token");
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data.token ?? null;
-    },
-    [isAuthenticated],
-  );
+  const fetchAccessToken: (args: {
+    forceRefreshToken: boolean;
+  }) => Promise<string | null> = useCallback(async () => {
+    if (!isAuthenticated) return null;
+    return fetchAuthToken();
+  }, [isAuthenticated]);
 
   return useMemo(
     () => ({ isLoading, isAuthenticated, fetchAccessToken }),

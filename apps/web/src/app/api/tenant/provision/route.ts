@@ -1,17 +1,28 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@clawe/backend";
+import { loadPlugins, getPlugin } from "@clawe/plugins";
 import { provisionTenant } from "@/lib/squadhub/provision";
-import { getConnection } from "@/lib/squadhub/connection";
 
 /**
  * POST /api/tenant/provision
  *
- * Runs tenant setup: registers default agents, configures heartbeat crons,
- * and seeds initial routines. Idempotent — safe to call multiple times.
+ * Authenticated route that ensures the current user has a provisioned tenant.
+ * Idempotent — safe to call multiple times.
  *
- * In Phase 7 this will also handle AWS infrastructure (ECS, EFS, CloudMap).
- * For now it only runs the application-level setup.
+ * Requires an Authorization header with the Convex JWT (works for both
+ * NextAuth and Cognito — the client auth provider supplies the token).
+ *
+ * Flow:
+ * 1. Read JWT from Authorization header
+ * 2. Ensure account exists (accounts.getOrCreateForUser)
+ * 3. Check for existing tenant (tenants.getForCurrentUser)
+ * 4. If no active tenant: create tenant, provision via plugin, update status
+ * 5. Run app-level setup (agents, crons, routines)
+ * 6. Return { ok: true, tenantId }
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
   if (!convexUrl) {
     return NextResponse.json(
@@ -20,11 +31,87 @@ export async function POST() {
     );
   }
 
-  try {
-    const result = await provisionTenant(getConnection(), convexUrl);
+  // 1. Read JWT from Authorization header
+  const authHeader = request.headers.get("authorization");
+  const authToken = authHeader?.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : null;
 
+  if (!authToken) {
+    return NextResponse.json(
+      { error: "Missing Authorization header" },
+      { status: 401 },
+    );
+  }
+
+  // Create authenticated Convex client
+  const convex = new ConvexHttpClient(convexUrl);
+  convex.setAuth(authToken);
+
+  try {
+    // 2. Ensure account exists
+    const account = await convex.mutation(api.accounts.getOrCreateForUser, {});
+
+    // 3. Check for existing tenant
+    const existingTenant = await convex.query(
+      api.tenants.getForCurrentUser,
+      {},
+    );
+
+    if (existingTenant && existingTenant.status === "active") {
+      // Tenant already provisioned — just re-run app setup below
+    } else {
+      // 4. Create tenant + provision via plugin
+      await loadPlugins();
+      const provisioner = getPlugin("provisioner");
+
+      // Create tenant record (or use existing non-active one)
+      const tenantIdToProvision = existingTenant
+        ? existingTenant._id
+        : await convex.mutation(api.tenants.create, {
+            accountId: account._id,
+          });
+
+      // Provision infrastructure (dev: reads env vars, cloud: creates AWS resources)
+      const provisionResult = await provisioner.provision({
+        tenantId: tenantIdToProvision,
+        accountId: account._id,
+        convexUrl,
+      });
+
+      // Update tenant with connection details
+      await convex.mutation(api.tenants.updateStatus, {
+        tenantId: tenantIdToProvision,
+        status: "active",
+        squadhubUrl: provisionResult.squadhubUrl,
+        squadhubToken: provisionResult.squadhubToken,
+        ...(provisionResult.metadata?.squadhubServiceArn && {
+          squadhubServiceArn: provisionResult.metadata.squadhubServiceArn,
+        }),
+        ...(provisionResult.metadata?.efsAccessPointId && {
+          efsAccessPointId: provisionResult.metadata.efsAccessPointId,
+        }),
+      });
+    }
+
+    // Re-fetch tenant to get latest connection details
+    const tenant = await convex.query(api.tenants.getForCurrentUser, {});
+
+    // 5. Run app-level setup (agents, crons, routines)
+    const connection = {
+      squadhubUrl:
+        tenant?.squadhubUrl ??
+        process.env.SQUADHUB_URL ??
+        "http://localhost:18790",
+      squadhubToken: tenant?.squadhubToken ?? process.env.SQUADHUB_TOKEN ?? "",
+    };
+
+    const result = await provisionTenant(connection, convexUrl, authToken);
+
+    // 6. Return result
     return NextResponse.json({
       ok: result.errors.length === 0,
+      tenantId: tenant?._id,
       agents: result.agents,
       crons: result.crons,
       routines: result.routines,

@@ -63,6 +63,9 @@ importers:
       '@clawe/backend':
         specifier: workspace:*
         version: link:../../packages/backend
+      '@clawe/plugins':
+        specifier: workspace:*
+        version: link:../../packages/plugins
       '@clawe/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -114,6 +117,9 @@ importers:
       aws-amplify:
         specifier: ^6.16.2
         version: 6.16.2
+      aws-jwt-verify:
+        specifier: ^5.1.1
+        version: 5.1.1
       axios:
         specifier: ^1.13.4
         version: 1.13.4
@@ -282,6 +288,27 @@ importers:
       typescript-eslint:
         specifier: ^8.50.0
         version: 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
+
+  packages/plugins:
+    devDependencies:
+      '@clawe/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@clawe/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.1(jiti@2.6.1)
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.15.3)(jiti@2.6.1)(jsdom@28.0.0)(lightningcss@1.30.2)(tsx@4.21.0)
 
   packages/shared:
     dependencies:
@@ -3006,6 +3033,10 @@ packages:
   aws-amplify@6.16.2:
     resolution: {integrity: sha512-7CHwfH5QxZ0rzCws/DNy5VLVcIIZWd9iUTtV1Oj6kPzpkFhCJ2I8gTvhFdh61HLhrg2lShcPQ8cecBIQS/ZJ0A==}
 
+  aws-jwt-verify@5.1.1:
+    resolution: {integrity: sha512-j6whGdGJmQ27agk4ijY8RPv6itb8JLb7SCJ86fEnneTcSBrpxuwL8kLq6y5WVH95aIknyAloEqAsaOLS1J8ITQ==}
+    engines: {node: '>=18.0.0'}
+
   axios@1.13.4:
     resolution: {integrity: sha512-1wVkUaAO6WyaYtCkcYCOx12ZgpGf9Zif+qXa4n+oYzK558YryKqiL6UWwd5DqiH3VRW0GYhTZQ/vlgJrCoNQlg==}
 
@@ -3889,6 +3920,7 @@ packages:
 
   js-yaml@4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
+    hasBin: true
 
   jsdom@28.0.0:
     resolution: {integrity: sha512-KDYJgZ6T2TKdU8yBfYueq5EPG/EylMsBvCaenWMJb2OXmjgczzwveRCoJ+Hgj1lXPDyasvrgneSn4GBuR1hYyA==}
@@ -8416,6 +8448,8 @@ snapshots:
     transitivePeerDependencies:
       - '@aws-amplify/react-native'
       - aws-crt
+
+  aws-jwt-verify@5.1.1: {}
 
   axios@1.13.4:
     dependencies:
