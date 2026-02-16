@@ -17,7 +17,7 @@ import { useUserMenu } from "@/hooks/use-user-menu";
 
 export const NavUser = () => {
   const { isMobile } = useSidebar();
-  const { guestMode, user, displayName, initials } = useUserMenu();
+  const { guestMode, user, displayName, initials, signOut } = useUserMenu();
 
   return (
     <SidebarMenu>
@@ -58,6 +58,7 @@ export const NavUser = () => {
             align="end"
             sideOffset={4}
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            onSignOut={signOut}
           />
         </DropdownMenu>
       </SidebarMenuItem>

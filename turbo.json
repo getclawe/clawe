@@ -9,7 +9,13 @@
     "SQUADHUB_URL",
     "SQUADHUB_TOKEN",
     "CLAWE_DATA_DIR",
-    "SQUADHUB_STATE_DIR"
+    "SQUADHUB_STATE_DIR",
+    "AUTH_PROVIDER",
+    "NEXTAUTH_SECRET",
+    "NEXTAUTH_URL",
+    "AUTO_LOGIN_EMAIL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET"
   ],
   "tasks": {
     "build": {

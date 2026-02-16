@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
+import { resolveTenantId } from "./lib/auth";
 
 // Get activity feed (most recent first)
 export const feed = query({
@@ -115,7 +115,7 @@ export const log = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const { machineToken: _, ...fields } = args;
 
     return await ctx.db.insert("activities", {
@@ -150,7 +150,7 @@ export const logBySession = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const { machineToken: _, ...fields } = args;
 
     let agentId = undefined;

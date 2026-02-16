@@ -1,22 +1,21 @@
-// TODO: Replace with actual auth check when authentication is implemented
-const GUEST_MODE = true;
+"use client";
 
-// Mock user for authenticated mode
-const mockUser = {
-  name: "User",
-  email: "user@example.com",
-};
+import { useAuth } from "@/providers/auth-provider";
 
 export const useUserMenu = () => {
-  const guestMode = GUEST_MODE;
-  const user = mockUser;
+  const { isAuthenticated, user: authUser, signOut } = useAuth();
+
+  const user = authUser
+    ? { name: authUser.name ?? authUser.email, email: authUser.email }
+    : { name: "User", email: "" };
   const displayName = user.name;
-  const initials = user.name.slice(0, 2).toUpperCase();
+  const initials = displayName.slice(0, 2).toUpperCase();
 
   return {
-    guestMode,
+    guestMode: !isAuthenticated,
     user,
     displayName,
     initials,
+    signOut: isAuthenticated ? signOut : undefined,
   };
 };

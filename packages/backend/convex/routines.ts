@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
+import { resolveTenantId } from "./lib/auth";
 
 // Schedule validator (reusable)
 const scheduleValidator = v.object({
@@ -63,7 +63,7 @@ export const create = mutation({
     color: v.string(),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const { machineToken: _, ...rest } = args;
     const now = Date.now();
     return await ctx.db.insert("routines", {
@@ -93,7 +93,7 @@ export const update = mutation({
     enabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     const { routineId, machineToken: _, ...updates } = args;
 
     // Filter out undefined values
@@ -115,7 +115,7 @@ export const remove = mutation({
     routineId: v.id("routines"),
   },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     await ctx.db.delete(args.routineId);
   },
 });
@@ -127,7 +127,7 @@ export const trigger = mutation({
     routineId: v.id("routines"),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const routine = await ctx.db.get(args.routineId);
     if (!routine) {
       throw new Error("Routine not found");

@@ -19,7 +19,9 @@
     "./types": {
       "types": "./convex/types.ts",
       "default": "./convex/types.ts"
-    }
+    },
+    "./dev-jwks/jwks.json": "./convex/dev-jwks/jwks.json",
+    "./dev-jwks/private.pem": "./convex/dev-jwks/private.pem"
   },
   "scripts": {
     "dev": "convex dev",

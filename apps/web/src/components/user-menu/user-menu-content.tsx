@@ -25,6 +25,7 @@ export interface UserMenuContentProps {
   side?: "top" | "bottom" | "left" | "right";
   sideOffset?: number;
   className?: string;
+  onSignOut?: () => void;
 }
 
 export const UserMenuContent = ({
@@ -36,6 +37,7 @@ export const UserMenuContent = ({
   side,
   sideOffset = 4,
   className,
+  onSignOut,
 }: UserMenuContentProps) => {
   const { theme, setTheme } = useTheme();
 
@@ -108,7 +110,7 @@ export const UserMenuContent = ({
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
-      <DropdownMenuItem>
+      <DropdownMenuItem onClick={onSignOut}>
         <LogOut />
         Log out
       </DropdownMenuItem>

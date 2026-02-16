@@ -1,0 +1,12 @@
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "n": "vZCt9CZYsmRKdjm8K1jhkn_iOHTweYcA1yls5ZtgB_cCgkAleuVP3OWBmSrs4sf748LZ_OUxcmh9FKKheH8P1fODrzf6HZuHWCU-byiERyRVwDpm8B6iF7DDf0ZuBFnaRJD5CKfAerqNDf1lqrq7cvTuLjGItgVGZrOB_cCMViVkIH7OMvmjgkjBIS9uLU8FS6AtoIg3nyawoDYHiLedBRWQxEbcUZicfK3YeGxMqyglhfArmduI2yCf_JtiteyE0qNla_pGWyyTkNA-PjqYBanKCAMhWL3Xbx8Gnm7UP3R2HfODPBe-H3ShgzZmkPC7VBv12_lngD5CCKqL7wz_ww",
+      "e": "AQAB",
+      "kid": "clawe-dev-key",
+      "alg": "RS256",
+      "use": "sig"
+    }
+  ]
+}

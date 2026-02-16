@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
-import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
+import { resolveTenantId } from "./lib/auth";
 
 // List all tasks with optional filters
 export const list = query({
@@ -210,7 +210,7 @@ export const create = mutation({
     createdBySessionKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
 
     // Find assignee if provided
@@ -299,7 +299,7 @@ export const updateStatus = mutation({
     bySessionKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("Task not found");
@@ -384,7 +384,7 @@ export const approve = mutation({
     humanAuthor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("Task not found");
@@ -445,7 +445,7 @@ export const requestChanges = mutation({
     humanAuthor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("Task not found");
@@ -505,7 +505,7 @@ export const assign = mutation({
     bySessionKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("Task not found");
@@ -578,7 +578,7 @@ export const addComment = mutation({
     humanAuthor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
 
     let fromAgentId = undefined;
@@ -633,7 +633,7 @@ export const addSubtask = mutation({
     assigneeSessionKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
 
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("Task not found");
@@ -689,7 +689,7 @@ export const updateSubtask = mutation({
     bySessionKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("Task not found");
@@ -795,7 +795,7 @@ export const update = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     const { machineToken, taskId, ...updates } = args;
     const filteredUpdates = Object.fromEntries(
       Object.entries(updates).filter(([, value]) => value !== undefined),
@@ -824,7 +824,7 @@ export const createFromDashboard = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
 
     // Find Clawe (main leader) to attribute the task creation
@@ -883,7 +883,7 @@ export const createWithPlan = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
 
     // Resolve creator
@@ -1003,7 +1003,7 @@ export const remove = mutation({
     taskId: v.id("tasks"),
   },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
 
     // Also delete related messages
     const messages = await ctx.db

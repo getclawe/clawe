@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { Montserrat, Space_Grotesk } from "next/font/google";
 import "@clawe/ui/globals.css";
 import "./globals.css";
+import { AuthProvider } from "@/providers/auth-provider";
 import { ConvexClientProvider } from "@/providers/convex-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -41,17 +42,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${spaceGrotesk.variable}`}
       >
         <QueryProvider>
-          <ConvexClientProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-              <Toaster />
-            </ThemeProvider>
-          </ConvexClientProvider>
+          <AuthProvider>
+            <ConvexClientProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+                <Toaster />
+              </ThemeProvider>
+            </ConvexClientProvider>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

@@ -8,7 +8,7 @@ import {
 import { useUserMenu } from "@/hooks/use-user-menu";
 
 export const SetupUserMenu = () => {
-  const { guestMode, user, displayName, initials } = useUserMenu();
+  const { guestMode, user, displayName, initials, signOut } = useUserMenu();
 
   return (
     <DropdownMenu>
@@ -30,6 +30,7 @@ export const SetupUserMenu = () => {
         align="end"
         sideOffset={8}
         className="w-64"
+        onSignOut={signOut}
       />
     </DropdownMenu>
   );

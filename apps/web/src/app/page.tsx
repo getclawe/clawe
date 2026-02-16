@@ -1,24 +1,39 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@clawe/backend";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function Home() {
   const router = useRouter();
-  const isOnboardingComplete = useQuery(api.tenants.isOnboardingComplete, {});
+  const { isAuthenticated } = useAuth();
+  const getOrCreateUser = useMutation(api.users.getOrCreateFromAuth);
+  const [userReady, setUserReady] = useState(false);
+
+  // Ensure user record exists before querying tenant data
+  useEffect(() => {
+    if (!isAuthenticated || userReady) return;
+    getOrCreateUser()
+      .then(() => setUserReady(true))
+      .catch(() => setUserReady(true));
+  }, [isAuthenticated, userReady, getOrCreateUser]);
+
+  const isOnboardingComplete = useQuery(
+    api.tenants.isOnboardingComplete,
+    isAuthenticated && userReady ? {} : "skip",
+  );
 
   useEffect(() => {
-    // Wait for query to load
-    if (isOnboardingComplete === undefined) return;
+    if (!userReady || isOnboardingComplete === undefined) return;
 
     if (isOnboardingComplete) {
       router.replace("/board");
     } else {
       router.replace("/setup");
     }
-  }, [isOnboardingComplete, router]);
+  }, [isOnboardingComplete, userReady, router]);
 
   return (
     <div className="flex min-h-svh items-center justify-center">

@@ -9,7 +9,7 @@
     "debug": "dotenv -e .env -- turbo run debug",
     "dev:web": "dotenv -e .env -- turbo run dev --filter=web",
     "convex:dev": "dotenv -e .env -- turbo run dev --filter=@clawe/backend",
-    "convex:deploy": "dotenv -e .env -- turbo run deploy --filter=@clawe/backend",
+    "convex:deploy": "dotenv -e .env -- ./scripts/convex-deploy.sh",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,css,json}\"",

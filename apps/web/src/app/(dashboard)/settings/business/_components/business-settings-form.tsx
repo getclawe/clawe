@@ -60,7 +60,6 @@ export const BusinessSettingsForm = () => {
           targetAudience: targetAudience || undefined,
           tone: tone || undefined,
         },
-        approved: true,
       });
       setIsDirty(false);
     } finally {

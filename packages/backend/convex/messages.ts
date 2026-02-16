@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
+import { resolveTenantId } from "./lib/auth";
 
 // List messages for a task
 export const listForTask = query({
@@ -132,7 +132,7 @@ export const create = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const { machineToken: _, ...rest } = args;
     const now = Date.now();
 
@@ -171,7 +171,7 @@ export const create = mutation({
 export const remove = mutation({
   args: { id: v.id("messages"), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     await ctx.db.delete(args.id);
   },
 });

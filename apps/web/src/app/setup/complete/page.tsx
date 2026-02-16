@@ -20,7 +20,7 @@ export default function CompletePage() {
   const handleFinish = async () => {
     setIsCompleting(true);
     try {
-      await completeOnboarding();
+      await completeOnboarding({});
       router.push("/board");
     } catch (error) {
       console.error("Failed to complete onboarding:", error);

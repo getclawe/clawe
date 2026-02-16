@@ -55,7 +55,6 @@ export const GET = async (request: Request) => {
       description: context.description,
       favicon: context.favicon,
       metadata: context.metadata,
-      approved: context.approved,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -103,7 +102,6 @@ export const POST = async (request: Request) => {
       description: body.description,
       favicon: body.favicon,
       metadata: body.metadata,
-      approved: body.approved,
     });
 
     return NextResponse.json({

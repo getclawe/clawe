@@ -40,11 +40,15 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+!packages/backend/convex/dev-jwks/*.pem
 
 # Claude Code local settings (personal permissions)
 .claude/settings.local.json
 
 convex/_generated
+
+# auth.config.ts is committed as the NextAuth version (default for local dev).
+# scripts/convex-deploy.sh overwrites it for cloud deployments.
 
 # Local data directory (Clawe config)
 .data/

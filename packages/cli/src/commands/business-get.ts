@@ -22,7 +22,6 @@ export async function businessGet(): Promise<void> {
         description: context.description,
         favicon: context.favicon,
         metadata: context.metadata,
-        approved: context.approved,
       },
       null,
       2,

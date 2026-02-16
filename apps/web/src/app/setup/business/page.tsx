@@ -18,7 +18,7 @@ export default function BusinessPage() {
 
   // Real-time subscription - auto-updates when CLI saves
   const businessContext = useQuery(api.businessContext.get, {});
-  const canContinue = businessContext?.approved === true;
+  const canContinue = businessContext !== null && businessContext !== undefined;
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">

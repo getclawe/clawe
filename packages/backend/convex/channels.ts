@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
+import { resolveTenantId } from "./lib/auth";
 
 export const list = query({
   args: { machineToken: v.optional(v.string()) },
@@ -38,7 +38,7 @@ export const upsert = mutation({
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const { machineToken: _, ...rest } = args;
 
     const existing = await ctx.db
@@ -74,7 +74,7 @@ export const disconnect = mutation({
     type: v.string(),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
 
     const existing = await ctx.db
       .query("channels")

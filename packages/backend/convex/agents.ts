@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
+import { resolveTenantId } from "./lib/auth";
 
 const agentStatusValidator = v.union(v.literal("online"), v.literal("offline"));
 
@@ -93,7 +93,7 @@ export const upsert = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const { machineToken: _, ...rest } = args;
     const now = Date.now();
 
@@ -139,7 +139,7 @@ export const create = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const { machineToken: _, ...rest } = args;
     const now = Date.now();
     return await ctx.db.insert("agents", {
@@ -164,7 +164,7 @@ export const updateStatus = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     await ctx.db.patch(args.id, {
       status: args.status,
       updatedAt: Date.now(),
@@ -176,7 +176,7 @@ export const updateStatus = mutation({
 export const heartbeat = mutation({
   args: { sessionKey: v.string(), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
 
     const agents = await ctx.db
@@ -222,7 +222,7 @@ export const setCurrentTask = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const agents = await ctx.db
       .query("agents")
       .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
@@ -248,7 +248,7 @@ export const setActivity = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const agents = await ctx.db
       .query("agents")
       .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
@@ -278,7 +278,7 @@ export const update = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     const { id, machineToken: _, ...updates } = args;
     const filteredUpdates = Object.fromEntries(
       Object.entries(updates).filter(([, value]) => value !== undefined),
@@ -294,7 +294,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("agents"), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     await ctx.db.delete(args.id);
   },
 });

@@ -9,7 +9,6 @@ export type BusinessSetOptions = {
   description?: string;
   favicon?: string;
   metadata?: string; // JSON string
-  approve?: boolean;
   removeBootstrap?: boolean;
 };
 
@@ -48,14 +47,9 @@ export async function businessSet(
           tone?: string;
         }
       | undefined,
-    approved: options.approve ?? false,
   });
 
   console.log(`Business context saved (id: ${id})`);
-
-  if (options.approve) {
-    console.log("Business context approved.");
-  }
 
   // Remove BOOTSTRAP.md if requested
   if (options.removeBootstrap) {

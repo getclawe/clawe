@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
-import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
+import { resolveTenantId } from "./lib/auth";
 
 // Generate upload URL for file storage
 export const generateUploadUrl = action({
@@ -100,7 +100,7 @@ export const create = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const { machineToken: _, ...rest } = args;
     const now = Date.now();
 
@@ -153,7 +153,7 @@ export const registerDeliverable = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const { machineToken: _, ...rest } = args;
     const now = Date.now();
 
@@ -204,7 +204,7 @@ export const update = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     const { id, machineToken: _, ...updates } = args;
     const filteredUpdates = Object.fromEntries(
       Object.entries(updates).filter(([, value]) => value !== undefined),
@@ -221,7 +221,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("documents"), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     await ctx.db.delete(args.id);
   },
 });

@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { resolveTenantId, resolveTenantIdMut } from "./lib/auth";
+import { resolveTenantId } from "./lib/auth";
 
 // Get undelivered notifications for an agent (by session key)
 export const getUndelivered = query({
@@ -98,7 +98,7 @@ export const markDelivered = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantIdMut(ctx, args);
+    await resolveTenantId(ctx, args);
     const now = Date.now();
 
     for (const id of args.notificationIds) {
@@ -129,7 +129,7 @@ export const send = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
     const targetKey = args.targetSessionKey;
 
@@ -200,7 +200,7 @@ export const sendToMany = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
     const notificationIds: string[] = [];
 
@@ -247,7 +247,7 @@ export const sendToMany = mutation({
 export const clearAll = mutation({
   args: { sessionKey: v.string(), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
 
     const agents = await ctx.db
       .query("agents")

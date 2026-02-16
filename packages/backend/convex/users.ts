@@ -19,19 +19,41 @@ export const getOrCreateFromAuth = mutation({
       .withIndex("by_email", (q) => q.eq("email", email))
       .first();
 
-    if (existing) {
-      return existing;
+    const now = Date.now();
+
+    let user = existing;
+    if (!user) {
+      const userId = await ctx.db.insert("users", {
+        email,
+        name: identity.name ?? undefined,
+        createdAt: now,
+        updatedAt: now,
+      });
+      user = (await ctx.db.get(userId))!;
     }
 
-    const now = Date.now();
-    const userId = await ctx.db.insert("users", {
-      email,
-      name: identity.name ?? undefined,
-      createdAt: now,
-      updatedAt: now,
-    });
+    // Ensure account + membership exist
+    const membership = await ctx.db
+      .query("accountMembers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
 
-    return (await ctx.db.get(userId))!;
+    if (!membership) {
+      const accountId = await ctx.db.insert("accounts", {
+        name: user.name ? `${user.name}'s Account` : undefined,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      await ctx.db.insert("accountMembers", {
+        userId: user._id,
+        accountId,
+        role: "owner",
+        createdAt: now,
+      });
+    }
+
+    return user;
   },
 });
 

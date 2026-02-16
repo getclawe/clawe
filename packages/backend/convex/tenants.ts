@@ -1,11 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import {
-  getUser,
-  resolveTenantId,
-  resolveTenantIdMut,
-  validateWatcherToken,
-} from "./lib/auth";
+import { getUser, resolveTenantId, validateWatcherToken } from "./lib/auth";
 
 const DEFAULT_TIMEZONE = "America/New_York";
 
@@ -26,7 +21,7 @@ export const setTimezone = mutation({
     timezone: v.string(),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const tenant = await ctx.db.get(tenantId);
     if (!tenant) {
       throw new Error("Tenant not found");
@@ -42,13 +37,19 @@ export const setTimezone = mutation({
   },
 });
 
-// Check if onboarding is complete for the current tenant
+// Check if onboarding is complete for the current tenant.
+// Returns false for new users who don't have a tenant yet.
 export const isOnboardingComplete = query({
   args: { machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantId(ctx, args);
-    const tenant = await ctx.db.get(tenantId);
-    return tenant?.settings?.onboardingComplete === true;
+    try {
+      const tenantId = await resolveTenantId(ctx, args);
+      const tenant = await ctx.db.get(tenantId);
+      return tenant?.settings?.onboardingComplete === true;
+    } catch {
+      // New user with no tenant — not onboarded
+      return false;
+    }
   },
 });
 
@@ -56,7 +57,7 @@ export const isOnboardingComplete = query({
 export const completeOnboarding = mutation({
   args: { machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const tenant = await ctx.db.get(tenantId);
     if (!tenant) {
       throw new Error("Tenant not found");
@@ -159,7 +160,7 @@ export const setAnthropicKey = mutation({
     apiKey: v.string(),
   },
   handler: async (ctx, args) => {
-    const tenantId = await resolveTenantIdMut(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const tenant = await ctx.db.get(tenantId);
     if (!tenant) {
       throw new Error("Tenant not found");

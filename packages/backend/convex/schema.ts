@@ -241,8 +241,6 @@ export default defineSchema({
         tone: v.optional(v.string()),
       }),
     ),
-    approved: v.boolean(),
-    approvedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_tenant", ["tenantId"]),

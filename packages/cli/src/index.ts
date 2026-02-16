@@ -88,7 +88,6 @@ Business Context:
       --description <desc>              Business description
       --favicon <url>                   Favicon URL
       --metadata <json>                 Additional metadata as JSON
-      --approve                         Mark as approved
       --remove-bootstrap                Remove BOOTSTRAP.md after saving
 
   Note: Only Clawe should use business:set. Other agents can read
@@ -360,7 +359,7 @@ async function main(): Promise<void> {
         const url = positionalArgs[0];
         if (!url) {
           console.error(
-            "Usage: clawe business:set <url> [--name <n>] [--description <d>] [--approve] [--remove-bootstrap]",
+            "Usage: clawe business:set <url> [--name <n>] [--description <d>] [--remove-bootstrap]",
           );
           process.exit(1);
         }
@@ -369,7 +368,6 @@ async function main(): Promise<void> {
           description: options.description,
           favicon: options.favicon,
           metadata: options.metadata,
-          approve: options.approve === "true",
           removeBootstrap: options["remove-bootstrap"] === "true",
         });
         break;
