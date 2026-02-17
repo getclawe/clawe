@@ -1,6 +1,5 @@
-import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { getUser } from "./lib/auth";
+import { getUser, ensureAccountForUser } from "./lib/auth";
 
 /**
  * Get or create an account for the current authenticated user.
@@ -12,33 +11,7 @@ export const getOrCreateForUser = mutation({
   args: {},
   handler: async (ctx) => {
     const user = await getUser(ctx);
-
-    // Check for existing account membership
-    const membership = await ctx.db
-      .query("accountMembers")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .first();
-
-    if (membership) {
-      return (await ctx.db.get(membership.accountId))!;
-    }
-
-    // Create new account + membership
-    const now = Date.now();
-    const accountId = await ctx.db.insert("accounts", {
-      name: user.name ? `${user.name}'s Account` : undefined,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    await ctx.db.insert("accountMembers", {
-      userId: user._id,
-      accountId,
-      role: "owner",
-      createdAt: now,
-    });
-
-    return (await ctx.db.get(accountId))!;
+    return ensureAccountForUser(ctx, user);
   },
 });
 
@@ -69,7 +42,7 @@ export const getForCurrentUser = query({
  * Returns false for new users who don't have an account yet.
  */
 export const isOnboardingComplete = query({
-  args: { machineToken: v.optional(v.string()) },
+  args: {},
   handler: async (ctx) => {
     try {
       const user = await getUser(ctx);
@@ -96,7 +69,7 @@ export const isOnboardingComplete = query({
  * Mark onboarding as complete for the current user's account.
  */
 export const completeOnboarding = mutation({
-  args: { machineToken: v.optional(v.string()) },
+  args: {},
   handler: async (ctx) => {
     const user = await getUser(ctx);
 

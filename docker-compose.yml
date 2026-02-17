@@ -43,8 +43,7 @@ services:
       dockerfile: apps/watcher/Dockerfile
     environment:
       - CONVEX_URL=${CONVEX_URL}
-      - SQUADHUB_URL=http://squadhub:18789
-      - SQUADHUB_TOKEN=${SQUADHUB_TOKEN}
+      - WATCHER_TOKEN=${WATCHER_TOKEN}
     depends_on:
       squadhub:
         condition: service_healthy

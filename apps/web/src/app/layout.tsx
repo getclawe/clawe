@@ -29,7 +29,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "Clawe",
-  description: "AI Marketing Agency assistant.",
+  description: "AI-powered multi-agent coordination system.",
 };
 
 export default function RootLayout({

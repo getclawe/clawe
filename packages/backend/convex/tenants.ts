@@ -1,6 +1,12 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { getUser, resolveTenantId, validateWatcherToken } from "./lib/auth";
+import {
+  ensureAccountForUser,
+  getUser,
+  getTenantIdFromJwt,
+  resolveTenantId,
+  validateWatcherToken,
+} from "./lib/auth";
 
 const DEFAULT_TIMEZONE = "America/New_York";
 
@@ -39,18 +45,25 @@ export const setTimezone = mutation({
 
 // Create a new tenant within an account
 export const create = mutation({
-  args: {
-    accountId: v.id("accounts"),
-  },
-  handler: async (ctx, args) => {
+  args: {},
+  handler: async (ctx) => {
+    const user = await getUser(ctx);
+    const account = await ensureAccountForUser(ctx, user);
+
+    // Idempotent: return existing tenant if one exists
+    const existing = await ctx.db
+      .query("tenants")
+      .withIndex("by_account", (q) => q.eq("accountId", account._id))
+      .first();
+    if (existing) return existing._id;
+
     const now = Date.now();
-    const tenantId = await ctx.db.insert("tenants", {
-      accountId: args.accountId,
+    return await ctx.db.insert("tenants", {
+      accountId: account._id,
       status: "provisioning",
       createdAt: now,
       updatedAt: now,
     });
-    return tenantId;
   },
 });
 
@@ -80,7 +93,6 @@ export const getForCurrentUser = query({
 // Update tenant provisioning status
 export const updateStatus = mutation({
   args: {
-    tenantId: v.id("tenants"),
     status: v.union(
       v.literal("provisioning"),
       v.literal("active"),
@@ -93,12 +105,13 @@ export const updateStatus = mutation({
     efsAccessPointId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const tenant = await ctx.db.get(args.tenantId);
+    const tenantId = await getTenantIdFromJwt(ctx);
+    const tenant = await ctx.db.get(tenantId);
     if (!tenant) {
       throw new Error("Tenant not found");
     }
 
-    await ctx.db.patch(args.tenantId, {
+    await ctx.db.patch(tenantId, {
       status: args.status,
       ...(args.squadhubUrl !== undefined && {
         squadhubUrl: args.squadhubUrl,

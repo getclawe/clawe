@@ -74,7 +74,9 @@ export default defineSchema({
     .index("by_tenant", ["tenantId"])
     .index("by_sessionKey", ["sessionKey"])
     .index("by_status", ["status"])
-    .index("by_lastSeen", ["lastSeen"]),
+    .index("by_lastSeen", ["lastSeen"])
+    .index("by_tenant_sessionKey", ["tenantId", "sessionKey"])
+    .index("by_tenant_status", ["tenantId", "status"]),
 
   // Tasks - Mission queue with full workflow support
   tasks: defineTable({
@@ -128,7 +130,8 @@ export default defineSchema({
   })
     .index("by_tenant", ["tenantId"])
     .index("by_status", ["status"])
-    .index("by_createdAt", ["createdAt"]),
+    .index("by_createdAt", ["createdAt"])
+    .index("by_tenant_status", ["tenantId", "status"]),
 
   // Messages - Task comments and agent communication
   messages: defineTable({
@@ -149,7 +152,9 @@ export default defineSchema({
     .index("by_tenant", ["tenantId"])
     .index("by_task", ["taskId"])
     .index("by_agent", ["fromAgentId"])
-    .index("by_created", ["createdAt"]),
+    .index("by_created", ["createdAt"])
+    .index("by_tenant_agent", ["tenantId", "fromAgentId"])
+    .index("by_tenant_task", ["tenantId", "taskId"]),
 
   // Notifications - Agent-to-agent coordination
   notifications: defineTable({
@@ -174,7 +179,13 @@ export default defineSchema({
     .index("by_tenant", ["tenantId"])
     .index("by_target_undelivered", ["targetAgentId", "delivered"])
     .index("by_target", ["targetAgentId"])
-    .index("by_createdAt", ["createdAt"]),
+    .index("by_createdAt", ["createdAt"])
+    .index("by_tenant_target", ["tenantId", "targetAgentId"])
+    .index("by_tenant_target_undelivered", [
+      "tenantId",
+      "targetAgentId",
+      "delivered",
+    ]),
 
   // Activities - Audit log / activity feed
   activities: defineTable({
@@ -188,6 +199,7 @@ export default defineSchema({
       v.literal("document_created"),
       v.literal("agent_heartbeat"),
       v.literal("notification_sent"),
+      v.literal("subtask_blocked"),
     ),
     agentId: v.optional(v.id("agents")),
     taskId: v.optional(v.id("tasks")),
@@ -199,7 +211,9 @@ export default defineSchema({
     .index("by_type", ["type"])
     .index("by_agent", ["agentId"])
     .index("by_task", ["taskId"])
-    .index("by_createdAt", ["createdAt"]),
+    .index("by_createdAt", ["createdAt"])
+    .index("by_tenant_task", ["tenantId", "taskId"])
+    .index("by_tenant_type", ["tenantId", "type"]),
 
   // Documents - Deliverables and file references
   documents: defineTable({
@@ -222,7 +236,9 @@ export default defineSchema({
     .index("by_tenant", ["tenantId"])
     .index("by_task", ["taskId"])
     .index("by_type", ["type"])
-    .index("by_agent", ["createdBy"]),
+    .index("by_agent", ["createdBy"])
+    .index("by_tenant_type", ["tenantId", "type"])
+    .index("by_tenant_task", ["tenantId", "taskId"]),
 
   // Business Context - Website/business info for agent context
   businessContext: defineTable({
@@ -250,7 +266,6 @@ export default defineSchema({
     tenantId: v.id("tenants"),
     type: v.string(),
     status: v.union(v.literal("connected"), v.literal("disconnected")),
-    accountId: v.optional(v.string()),
     connectedAt: v.optional(v.number()),
     metadata: v.optional(v.any()),
   })
@@ -293,5 +308,6 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_tenant", ["tenantId"])
-    .index("by_enabled", ["enabled"]),
+    .index("by_enabled", ["enabled"])
+    .index("by_tenant_enabled", ["tenantId", "enabled"]),
 });

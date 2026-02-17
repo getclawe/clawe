@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { resolveTenantId } from "./lib/auth";
+import { getAgentBySessionKey } from "./lib/helpers";
 
 // Get activity feed (most recent first)
 export const feed = query({
@@ -15,25 +16,32 @@ export const feed = query({
     const { machineToken: _, ...filters } = args;
     const limit = filters.limit ?? 50;
 
-    // Always query by tenant first, then filter in JS
-    const allActivities = await ctx.db
-      .query("activities")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .order("desc")
-      .collect();
-
     let activities;
 
     if (filters.taskId) {
-      activities = allActivities
-        .filter((a) => a.taskId === filters.taskId)
-        .slice(0, limit);
+      activities = await ctx.db
+        .query("activities")
+        .withIndex("by_tenant_task", (q) =>
+          q.eq("tenantId", tenantId).eq("taskId", filters.taskId),
+        )
+        .order("desc")
+        .take(limit);
     } else if (filters.agentId) {
+      // No compound index for agentId — filter in JS
+      const allActivities = await ctx.db
+        .query("activities")
+        .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+        .order("desc")
+        .collect();
       activities = allActivities
         .filter((a) => a.agentId === filters.agentId)
         .slice(0, limit);
     } else {
-      activities = allActivities.slice(0, limit);
+      activities = await ctx.db
+        .query("activities")
+        .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+        .order("desc")
+        .take(limit);
     }
 
     // Enrich with agent and task info
@@ -84,14 +92,13 @@ export const byType = query({
     const { machineToken: _, ...filters } = args;
     const limit = filters.limit ?? 50;
 
-    // Query by tenant first, then filter by type in JS
-    const allActivities = await ctx.db
+    return await ctx.db
       .query("activities")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .withIndex("by_tenant_type", (q) =>
+        q.eq("tenantId", tenantId).eq("type", filters.type),
+      )
       .order("desc")
-      .collect();
-
-    return allActivities.filter((a) => a.type === filters.type).slice(0, limit);
+      .take(limit);
   },
 });
 
@@ -156,11 +163,11 @@ export const logBySession = mutation({
     let agentId = undefined;
 
     if (fields.sessionKey) {
-      const sessionKey = fields.sessionKey;
-      const agent = await ctx.db
-        .query("agents")
-        .withIndex("by_sessionKey", (q) => q.eq("sessionKey", sessionKey))
-        .first();
+      const agent = await getAgentBySessionKey(
+        ctx,
+        tenantId,
+        fields.sessionKey,
+      );
       if (agent) {
         agentId = agent._id;
       }

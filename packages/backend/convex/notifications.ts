@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { resolveTenantId } from "./lib/auth";
+import { getAgentBySessionKey } from "./lib/helpers";
 
 // Get undelivered notifications for an agent (by session key)
 export const getUndelivered = query({
@@ -9,11 +10,7 @@ export const getUndelivered = query({
     const tenantId = await resolveTenantId(ctx, args);
 
     // Find the agent within this tenant
-    const agents = await ctx.db
-      .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .collect();
-    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
+    const agent = await getAgentBySessionKey(ctx, tenantId, args.sessionKey);
 
     if (!agent) {
       return [];
@@ -22,8 +19,11 @@ export const getUndelivered = query({
     // Get undelivered notifications
     const notifications = await ctx.db
       .query("notifications")
-      .withIndex("by_target_undelivered", (q) =>
-        q.eq("targetAgentId", agent._id).eq("delivered", false),
+      .withIndex("by_tenant_target_undelivered", (q) =>
+        q
+          .eq("tenantId", tenantId)
+          .eq("targetAgentId", agent._id)
+          .eq("delivered", false),
       )
       .collect();
 
@@ -68,11 +68,7 @@ export const getForAgent = query({
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
 
-    const agents = await ctx.db
-      .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .collect();
-    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
+    const agent = await getAgentBySessionKey(ctx, tenantId, args.sessionKey);
 
     if (!agent) {
       return [];
@@ -80,7 +76,9 @@ export const getForAgent = query({
 
     let query = ctx.db
       .query("notifications")
-      .withIndex("by_target", (q) => q.eq("targetAgentId", agent._id))
+      .withIndex("by_tenant_target", (q) =>
+        q.eq("tenantId", tenantId).eq("targetAgentId", agent._id),
+      )
       .order("desc");
 
     const notifications = args.limit
@@ -98,10 +96,14 @@ export const markDelivered = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantId(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
 
     for (const id of args.notificationIds) {
+      const notification = await ctx.db.get(id);
+      if (!notification || notification.tenantId !== tenantId) {
+        throw new Error("Notification not found");
+      }
       await ctx.db.patch(id, {
         delivered: true,
         deliveredAt: now,
@@ -131,14 +133,13 @@ export const send = mutation({
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
-    const targetKey = args.targetSessionKey;
 
     // Find target agent within this tenant
-    const agents = await ctx.db
-      .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .collect();
-    const targetAgent = agents.find((a) => a.sessionKey === targetKey);
+    const targetAgent = await getAgentBySessionKey(
+      ctx,
+      tenantId,
+      args.targetSessionKey,
+    );
 
     if (!targetAgent) {
       throw new Error(`Target agent not found: ${args.targetSessionKey}`);
@@ -147,8 +148,10 @@ export const send = mutation({
     // Find source agent if provided
     let sourceAgentId = undefined;
     if (args.sourceSessionKey) {
-      const sourceAgent = agents.find(
-        (a) => a.sessionKey === args.sourceSessionKey,
+      const sourceAgent = await getAgentBySessionKey(
+        ctx,
+        tenantId,
+        args.sourceSessionKey,
       );
       if (sourceAgent) {
         sourceAgentId = sourceAgent._id;
@@ -249,11 +252,7 @@ export const clearAll = mutation({
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
 
-    const agents = await ctx.db
-      .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .collect();
-    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
+    const agent = await getAgentBySessionKey(ctx, tenantId, args.sessionKey);
 
     if (!agent) {
       return 0;
@@ -261,8 +260,11 @@ export const clearAll = mutation({
 
     const notifications = await ctx.db
       .query("notifications")
-      .withIndex("by_target_undelivered", (q) =>
-        q.eq("targetAgentId", agent._id).eq("delivered", false),
+      .withIndex("by_tenant_target_undelivered", (q) =>
+        q
+          .eq("tenantId", tenantId)
+          .eq("targetAgentId", agent._id)
+          .eq("delivered", false),
       )
       .collect();
 

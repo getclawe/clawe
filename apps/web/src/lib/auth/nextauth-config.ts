@@ -45,7 +45,7 @@ if (process.env.AUTO_LOGIN_EMAIL) {
         email: { label: "Email", type: "email" },
       },
       authorize: async (credentials) => {
-        const email = credentials.email as string;
+        const email = String(credentials.email ?? "");
         if (!email) return null;
         return { id: email, email, name: email.split("@")[0] };
       },
@@ -61,9 +61,9 @@ const nextAuth = NextAuth({
       if (!token) return "";
       const privateKey = await getPrivateKey();
       return new SignJWT({
-        sub: token.email as string,
-        email: token.email as string,
-        name: token.name as string,
+        sub: String(token.email ?? ""),
+        email: String(token.email ?? ""),
+        name: String(token.name ?? ""),
       })
         .setProtectedHeader({ alg: "RS256", kid: "clawe-dev-key" })
         .setIssuer(ISSUER)
@@ -91,8 +91,8 @@ const nextAuth = NextAuth({
       return token;
     },
     session({ session, token }) {
-      if (token.email) session.user.email = token.email as string;
-      if (token.name) session.user.name = token.name as string;
+      if (token.email) session.user.email = String(token.email);
+      if (token.name) session.user.name = String(token.name);
       return session;
     },
   },

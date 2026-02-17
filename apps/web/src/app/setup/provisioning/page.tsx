@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@clawe/backend";
@@ -39,6 +39,19 @@ export default function ProvisioningPage() {
     }
   }, [tenant?.status, isOnboardingComplete, router]);
 
+  const provision = useCallback(async () => {
+    setError(null);
+    try {
+      await apiClient.post("/api/tenant/provision");
+      // Convex subscription will reactively update `tenant` → redirect fires
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "An unexpected error occurred";
+      setError(message);
+      provisioningRef.current = false;
+    }
+  }, [apiClient]);
+
   // Trigger provisioning when no active tenant
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -51,21 +64,7 @@ export default function ProvisioningPage() {
 
     provisioningRef.current = true;
     provision();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, tenant]);
-
-  const provision = async () => {
-    setError(null);
-    try {
-      await apiClient.post("/api/tenant/provision");
-      // Convex subscription will reactively update `tenant` → redirect fires
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "An unexpected error occurred";
-      setError(message);
-      provisioningRef.current = false;
-    }
-  };
+  }, [isAuthenticated, tenant, provision]);
 
   if (error) {
     return (

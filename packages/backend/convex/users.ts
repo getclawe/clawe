@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { ensureAccountForUser } from "./lib/auth";
 
 export const getOrCreateFromAuth = mutation({
   args: {},
@@ -29,29 +30,13 @@ export const getOrCreateFromAuth = mutation({
         createdAt: now,
         updatedAt: now,
       });
-      user = (await ctx.db.get(userId))!;
+      const created = await ctx.db.get(userId);
+      if (!created) throw new Error("Failed to create user");
+      user = created;
     }
 
     // Ensure account + membership exist
-    const membership = await ctx.db
-      .query("accountMembers")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .first();
-
-    if (!membership) {
-      const accountId = await ctx.db.insert("accounts", {
-        name: user.name ? `${user.name}'s Account` : undefined,
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      await ctx.db.insert("accountMembers", {
-        userId: user._id,
-        accountId,
-        role: "owner",
-        createdAt: now,
-      });
-    }
+    await ensureAccountForUser(ctx, user);
 
     return user;
   },

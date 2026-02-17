@@ -21,9 +21,12 @@ export const machineToken = process.env.SQUADHUB_TOKEN || "";
  * Inject machineToken into Convex function args for tenant scoping.
  * All tenant-scoped Convex functions accept optional `machineToken`.
  */
-function injectToken<T>(args: T[]): T[] {
-  const base = (args[0] ?? {}) as Record<string, unknown>;
-  return [{ ...base, machineToken } as T];
+function injectToken(args: unknown[]): unknown[] {
+  const base =
+    args[0] != null && typeof args[0] === "object"
+      ? (args[0] as Record<string, unknown>)
+      : {};
+  return [{ ...base, machineToken }];
 }
 
 // Common MIME types by extension

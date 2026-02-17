@@ -8,6 +8,12 @@ export interface VerifiedToken extends JWTPayload {
   email?: string;
 }
 
+function isVerifiedToken(
+  payload: JWTPayload | Record<string, unknown>,
+): payload is VerifiedToken {
+  return typeof payload.sub === "string";
+}
+
 // ---------------------------------------------------------------------------
 // Cognito: use the official AWS verifier (handles JWKS caching, kid rotation,
 // token_use / client_id validation, and Cognito-specific claim checks).
@@ -39,8 +45,8 @@ async function verifyCognitoToken(
 ): Promise<VerifiedToken | null> {
   try {
     const payload = await getCognitoVerifier().verify(token);
-    if (!payload.sub) return null;
-    return payload as VerifiedToken;
+    if (!isVerifiedToken(payload)) return null;
+    return payload;
   } catch {
     return null;
   }
@@ -70,8 +76,8 @@ async function verifyNextAuthToken(
       audience: "convex",
     });
 
-    if (!payload.sub) return null;
-    return payload as VerifiedToken;
+    if (!isVerifiedToken(payload)) return null;
+    return payload;
   } catch {
     return null;
   }

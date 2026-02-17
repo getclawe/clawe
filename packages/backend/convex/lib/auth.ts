@@ -1,7 +1,8 @@
-import type { Id } from "../_generated/dataModel";
-import type { QueryCtx } from "../_generated/server";
+import type { Doc, Id } from "../_generated/dataModel";
+import type { MutationCtx, QueryCtx } from "../_generated/server";
 
 type ReadCtx = { db: QueryCtx["db"]; auth: QueryCtx["auth"] };
+type WriteCtx = { db: MutationCtx["db"] };
 
 /**
  * Browser path: get the current user from JWT identity.
@@ -126,4 +127,41 @@ export async function resolveTenantId(
   }
 
   return getTenantIdFromJwt(ctx);
+}
+
+/**
+ * Ensure an account and membership exist for the given user.
+ * Returns the existing or newly created account.
+ */
+export async function ensureAccountForUser(
+  ctx: ReadCtx & WriteCtx,
+  user: Doc<"users">,
+): Promise<Doc<"accounts">> {
+  const membership = await ctx.db
+    .query("accountMembers")
+    .withIndex("by_user", (q) => q.eq("userId", user._id))
+    .first();
+
+  if (membership) {
+    const account = await ctx.db.get(membership.accountId);
+    if (account) return account;
+  }
+
+  const now = Date.now();
+  const accountId = await ctx.db.insert("accounts", {
+    name: user.name ? `${user.name}'s Account` : undefined,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  await ctx.db.insert("accountMembers", {
+    userId: user._id,
+    accountId,
+    role: "owner",
+    createdAt: now,
+  });
+
+  const account = await ctx.db.get(accountId);
+  if (!account) throw new Error("Failed to create account");
+  return account;
 }

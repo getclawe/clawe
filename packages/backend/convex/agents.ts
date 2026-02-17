@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { resolveTenantId } from "./lib/auth";
+import { getAgentBySessionKey } from "./lib/helpers";
 
 const agentStatusValidator = v.union(v.literal("online"), v.literal("offline"));
 
@@ -20,8 +21,10 @@ export const list = query({
 export const get = query({
   args: { id: v.id("agents"), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    await resolveTenantId(ctx, args);
-    return await ctx.db.get(args.id);
+    const tenantId = await resolveTenantId(ctx, args);
+    const agent = await ctx.db.get(args.id);
+    if (!agent || agent.tenantId !== tenantId) return null;
+    return agent;
   },
 });
 
@@ -30,11 +33,7 @@ export const getBySessionKey = query({
   args: { sessionKey: v.string(), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
-    const agents = await ctx.db
-      .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .collect();
-    return agents.find((a) => a.sessionKey === args.sessionKey) ?? null;
+    return await getAgentBySessionKey(ctx, tenantId, args.sessionKey);
   },
 });
 
@@ -43,11 +42,12 @@ export const listByStatus = query({
   args: { status: agentStatusValidator, machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
-    const agents = await ctx.db
+    return await ctx.db
       .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .withIndex("by_tenant_status", (q) =>
+        q.eq("tenantId", tenantId).eq("status", args.status),
+      )
       .collect();
-    return agents.filter((a) => a.status === args.status);
   },
 });
 
@@ -97,11 +97,7 @@ export const upsert = mutation({
     const { machineToken: _, ...rest } = args;
     const now = Date.now();
 
-    const agents = await ctx.db
-      .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .collect();
-    const existing = agents.find((a) => a.sessionKey === rest.sessionKey);
+    const existing = await getAgentBySessionKey(ctx, tenantId, rest.sessionKey);
 
     if (existing) {
       await ctx.db.patch(existing._id, {
@@ -164,7 +160,11 @@ export const updateStatus = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantId(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
+    const agent = await ctx.db.get(args.id);
+    if (!agent || agent.tenantId !== tenantId) {
+      throw new Error("Not found");
+    }
     await ctx.db.patch(args.id, {
       status: args.status,
       updatedAt: Date.now(),
@@ -179,11 +179,7 @@ export const heartbeat = mutation({
     const tenantId = await resolveTenantId(ctx, args);
     const now = Date.now();
 
-    const agents = await ctx.db
-      .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .collect();
-    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
+    const agent = await getAgentBySessionKey(ctx, tenantId, args.sessionKey);
 
     if (!agent) {
       throw new Error(`Agent not found: ${args.sessionKey}`);
@@ -223,11 +219,7 @@ export const setCurrentTask = mutation({
   },
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
-    const agents = await ctx.db
-      .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .collect();
-    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
+    const agent = await getAgentBySessionKey(ctx, tenantId, args.sessionKey);
 
     if (!agent) {
       throw new Error(`Agent not found: ${args.sessionKey}`);
@@ -249,11 +241,7 @@ export const setActivity = mutation({
   },
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
-    const agents = await ctx.db
-      .query("agents")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
-      .collect();
-    const agent = agents.find((a) => a.sessionKey === args.sessionKey);
+    const agent = await getAgentBySessionKey(ctx, tenantId, args.sessionKey);
 
     if (!agent) {
       throw new Error(`Agent not found: ${args.sessionKey}`);
@@ -278,7 +266,11 @@ export const update = mutation({
     machineToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantId(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
+    const agent = await ctx.db.get(args.id);
+    if (!agent || agent.tenantId !== tenantId) {
+      throw new Error("Not found");
+    }
     const { id, machineToken: _, ...updates } = args;
     const filteredUpdates = Object.fromEntries(
       Object.entries(updates).filter(([, value]) => value !== undefined),
@@ -294,7 +286,11 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("agents"), machineToken: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    await resolveTenantId(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
+    const agent = await ctx.db.get(args.id);
+    if (!agent || agent.tenantId !== tenantId) {
+      throw new Error("Not found");
+    }
     await ctx.db.delete(args.id);
   },
 });

@@ -22,7 +22,7 @@ import { setupTenant } from "@/lib/squadhub/setup";
  * 5. Run app-level setup (agents, crons, routines)
  * 6. Return { ok: true, tenantId }
  */
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
   if (!convexUrl) {
     return NextResponse.json(
@@ -68,9 +68,7 @@ export async function POST(request: NextRequest) {
       // Create tenant record (or use existing non-active one)
       const tenantIdToProvision = existingTenant
         ? existingTenant._id
-        : await convex.mutation(api.tenants.create, {
-            accountId: account._id,
-          });
+        : await convex.mutation(api.tenants.create, {});
 
       // Provision infrastructure (dev: reads env vars)
       const provisionResult = await provisioner.provision({
@@ -81,7 +79,6 @@ export async function POST(request: NextRequest) {
 
       // Update tenant with connection details
       await convex.mutation(api.tenants.updateStatus, {
-        tenantId: tenantIdToProvision,
         status: "active",
         squadhubUrl: provisionResult.squadhubUrl,
         squadhubToken: provisionResult.squadhubToken,
@@ -125,7 +122,7 @@ export async function POST(request: NextRequest) {
     // 6. Return result
     return NextResponse.json({
       ok: result.errors.length === 0,
-      tenantId: tenant?._id,
+      tenantId: tenant._id,
       agents: result.agents,
       crons: result.crons,
       routines: result.routines,
@@ -135,4 +132,4 @@ export async function POST(request: NextRequest) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
+};

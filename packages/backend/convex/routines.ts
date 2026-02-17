@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { resolveTenantId } from "./lib/auth";
+import { getAgentBySessionKey } from "./lib/helpers";
 
 // Schedule validator (reusable)
 const scheduleValidator = v.object({
@@ -28,15 +29,20 @@ export const list = query({
   },
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
-    const routines = await ctx.db
+
+    if (args.enabledOnly) {
+      return await ctx.db
+        .query("routines")
+        .withIndex("by_tenant_enabled", (q) =>
+          q.eq("tenantId", tenantId).eq("enabled", true),
+        )
+        .collect();
+    }
+
+    return await ctx.db
       .query("routines")
       .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
       .collect();
-
-    if (args.enabledOnly) {
-      return routines.filter((r) => r.enabled);
-    }
-    return routines;
   },
 });
 
@@ -47,8 +53,10 @@ export const get = query({
     routineId: v.id("routines"),
   },
   handler: async (ctx, args) => {
-    await resolveTenantId(ctx, args);
-    return await ctx.db.get(args.routineId);
+    const tenantId = await resolveTenantId(ctx, args);
+    const routine = await ctx.db.get(args.routineId);
+    if (!routine || routine.tenantId !== tenantId) return null;
+    return routine;
   },
 });
 
@@ -93,7 +101,10 @@ export const update = mutation({
     enabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await resolveTenantId(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
+    const routine = await ctx.db.get(args.routineId);
+    if (!routine || routine.tenantId !== tenantId) throw new Error("Not found");
+
     const { routineId, machineToken: _, ...updates } = args;
 
     // Filter out undefined values
@@ -115,7 +126,9 @@ export const remove = mutation({
     routineId: v.id("routines"),
   },
   handler: async (ctx, args) => {
-    await resolveTenantId(ctx, args);
+    const tenantId = await resolveTenantId(ctx, args);
+    const routine = await ctx.db.get(args.routineId);
+    if (!routine || routine.tenantId !== tenantId) throw new Error("Not found");
     await ctx.db.delete(args.routineId);
   },
 });
@@ -129,27 +142,36 @@ export const trigger = mutation({
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
     const routine = await ctx.db.get(args.routineId);
-    if (!routine) {
+    if (!routine || routine.tenantId !== tenantId) {
       throw new Error("Routine not found");
     }
 
     // Find Clawe (main leader) to attribute the task creation
-    const clawe = await ctx.db
-      .query("agents")
-      .withIndex("by_sessionKey", (q) => q.eq("sessionKey", "agent:main:main"))
-      .first();
+    const clawe = await getAgentBySessionKey(ctx, tenantId, "agent:main:main");
 
     const now = Date.now();
 
-    // Deduplicate: skip if an active task with the same title already exists
-    const existingTasks = await ctx.db
-      .query("tasks")
-      .withIndex("by_createdAt")
-      .collect();
-    const activeStatuses = ["inbox", "assigned", "in_progress", "review"];
-    const duplicate = existingTasks.find(
-      (t) => t.title === routine.title && activeStatuses.includes(t.status),
-    );
+    // Deduplicate: skip if an active task with the same title already exists (within this tenant)
+    const activeStatuses = [
+      "inbox",
+      "assigned",
+      "in_progress",
+      "review",
+    ] as const;
+    let duplicate = null;
+    for (const status of activeStatuses) {
+      const match = await ctx.db
+        .query("tasks")
+        .withIndex("by_tenant_status", (q) =>
+          q.eq("tenantId", tenantId).eq("status", status),
+        )
+        .filter((q) => q.eq(q.field("title"), routine.title))
+        .first();
+      if (match) {
+        duplicate = match;
+        break;
+      }
+    }
     if (duplicate) {
       // Already an active task for this routine — skip creation
       await ctx.db.patch(args.routineId, {
@@ -215,18 +237,18 @@ export const getDueRoutines = query({
     const { currentTimestamp, dayOfWeek, hour, minute } = args;
 
     // Get all enabled routines for this tenant
-    const routines = await ctx.db
+    const enabledRoutines = await ctx.db
       .query("routines")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .withIndex("by_tenant_enabled", (q) =>
+        q.eq("tenantId", tenantId).eq("enabled", true),
+      )
       .collect();
-
-    const enabledRoutines = routines.filter((r) => r.enabled);
 
     // Current time as minutes since midnight (in user's timezone)
     const currentMinuteOfDay = hour * 60 + minute;
 
     const dueRoutines: Array<{
-      _id: (typeof routines)[0]["_id"];
+      _id: (typeof enabledRoutines)[0]["_id"];
       title: string;
       cycleStart: number;
     }> = [];
