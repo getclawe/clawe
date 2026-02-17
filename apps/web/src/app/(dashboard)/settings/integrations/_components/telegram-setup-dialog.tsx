@@ -93,7 +93,7 @@ export const TelegramSetupDialog = ({
       await upsertChannel({
         type: "telegram",
         status: "connected",
-        accountId: botUsername ?? undefined,
+        metadata: { botUsername: botUsername ?? undefined },
       });
       setStep("success");
       toast.success("Telegram connected successfully");

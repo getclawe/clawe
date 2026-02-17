@@ -34,7 +34,6 @@ export const upsert = mutation({
     machineToken: v.optional(v.string()),
     type: v.string(),
     status: v.union(v.literal("connected"), v.literal("disconnected")),
-    accountId: v.optional(v.string()),
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
@@ -51,7 +50,6 @@ export const upsert = mutation({
     const data = {
       type: rest.type,
       status: rest.status,
-      accountId: rest.accountId,
       metadata: rest.metadata,
       connectedAt: rest.status === "connected" ? Date.now() : undefined,
     };

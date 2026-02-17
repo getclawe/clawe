@@ -101,7 +101,7 @@ export default function TelegramPage() {
       await upsertChannel({
         type: "telegram",
         status: "connected",
-        accountId: botUsername ?? undefined,
+        metadata: { botUsername: botUsername ?? undefined },
       });
       setStep("success");
     },

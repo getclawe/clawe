@@ -55,7 +55,7 @@ export const TelegramIntegrationCard = () => {
         <h3 className="mb-1 font-medium">Telegram</h3>
         <p className="text-muted-foreground mb-4 text-sm">
           {isConnected
-            ? `@${channel.accountId}`
+            ? `@${channel.metadata?.botUsername ?? "connected"}`
             : "Receive and respond to messages"}
         </p>
 
@@ -104,12 +104,12 @@ export const TelegramIntegrationCard = () => {
       <TelegramDisconnectDialog
         open={disconnectOpen}
         onOpenChange={setDisconnectOpen}
-        botUsername={channel?.accountId}
+        botUsername={channel?.metadata?.botUsername}
       />
       <TelegramRemoveDialog
         open={removeOpen}
         onOpenChange={setRemoveOpen}
-        botUsername={channel?.accountId}
+        botUsername={channel?.metadata?.botUsername}
       />
     </>
   );
