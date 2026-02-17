@@ -1,3 +1,4 @@
+import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getUser } from "./lib/auth";
 
@@ -60,5 +61,62 @@ export const getForCurrentUser = query({
     }
 
     return await ctx.db.get(membership.accountId);
+  },
+});
+
+/**
+ * Check if onboarding is complete for the current user's account.
+ * Returns false for new users who don't have an account yet.
+ */
+export const isOnboardingComplete = query({
+  args: { machineToken: v.optional(v.string()) },
+  handler: async (ctx) => {
+    try {
+      const user = await getUser(ctx);
+
+      const membership = await ctx.db
+        .query("accountMembers")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .first();
+
+      if (!membership) {
+        return false;
+      }
+
+      const account = await ctx.db.get(membership.accountId);
+      return account?.onboardingComplete === true;
+    } catch {
+      // New user with no account — not onboarded
+      return false;
+    }
+  },
+});
+
+/**
+ * Mark onboarding as complete for the current user's account.
+ */
+export const completeOnboarding = mutation({
+  args: { machineToken: v.optional(v.string()) },
+  handler: async (ctx) => {
+    const user = await getUser(ctx);
+
+    const membership = await ctx.db
+      .query("accountMembers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
+
+    if (!membership) {
+      throw new Error("No account found for user");
+    }
+
+    const account = await ctx.db.get(membership.accountId);
+    if (!account) {
+      throw new Error("Account not found");
+    }
+
+    await ctx.db.patch(membership.accountId, {
+      onboardingComplete: true,
+      updatedAt: Date.now(),
+    });
   },
 });

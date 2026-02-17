@@ -24,7 +24,9 @@ export async function loadPlugins(): Promise<void> {
   if (pluginsLoaded) return;
 
   try {
-    const external = await import("@clawe/cloud-plugins");
+    const external = await import(
+      /* webpackIgnore: true */ "@clawe/cloud-plugins"
+    );
     plugins = external.register();
     pluginsLoaded = true;
   } catch {

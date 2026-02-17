@@ -13,9 +13,18 @@ const CONVEX_URL = process.env.CONVEX_URL;
 /**
  * Machine token read from SQUADHUB_TOKEN env var.
  * Used to identify which tenant this CLI session belongs to.
- * TODO (Phase 2.6): Inject into all Convex calls for tenant scoping.
+ * Automatically injected into all Convex calls for tenant scoping.
  */
 export const machineToken = process.env.SQUADHUB_TOKEN || "";
+
+/**
+ * Inject machineToken into Convex function args for tenant scoping.
+ * All tenant-scoped Convex functions accept optional `machineToken`.
+ */
+function injectToken<T>(args: T[]): T[] {
+  const base = (args[0] ?? {}) as Record<string, unknown>;
+  return [{ ...base, machineToken } as T];
+}
 
 // Common MIME types by extension
 const MIME_TYPES: Record<string, string> = {
@@ -49,35 +58,35 @@ const client = new ConvexHttpClient(CONVEX_URL);
 
 /**
  * Wrapper around ConvexHttpClient.query.
- * TODO (Phase 2.6): Inject machineToken into args for tenant scoping.
+ * Injects machineToken for tenant scoping.
  */
 export function query<F extends FunctionReference<"query">>(
   fn: F,
   ...args: OptionalRestArgs<F>
 ): Promise<FunctionReturnType<F>> {
-  return client.query(fn, ...args);
+  return client.query(fn, ...(injectToken(args) as OptionalRestArgs<F>));
 }
 
 /**
  * Wrapper around ConvexHttpClient.mutation.
- * TODO (Phase 2.6): Inject machineToken into args for tenant scoping.
+ * Injects machineToken for tenant scoping.
  */
 export function mutation<F extends FunctionReference<"mutation">>(
   fn: F,
   ...args: OptionalRestArgs<F>
 ): Promise<FunctionReturnType<F>> {
-  return client.mutation(fn, ...args);
+  return client.mutation(fn, ...(injectToken(args) as OptionalRestArgs<F>));
 }
 
 /**
  * Wrapper around ConvexHttpClient.action.
- * TODO (Phase 2.6): Inject machineToken into args for tenant scoping.
+ * Injects machineToken for tenant scoping.
  */
 export function action<F extends FunctionReference<"action">>(
   fn: F,
   ...args: OptionalRestArgs<F>
 ): Promise<FunctionReturnType<F>> {
-  return client.action(fn, ...args);
+  return client.action(fn, ...(injectToken(args) as OptionalRestArgs<F>));
 }
 
 /**

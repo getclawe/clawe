@@ -37,42 +37,6 @@ export const setTimezone = mutation({
   },
 });
 
-// Check if onboarding is complete for the current tenant.
-// Returns false for new users who don't have a tenant yet.
-export const isOnboardingComplete = query({
-  args: { machineToken: v.optional(v.string()) },
-  handler: async (ctx, args) => {
-    try {
-      const tenantId = await resolveTenantId(ctx, args);
-      const tenant = await ctx.db.get(tenantId);
-      return tenant?.settings?.onboardingComplete === true;
-    } catch {
-      // New user with no tenant — not onboarded
-      return false;
-    }
-  },
-});
-
-// Mark onboarding as complete for the current tenant
-export const completeOnboarding = mutation({
-  args: { machineToken: v.optional(v.string()) },
-  handler: async (ctx, args) => {
-    const tenantId = await resolveTenantId(ctx, args);
-    const tenant = await ctx.db.get(tenantId);
-    if (!tenant) {
-      throw new Error("Tenant not found");
-    }
-
-    await ctx.db.patch(tenantId, {
-      settings: {
-        ...tenant.settings,
-        onboardingComplete: true,
-      },
-      updatedAt: Date.now(),
-    });
-  },
-});
-
 // Create a new tenant within an account
 export const create = mutation({
   args: {

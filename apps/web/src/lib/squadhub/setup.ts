@@ -213,7 +213,7 @@ async function seedRoutines(convex: ConvexHttpClient): Promise<{
  * 3. Setup heartbeat cron jobs on squadhub
  * 4. Seed default routines in Convex
  */
-export async function provisionTenant(
+export async function setupTenant(
   connection: SquadhubConnection,
   convexUrl: string,
   authToken?: string,

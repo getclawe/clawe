@@ -20,20 +20,37 @@ export default function Home() {
       .catch(() => setUserReady(true));
   }, [isAuthenticated, userReady, getOrCreateUser]);
 
+  const tenant = useQuery(
+    api.tenants.getForCurrentUser,
+    isAuthenticated && userReady ? {} : "skip",
+  );
+
   const isOnboardingComplete = useQuery(
-    api.tenants.isOnboardingComplete,
+    api.accounts.isOnboardingComplete,
     isAuthenticated && userReady ? {} : "skip",
   );
 
   useEffect(() => {
-    if (!userReady || isOnboardingComplete === undefined) return;
+    if (!userReady) return;
+
+    // Still loading tenant query
+    if (tenant === undefined) return;
+
+    // No tenant or not active → provisioning
+    if (tenant === null || tenant.status !== "active") {
+      router.replace("/setup/provisioning");
+      return;
+    }
+
+    // Tenant is active — wait for onboarding check
+    if (isOnboardingComplete === undefined) return;
 
     if (isOnboardingComplete) {
       router.replace("/board");
     } else {
       router.replace("/setup");
     }
-  }, [isOnboardingComplete, userReady, router]);
+  }, [tenant, isOnboardingComplete, userReady, router]);
 
   return (
     <div className="flex min-h-svh items-center justify-center">

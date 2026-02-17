@@ -13,6 +13,7 @@ export default defineSchema({
   // Accounts - Billing/organizational unit (one auto-created per user on signup)
   accounts: defineTable({
     name: v.optional(v.string()),
+    onboardingComplete: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }),
@@ -45,7 +46,6 @@ export default defineSchema({
     settings: v.optional(
       v.object({
         timezone: v.optional(v.string()),
-        onboardingComplete: v.optional(v.boolean()),
       }),
     ),
     createdAt: v.number(),

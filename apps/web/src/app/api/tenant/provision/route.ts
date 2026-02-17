@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@clawe/backend";
 import { loadPlugins, getPlugin } from "@clawe/plugins";
-import { provisionTenant } from "@/lib/squadhub/provision";
+import { setupTenant } from "@/lib/squadhub/setup";
 
 /**
  * POST /api/tenant/provision
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
             accountId: account._id,
           });
 
-      // Provision infrastructure (dev: reads env vars, cloud: creates AWS resources)
+      // Provision infrastructure (dev: reads env vars)
       const provisionResult = await provisioner.provision({
         tenantId: tenantIdToProvision,
         accountId: account._id,
@@ -97,16 +97,30 @@ export async function POST(request: NextRequest) {
     // Re-fetch tenant to get latest connection details
     const tenant = await convex.query(api.tenants.getForCurrentUser, {});
 
+    if (!tenant) {
+      return NextResponse.json(
+        { error: "Failed to retrieve tenant after provisioning" },
+        { status: 500 },
+      );
+    } else if (tenant.status !== "active") {
+      return NextResponse.json(
+        { error: `Tenant in unexpected status "${tenant.status}"` },
+        { status: 500 },
+      );
+    } else if (!tenant.squadhubUrl || !tenant.squadhubToken) {
+      return NextResponse.json(
+        { error: "Tenant missing Squadhub connection details" },
+        { status: 500 },
+      );
+    }
+
     // 5. Run app-level setup (agents, crons, routines)
     const connection = {
-      squadhubUrl:
-        tenant?.squadhubUrl ??
-        process.env.SQUADHUB_URL ??
-        "http://localhost:18790",
-      squadhubToken: tenant?.squadhubToken ?? process.env.SQUADHUB_TOKEN ?? "",
+      squadhubUrl: tenant.squadhubUrl,
+      squadhubToken: tenant.squadhubToken,
     };
 
-    const result = await provisionTenant(connection, convexUrl, authToken);
+    const result = await setupTenant(connection, convexUrl, authToken);
 
     // 6. Return result
     return NextResponse.json({
