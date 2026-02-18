@@ -6,6 +6,7 @@ import type {
   SessionsListResult,
   GatewayHealthResult,
   TelegramProbeResult,
+  PairingRequest,
 } from "./types";
 
 export type SquadhubConnection = {
@@ -196,6 +197,31 @@ export async function sessionsSend(
     sessionKey,
     message,
     timeoutSeconds: timeoutSeconds ?? 10,
+  });
+}
+
+// Pairing (via clawe_pairing plugin tool)
+export async function listPairingRequests(
+  connection: SquadhubConnection,
+  channel: string,
+): Promise<ToolResult<{ ok: boolean; requests: PairingRequest[] }>> {
+  return invokeTool(connection, "clawe_pairing", undefined, {
+    action: "list",
+    channel,
+  });
+}
+
+export async function approvePairingCode(
+  connection: SquadhubConnection,
+  channel: string,
+  code: string,
+): Promise<
+  ToolResult<{ ok: boolean; id?: string; approved?: boolean; error?: string }>
+> {
+  return invokeTool(connection, "clawe_pairing", undefined, {
+    action: "approve",
+    channel,
+    code,
   });
 }
 

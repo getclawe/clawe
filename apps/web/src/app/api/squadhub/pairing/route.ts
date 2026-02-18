@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
-  listChannelPairingRequests,
-  approveChannelPairingCode,
+  listPairingRequests,
+  approvePairingCode,
 } from "@clawe/shared/squadhub";
 import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
 import { getConnection } from "@/lib/squadhub/connection";
+
+function parseToolText(result: {
+  result: { content: Array<{ text?: string }> };
+}): Record<string, unknown> {
+  const text = result.result.content[0]?.text;
+  if (!text) return {};
+  return JSON.parse(text) as Record<string, unknown>;
+}
 
 // GET /api/squadhub/pairing?channel=telegram - List pending pairing requests
 export async function GET(request: NextRequest) {
@@ -13,14 +21,14 @@ export async function GET(request: NextRequest) {
   if (auth.error) return auth.error;
 
   const channel = request.nextUrl.searchParams.get("channel") || "telegram";
-
-  const result = await listChannelPairingRequests(channel);
+  const result = await listPairingRequests(getConnection(auth.tenant), channel);
 
   if (!result.ok) {
     return NextResponse.json({ error: result.error.message }, { status: 500 });
   }
 
-  return NextResponse.json(result.result);
+  const data = parseToolText(result);
+  return NextResponse.json({ requests: data.requests ?? [] });
 }
 
 // POST /api/squadhub/pairing - Approve a pairing code
@@ -39,18 +47,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Code is required" }, { status: 400 });
     }
 
-    const result = await approveChannelPairingCode(
+    const result = await approvePairingCode(
       getConnection(auth.tenant),
       channel,
       code,
     );
 
     if (!result.ok) {
-      const status = result.error.type === "not_found" ? 404 : 500;
-      return NextResponse.json({ error: result.error.message }, { status });
+      return NextResponse.json(
+        { error: result.error.message },
+        { status: 500 },
+      );
     }
 
-    return NextResponse.json(result.result);
+    const data = parseToolText(result);
+    if (!data.ok) {
+      return NextResponse.json(
+        { error: data.error || "Failed to approve pairing code" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({ id: data.id, approved: data.approved });
   } catch {
     return NextResponse.json(
       { error: "Failed to approve pairing code" },

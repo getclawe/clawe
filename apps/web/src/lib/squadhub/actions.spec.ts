@@ -6,7 +6,7 @@ vi.mock("@clawe/shared/squadhub", () => ({
   getConfig: vi.fn(),
   saveTelegramBotToken: vi.fn(),
   probeTelegramToken: vi.fn(),
-  approveChannelPairingCode: vi.fn(),
+  approvePairingCode: vi.fn(),
 }));
 
 import {

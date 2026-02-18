@@ -11,6 +11,8 @@ export {
   sessionsSend,
   cronList,
   cronAdd,
+  listPairingRequests,
+  approvePairingCode,
 } from "./client";
 export type {
   SquadhubConnection,
@@ -30,12 +32,6 @@ export type {
 export { GatewayClient, createGatewayClient } from "./gateway-client";
 export type { GatewayClientOptions } from "./gateway-client";
 export { getSharedClient } from "./shared-client";
-
-// Pairing
-export {
-  listChannelPairingRequests,
-  approveChannelPairingCode,
-} from "./pairing";
 
 // Types
 export type {

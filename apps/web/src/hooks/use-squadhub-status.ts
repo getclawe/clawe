@@ -22,8 +22,8 @@ export const useSquadhubStatus = () => {
         return false;
       }
     },
-    refetchInterval: 30000, // Check every 30 seconds
-    staleTime: 10000,
+    refetchInterval: 10000, // Check every 10 seconds
+    staleTime: 5000,
     retry: false,
   });
 

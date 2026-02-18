@@ -15,6 +15,7 @@ import type * as businessContext from "../businessContext.js";
 import type * as channels from "../channels.js";
 import type * as documents from "../documents.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_helpers from "../lib/helpers.js";
 import type * as messages from "../messages.js";
 import type * as notifications from "../notifications.js";
 import type * as routines from "../routines.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   channels: typeof channels;
   documents: typeof documents;
   "lib/auth": typeof lib_auth;
+  "lib/helpers": typeof lib_helpers;
   messages: typeof messages;
   notifications: typeof notifications;
   routines: typeof routines;

@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g openclaw@latest
+RUN npm install -g openclaw@2026.2.17
 
 RUN mkdir -p /data/config /data/workspace
 
@@ -23,6 +23,11 @@ RUN chmod +x /opt/clawe/scripts/*.sh
 # Copy bundled CLI (single file with all deps included)
 COPY packages/cli/dist/clawe.js /usr/local/bin/clawe
 RUN chmod +x /usr/local/bin/clawe
+
+# Copy Clawe OpenClaw extensions (plugin bundle + manifest)
+COPY packages/squadhub-extensions/dist/index.js /opt/clawe/extensions/clawe/dist/index.js
+COPY packages/squadhub-extensions/openclaw.plugin.json /opt/clawe/extensions/clawe/openclaw.plugin.json
+COPY packages/squadhub-extensions/package.json /opt/clawe/extensions/clawe/package.json
 
 ENV OPENCLAW_STATE_DIR=/data/config
 ENV OPENCLAW_PORT=18789

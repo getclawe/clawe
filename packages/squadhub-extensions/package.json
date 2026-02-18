@@ -1,0 +1,28 @@
+{
+  "name": "@clawe/squadhub-extensions",
+  "version": "0.1.0",
+  "description": "OpenClaw plugin extensions for Clawe squadhub",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "check-types": "tsc --noEmit"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  },
+  "devDependencies": {
+    "@clawe/typescript-config": "workspace:*",
+    "@sinclair/typebox": "^0.34.0",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.0"
+  },
+  "files": [
+    "dist",
+    "openclaw.plugin.json"
+  ]
+}

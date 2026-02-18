@@ -64,6 +64,11 @@
       }
     ]
   },
+  "plugins": {
+    "load": {
+      "paths": ["/opt/clawe/extensions/clawe"]
+    }
+  },
   "tools": {
     "agentToAgent": {
       "enabled": true,
@@ -96,6 +101,9 @@
     "auth": {
       "mode": "token",
       "token": "${OPENCLAW_TOKEN}"
+    },
+    "tools": {
+      "allow": ["gateway"]
     },
     "http": {
       "endpoints": {

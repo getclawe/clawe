@@ -62,8 +62,12 @@ node /opt/clawe/scripts/pair-device.js --watch &
 
 echo "==> Starting OpenClaw gateway on port $PORT..."
 
+# OpenClaw does a "full process restart" on certain config changes (e.g.
+# adding a Telegram channel).  It spawns a child process and the parent
+# exits.  In Docker, PID 1 exiting kills the container.  We rely on
+# Docker's restart policy (restart: unless-stopped) to handle this.
 exec openclaw gateway run \
     --port "$PORT" \
-    --bind 0.0.0.0 \
+    --bind lan \
     --token "$TOKEN" \
     --allow-unconfigured

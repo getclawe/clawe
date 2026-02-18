@@ -1,0 +1,8 @@
+{
+  "id": "squadhub-extensions",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
