@@ -1,7 +1,7 @@
 {
   "$schema": "https://v2-7-6.turborepo.dev/schema.json",
   "ui": "tui",
-  "globalEnv": ["ENVIRONMENT"],
+  "globalEnv": ["ENVIRONMENT", "CLAWE_EDITION"],
   "globalPassThroughEnv": [
     "CONVEX_URL",
     "ANTHROPIC_API_KEY",

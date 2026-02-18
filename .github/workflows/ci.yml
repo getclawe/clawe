@@ -13,6 +13,7 @@ concurrency:
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  CLAWE_EDITION: ${{ vars.CLAWE_EDITION || 'oss' }}
 
 jobs:
   ci:
