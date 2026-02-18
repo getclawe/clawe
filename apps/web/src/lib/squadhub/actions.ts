@@ -7,6 +7,7 @@ import {
   removeTelegramBotToken as removeTelegramBotTokenClient,
   probeTelegramToken,
   approvePairingCode as approvePairingCodeClient,
+  parseToolText,
 } from "@clawe/shared/squadhub";
 import { getConnection } from "./connection";
 
@@ -49,28 +50,19 @@ export async function approvePairingCode(
     };
   }
 
-  // Parse the tool's text response
-  const text = result.result.content[0]?.text;
-  if (!text) {
-    return {
-      ok: false as const,
-      error: { type: "parse_error", message: "Empty tool response" },
-    };
-  }
-
-  const data = JSON.parse(text) as {
+  const data = parseToolText<{
     ok: boolean;
     id?: string;
     approved?: boolean;
     error?: string;
-  };
+  }>(result);
 
-  if (!data.ok) {
+  if (!data?.ok) {
     return {
       ok: false as const,
       error: {
         type: "not_found",
-        message: data.error || "Invalid or expired pairing code",
+        message: data?.error || "Invalid or expired pairing code",
       },
     };
   }

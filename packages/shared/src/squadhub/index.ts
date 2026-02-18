@@ -13,6 +13,7 @@ export {
   cronAdd,
   listPairingRequests,
   approvePairingCode,
+  parseToolText,
 } from "./client";
 export type {
   SquadhubConnection,
@@ -37,7 +38,6 @@ export { getSharedClient } from "./shared-client";
 export type {
   AgentToolResult,
   ToolResult,
-  DirectResult,
   ConfigGetResult,
   ConfigPatchResult,
   Session,
@@ -46,8 +46,6 @@ export type {
   GatewayHealthResult,
   TelegramProbeResult,
   PairingRequest,
-  PairingListResult,
-  PairingApproveResult,
 } from "./types";
 
 // Gateway Types

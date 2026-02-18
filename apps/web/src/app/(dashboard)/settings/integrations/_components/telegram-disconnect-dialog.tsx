@@ -55,8 +55,8 @@ export const TelegramDisconnectDialog = ({
           <AlertDialogDescription>
             Your bot{" "}
             {botUsername && <span className="font-medium">@{botUsername}</span>}{" "}
-            will stop receiving messages. The bot token will remain saved and
-            you can reconnect anytime.
+            will stop receiving messages. You can reconnect anytime by adding a
+            new bot token.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

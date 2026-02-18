@@ -3,17 +3,10 @@ import type { NextRequest } from "next/server";
 import {
   listPairingRequests,
   approvePairingCode,
+  parseToolText,
 } from "@clawe/shared/squadhub";
 import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
 import { getConnection } from "@/lib/squadhub/connection";
-
-function parseToolText(result: {
-  result: { content: Array<{ text?: string }> };
-}): Record<string, unknown> {
-  const text = result.result.content[0]?.text;
-  if (!text) return {};
-  return JSON.parse(text) as Record<string, unknown>;
-}
 
 // GET /api/squadhub/pairing?channel=telegram - List pending pairing requests
 export async function GET(request: NextRequest) {
@@ -27,8 +20,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: result.error.message }, { status: 500 });
   }
 
-  const data = parseToolText(result);
-  return NextResponse.json({ requests: data.requests ?? [] });
+  const data = parseToolText<{ requests?: unknown[] }>(result);
+  return NextResponse.json({ requests: data?.requests ?? [] });
 }
 
 // POST /api/squadhub/pairing - Approve a pairing code
@@ -60,10 +53,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = parseToolText(result);
-    if (!data.ok) {
+    const data = parseToolText<{
+      ok: boolean;
+      id?: string;
+      approved?: boolean;
+      error?: string;
+    }>(result);
+
+    if (!data?.ok) {
       return NextResponse.json(
-        { error: data.error || "Failed to approve pairing code" },
+        { error: data?.error || "Failed to approve pairing code" },
         { status: 404 },
       );
     }

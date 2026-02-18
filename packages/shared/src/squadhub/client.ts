@@ -58,6 +58,23 @@ async function invokeTool<T>(
   }
 }
 
+/**
+ * Parse the text payload from a tool invoke result.
+ * Tool results wrap their data as JSON inside `content[0].text`.
+ */
+export function parseToolText<T = Record<string, unknown>>(
+  result: ToolResult<unknown>,
+): T | null {
+  if (!result.ok) return null;
+  const text = result.result.content[0]?.text;
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 export async function checkHealth(
   connection: SquadhubConnection,
 ): Promise<ToolResult<GatewayHealthResult>> {

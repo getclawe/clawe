@@ -14,11 +14,6 @@ export type ToolResult<T = unknown> =
   | { ok: true; result: AgentToolResult<T> }
   | { ok: false; error: { type: string; message: string } };
 
-// DirectResult for operations that don't go through squadhub tools
-export type DirectResult<T = unknown> =
-  | { ok: true; result: T }
-  | { ok: false; error: { type: string; message: string } };
-
 export type ConfigGetResult = {
   config: Record<string, unknown>;
   hash: string;
@@ -68,13 +63,4 @@ export type PairingRequest = {
   createdAt: string;
   lastSeenAt: string;
   meta?: Record<string, string>;
-};
-
-export type PairingListResult = {
-  requests: PairingRequest[];
-};
-
-export type PairingApproveResult = {
-  id: string;
-  approved: boolean;
 };
