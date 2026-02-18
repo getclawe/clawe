@@ -9,8 +9,9 @@ import type { Tenant } from "@clawe/backend/types";
 export function getConnection(tenant?: Tenant | null): SquadhubConnection {
   return {
     squadhubUrl:
-      tenant?.squadhubUrl || process.env.SQUADHUB_URL || "http://localhost:18790",
-    squadhubToken:
-      tenant?.squadhubToken || process.env.SQUADHUB_TOKEN || "",
+      tenant?.squadhubUrl ||
+      process.env.SQUADHUB_URL ||
+      "http://localhost:18790",
+    squadhubToken: tenant?.squadhubToken || process.env.SQUADHUB_TOKEN || "",
   };
 }
