@@ -20,6 +20,5 @@ export class DefaultSquadhubProvisioner implements SquadhubProvisioner {
     return { status: "active" };
   }
 
-  async deprovision(): Promise<void> {
-  }
+  async deprovision(): Promise<void> {}
 }
