@@ -10,10 +10,8 @@ import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
  * Dev: no-op. Cloud: forces new ECS task deployment.
  */
 export const POST = async (request: NextRequest) => {
-  const result = await getAuthenticatedTenant(request);
-  if ("error" in result) return result.error;
-
-  const { tenant } = result;
+  const { error, tenant } = await getAuthenticatedTenant(request);
+  if (error) return error;
 
   try {
     await loadPlugins();

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSharedClient } from "@clawe/shared/squadhub";
 import type { ChatHistoryResponse } from "@clawe/shared/squadhub";
+import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
 import { getConnection } from "@/lib/squadhub/connection";
 
 export const runtime = "nodejs";
@@ -10,6 +11,9 @@ export const dynamic = "force-dynamic";
  * GET /api/chat/history?sessionKey=xxx&limit=200
  */
 export async function GET(request: NextRequest) {
+  const auth = await getAuthenticatedTenant(request);
+  if (auth.error) return auth.error;
+
   const searchParams = request.nextUrl.searchParams;
   const sessionKey = searchParams.get("sessionKey");
   const limitParam = searchParams.get("limit");
@@ -30,7 +34,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const client = await getSharedClient(getConnection());
+    const client = await getSharedClient(getConnection(auth.tenant));
 
     const response = await client.request<ChatHistoryResponse>("chat.history", {
       sessionKey,

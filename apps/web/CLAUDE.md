@@ -61,17 +61,15 @@ const { data } = useQuery({
 
 ## Types
 
-Document types come from Convex. Use `Doc<"tableName">` from the generated types:
+Document types live in `packages/backend/convex/types.ts`. Import from `@clawe/backend/types`:
 
 ```tsx
-import type { Doc } from "@clawe/backend/server";
-
-type Task = Doc<"tasks">;
-type Agent = Doc<"agents">;
-type Message = Doc<"messages">;
+import type { Agent, Tenant } from "@clawe/backend/types";
 ```
 
-Or infer from query results (preferred when using the data directly).
+- If a type doesn't exist yet, add it to `types.ts` using `Doc<>`
+- Never use `Doc<>` outside of `types.ts`
+- Or infer from query results (preferred when using the data directly)
 
 **Environment variables:**
 

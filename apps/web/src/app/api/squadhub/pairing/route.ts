@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import {
   listChannelPairingRequests,
   approveChannelPairingCode,
 } from "@clawe/shared/squadhub";
+import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
 import { getConnection } from "@/lib/squadhub/connection";
 
 // GET /api/squadhub/pairing?channel=telegram - List pending pairing requests
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const channel = searchParams.get("channel") || "telegram";
+export async function GET(request: NextRequest) {
+  const auth = await getAuthenticatedTenant(request);
+  if (auth.error) return auth.error;
+
+  const channel = request.nextUrl.searchParams.get("channel") || "telegram";
 
   const result = await listChannelPairingRequests(channel);
 
@@ -20,7 +24,10 @@ export async function GET(request: Request) {
 }
 
 // POST /api/squadhub/pairing - Approve a pairing code
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const auth = await getAuthenticatedTenant(request);
+  if (auth.error) return auth.error;
+
   try {
     const body = await request.json();
     const { channel = "telegram", code } = body as {
@@ -33,7 +40,7 @@ export async function POST(request: Request) {
     }
 
     const result = await approveChannelPairingCode(
-      getConnection(),
+      getConnection(auth.tenant),
       channel,
       code,
     );

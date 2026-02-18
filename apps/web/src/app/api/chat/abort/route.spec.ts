@@ -2,6 +2,20 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 import { POST } from "./route";
 
+// Mock tenant auth
+vi.mock("@/lib/api/tenant-auth", () => ({
+  getAuthenticatedTenant: vi.fn(async () => ({
+    error: null,
+    convex: {},
+    tenant: {
+      _id: "test-tenant-id",
+      squadhubUrl: "http://localhost:18790",
+      squadhubToken: "test-token",
+      status: "active",
+    },
+  })),
+}));
+
 // Mock the shared client
 const mockRequest = vi.fn();
 

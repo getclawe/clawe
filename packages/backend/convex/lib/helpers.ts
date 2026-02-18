@@ -1,11 +1,12 @@
 import type { QueryCtx } from "../_generated/server";
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
+import type { Agent } from "../types";
 
 export async function getAgentBySessionKey(
   ctx: { db: QueryCtx["db"] },
   tenantId: Id<"tenants">,
   sessionKey: string,
-): Promise<Doc<"agents"> | null> {
+): Promise<Agent | null> {
   return await ctx.db
     .query("agents")
     .withIndex("by_tenant_sessionKey", (q) =>

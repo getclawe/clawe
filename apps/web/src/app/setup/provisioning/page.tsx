@@ -10,11 +10,15 @@ import { Spinner } from "@clawe/ui/components/spinner";
 import { useAuth } from "@/providers/auth-provider";
 import { useApiClient } from "@/hooks/use-api-client";
 
+const POLL_INTERVAL_MS = 3000;
+const DEFAULT_MESSAGE = "Setting up your workspace...";
+
 export default function ProvisioningPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const apiClient = useApiClient();
   const [error, setError] = useState<string | null>(null);
+  const [progressMessage, setProgressMessage] = useState(DEFAULT_MESSAGE);
   const provisioningRef = useRef(false);
 
   const tenant = useQuery(
@@ -39,8 +43,38 @@ export default function ProvisioningPage() {
     }
   }, [tenant?.status, isOnboardingComplete, router]);
 
+  // Poll provisioning status for progress messages
+  useEffect(() => {
+    if (tenant?.status !== "provisioning") return;
+
+    const poll = async () => {
+      try {
+        const { data } = await apiClient.get<{
+          status: "provisioning" | "active" | "error";
+          message?: string;
+        }>("/api/tenant/status");
+
+        if (data.message) {
+          setProgressMessage(data.message);
+        }
+
+        if (data.status === "error") {
+          setError(data.message ?? "Provisioning failed");
+          provisioningRef.current = false;
+        }
+      } catch {
+        // Polling errors are non-fatal — Convex subscription handles redirect
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [tenant?.status, apiClient]);
+
   const provision = useCallback(async () => {
     setError(null);
+    setProgressMessage(DEFAULT_MESSAGE);
     try {
       await apiClient.post("/api/tenant/provision");
       // Convex subscription will reactively update `tenant` → redirect fires
@@ -87,7 +121,7 @@ export default function ProvisioningPage() {
     <div className="flex flex-1 items-start justify-center pt-[20vh]">
       <div className="flex flex-col items-center gap-4">
         <Spinner className="h-8 w-8" />
-        <h2 className="text-lg font-semibold">Setting up your workspace...</h2>
+        <h2 className="text-lg font-semibold">{progressMessage}</h2>
         <p className="text-muted-foreground text-sm">
           This will only take a moment.
         </p>

@@ -1,5 +1,6 @@
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import type { User, Account } from "../types";
 
 type ReadCtx = { db: QueryCtx["db"]; auth: QueryCtx["auth"] };
 type WriteCtx = { db: MutationCtx["db"] };
@@ -135,8 +136,8 @@ export async function resolveTenantId(
  */
 export async function ensureAccountForUser(
   ctx: ReadCtx & WriteCtx,
-  user: Doc<"users">,
-): Promise<Doc<"accounts">> {
+  user: User,
+): Promise<Account> {
   const membership = await ctx.db
     .query("accountMembers")
     .withIndex("by_user", (q) => q.eq("userId", user._id))

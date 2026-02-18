@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSharedClient } from "@clawe/shared/squadhub";
+import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
 import { getConnection } from "@/lib/squadhub/connection";
 
 export const runtime = "nodejs";
@@ -15,6 +16,9 @@ type AbortRequestBody = {
  * Abort an in-progress chat generation.
  */
 export async function POST(request: NextRequest) {
+  const auth = await getAuthenticatedTenant(request);
+  if (auth.error) return auth.error;
+
   let body: AbortRequestBody;
 
   try {
@@ -33,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const client = await getSharedClient(getConnection());
+    const client = await getSharedClient(getConnection(auth.tenant));
 
     await client.request("chat.abort", {
       sessionKey,

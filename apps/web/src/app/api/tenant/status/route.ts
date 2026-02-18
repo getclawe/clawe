@@ -4,21 +4,22 @@ import { loadPlugins, getPlugin } from "@clawe/plugins";
 import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
 
 /**
- * DELETE /api/tenant/squadhub
+ * GET /api/tenant/status
  *
- * Destroy the current user's squadhub service permanently.
- * Dev: no-op. Cloud: deletes ECS service + EFS access point + CloudMap entry.
+ * Check provisioning status for the current user's tenant.
+ * Dev: always returns { status: "active" }.
+ * Cloud: returns real ECS provisioning status.
  */
-export const DELETE = async (request: NextRequest) => {
+export const GET = async (request: NextRequest) => {
   const { error, tenant } = await getAuthenticatedTenant(request);
   if (error) return error;
 
   try {
     await loadPlugins();
-    const lifecycle = getPlugin("squadhub-lifecycle");
-    await lifecycle.destroy(tenant._id);
+    const provisioner = getPlugin("squadhub-provisioner");
+    const status = await provisioner.getProvisioningStatus(tenant._id);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json(status);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });

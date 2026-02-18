@@ -1,5 +1,7 @@
+import type { NextRequest } from "next/server";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
 import { getConnection } from "@/lib/squadhub/connection";
 
 export const runtime = "nodejs";
@@ -7,10 +9,13 @@ export const dynamic = "force-dynamic";
 
 /**
  * POST /api/chat
- * Proxy chat requests to the squadhub's OpenAI-compatible endpoint.
+ * Proxy chat requests to the tenant's squadhub OpenAI-compatible endpoint.
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const auth = await getAuthenticatedTenant(request);
+    if (auth.error) return auth.error;
+
     const body = await request.json();
     const { messages, sessionKey } = body;
 
@@ -28,7 +33,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const { squadhubUrl, squadhubToken } = getConnection();
+    const { squadhubUrl, squadhubToken } = getConnection(auth.tenant);
 
     // Create OpenAI-compatible client pointing to squadhub gateway
     const squadhub = createOpenAI({

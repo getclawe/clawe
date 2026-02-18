@@ -1,5 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
 import { POST } from "./route";
+
+// Mock tenant auth
+vi.mock("@/lib/api/tenant-auth", () => ({
+  getAuthenticatedTenant: vi.fn(async () => ({
+    error: null,
+    convex: {},
+    tenant: {
+      _id: "test-tenant-id",
+      squadhubUrl: "http://localhost:18790",
+      squadhubToken: "test-token",
+      status: "active",
+    },
+  })),
+}));
 
 // Mock the AI SDK
 vi.mock("@ai-sdk/openai", () => ({
@@ -25,7 +40,7 @@ describe("POST /api/chat", () => {
   });
 
   it("returns 400 when sessionKey is missing", async () => {
-    const request = new Request("http://localhost/api/chat", {
+    const request = new NextRequest("http://localhost/api/chat", {
       method: "POST",
       body: JSON.stringify({ messages: [{ role: "user", content: "Hello" }] }),
     });
@@ -38,7 +53,7 @@ describe("POST /api/chat", () => {
   });
 
   it("returns 400 when messages is missing", async () => {
-    const request = new Request("http://localhost/api/chat", {
+    const request = new NextRequest("http://localhost/api/chat", {
       method: "POST",
       body: JSON.stringify({ sessionKey: "test-session" }),
     });
@@ -51,7 +66,7 @@ describe("POST /api/chat", () => {
   });
 
   it("returns stream response with valid request", async () => {
-    const request = new Request("http://localhost/api/chat", {
+    const request = new NextRequest("http://localhost/api/chat", {
       method: "POST",
       body: JSON.stringify({
         sessionKey: "test-session",
@@ -64,7 +79,7 @@ describe("POST /api/chat", () => {
   });
 
   it("returns 500 on invalid JSON", async () => {
-    const request = new Request("http://localhost/api/chat", {
+    const request = new NextRequest("http://localhost/api/chat", {
       method: "POST",
       body: "invalid json",
     });
