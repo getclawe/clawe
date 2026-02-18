@@ -51,7 +51,7 @@ describe("DefaultSquadhubProvisioner", () => {
 
   it("deprovision is a no-op", async () => {
     await expect(
-      provisioner.deprovision("test-tenant"),
+      provisioner.deprovision({ tenantId: "test-tenant" }),
     ).resolves.toBeUndefined();
   });
 });

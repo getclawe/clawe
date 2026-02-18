@@ -8,6 +8,7 @@ export type {
   ProvisionParams,
   ProvisionResult,
   ProvisioningStatus,
+  DeprovisionParams,
   SquadhubLifecycle,
   SquadhubStatus,
 } from "./interfaces";

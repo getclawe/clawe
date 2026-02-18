@@ -17,6 +17,12 @@ export interface ProvisioningStatus {
   message?: string;
 }
 
+export interface DeprovisionParams {
+  tenantId: string;
+  /** Metadata returned by provision() — contains resource IDs needed for cleanup. */
+  metadata?: Record<string, string>;
+}
+
 export interface SquadhubProvisioner {
   /** Create infrastructure for a new tenant and return connection details. */
   provision(params: ProvisionParams): Promise<ProvisionResult>;
@@ -25,5 +31,5 @@ export interface SquadhubProvisioner {
   getProvisioningStatus(tenantId: string): Promise<ProvisioningStatus>;
 
   /** Tear down all infrastructure for a tenant. */
-  deprovision(tenantId: string): Promise<void>;
+  deprovision(params: DeprovisionParams): Promise<void>;
 }
