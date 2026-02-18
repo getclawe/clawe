@@ -63,7 +63,7 @@ export const POST = async (request: NextRequest) => {
     } else {
       // 4. Create tenant + provision via plugin
       await loadPlugins();
-      const provisioner = getPlugin("provisioner");
+      const provisioner = getPlugin("squadhub-provisioner");
 
       // Create tenant record (or use existing non-active one)
       const tenantIdToProvision = existingTenant

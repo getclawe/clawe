@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { loadPlugins, hasPlugin, getPlugin } from "./registry";
-import { DevProvisioner } from "./defaults/provisioner";
-import { DevLifecycle } from "./defaults/lifecycle";
+import type { SquadhubProvisioner } from "./interfaces/squadhub-provisioner";
+import type { SquadhubLifecycle } from "./interfaces/squadhub-lifecycle";
+import { DefaultSquadhubProvisioner } from "./defaults/squadhub-provisioner";
+import { DefaultSquadhubLifecycle } from "./defaults/squadhub-lifecycle";
 
 describe("registry", () => {
   describe("loadPlugins", () => {
@@ -13,22 +15,22 @@ describe("registry", () => {
 
   describe("getPlugin", () => {
     it("returns dev provisioner by default", () => {
-      const provisioner = getPlugin("provisioner");
-      expect(provisioner).toBeInstanceOf(DevProvisioner);
+      const provisioner = getPlugin("squadhub-provisioner");
+      expect(provisioner).toBeInstanceOf(DefaultSquadhubProvisioner);
     });
 
     it("returns dev lifecycle by default", () => {
-      const lifecycle = getPlugin("lifecycle");
-      expect(lifecycle).toBeInstanceOf(DevLifecycle);
+      const lifecycle = getPlugin("squadhub-lifecycle");
+      expect(lifecycle).toBeInstanceOf(DefaultSquadhubLifecycle);
     });
   });
 });
 
-describe("DevProvisioner", () => {
-  let provisioner: DevProvisioner;
+describe("DefaultSquadhubProvisioner", () => {
+  let provisioner: SquadhubProvisioner;
 
   beforeEach(() => {
-    provisioner = new DevProvisioner();
+    provisioner = new DefaultSquadhubProvisioner();
   });
 
   it("provision returns env-based connection", async () => {
@@ -54,11 +56,11 @@ describe("DevProvisioner", () => {
   });
 });
 
-describe("DevLifecycle", () => {
-  let lifecycle: DevLifecycle;
+describe("DefaultSquadhubLifecycle", () => {
+  let lifecycle: SquadhubLifecycle;
 
   beforeEach(() => {
-    lifecycle = new DevLifecycle();
+    lifecycle = new DefaultSquadhubLifecycle();
   });
 
   it("restart is a no-op", async () => {

@@ -1,8 +1,8 @@
 export type {
-  TenantProvisioner,
+  SquadhubProvisioner,
   ProvisionParams,
   ProvisionResult,
   ProvisioningStatus,
-} from "./provisioner";
+} from "./squadhub-provisioner";
 
-export type { SquadhubLifecycle, SquadhubStatus } from "./lifecycle";
+export type { SquadhubLifecycle, SquadhubStatus } from "./squadhub-lifecycle";

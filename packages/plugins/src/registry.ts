@@ -1,16 +1,16 @@
-import type { TenantProvisioner } from "./interfaces/provisioner";
-import type { SquadhubLifecycle } from "./interfaces/lifecycle";
-import { DevProvisioner } from "./defaults/provisioner";
-import { DevLifecycle } from "./defaults/lifecycle";
+import type { SquadhubProvisioner } from "./interfaces/squadhub-provisioner";
+import type { SquadhubLifecycle } from "./interfaces/squadhub-lifecycle";
+import { DefaultSquadhubProvisioner } from "./defaults/squadhub-provisioner";
+import { DefaultSquadhubLifecycle } from "./defaults/squadhub-lifecycle";
 
 export interface PluginMap {
-  provisioner: TenantProvisioner;
-  lifecycle: SquadhubLifecycle;
+  "squadhub-provisioner": SquadhubProvisioner;
+  "squadhub-lifecycle": SquadhubLifecycle;
 }
 
 let plugins: PluginMap = {
-  provisioner: new DevProvisioner(),
-  lifecycle: new DevLifecycle(),
+  "squadhub-provisioner": new DefaultSquadhubProvisioner(),
+  "squadhub-lifecycle": new DefaultSquadhubLifecycle(),
 };
 
 let pluginsLoaded = false;

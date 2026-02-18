@@ -17,7 +17,7 @@ export interface ProvisioningStatus {
   message?: string;
 }
 
-export interface TenantProvisioner {
+export interface SquadhubProvisioner {
   /** Create infrastructure for a new tenant and return connection details. */
   provision(params: ProvisionParams): Promise<ProvisionResult>;
 

@@ -1,15 +1,14 @@
 import type {
-  TenantProvisioner,
+  SquadhubProvisioner,
   ProvisionResult,
   ProvisioningStatus,
-} from "../interfaces/provisioner";
+} from "../interfaces/squadhub-provisioner";
 
 /**
- * Dev/self-hosted provisioner.
- * Reads SQUADHUB_URL and SQUADHUB_TOKEN from environment variables.
- * Returns immediately — no infrastructure to create.
+ * Default squadhub provisioner — reads connection from environment variables.
+ * Override with a cloud implementation to provision real infrastructure.
  */
-export class DevProvisioner implements TenantProvisioner {
+export class DefaultSquadhubProvisioner implements SquadhubProvisioner {
   async provision(): Promise<ProvisionResult> {
     return {
       squadhubUrl: process.env.SQUADHUB_URL ?? "http://localhost:18790",
@@ -22,6 +21,5 @@ export class DevProvisioner implements TenantProvisioner {
   }
 
   async deprovision(): Promise<void> {
-    // No-op in dev — user manages squadhub via docker compose.
   }
 }

@@ -1,2 +1,2 @@
-export { DevProvisioner } from "./provisioner";
-export { DevLifecycle } from "./lifecycle";
+export { DefaultSquadhubProvisioner } from "./squadhub-provisioner";
+export { DefaultSquadhubLifecycle } from "./squadhub-lifecycle";

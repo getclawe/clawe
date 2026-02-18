@@ -4,7 +4,7 @@ export type { PluginMap } from "./registry";
 
 // Interfaces
 export type {
-  TenantProvisioner,
+  SquadhubProvisioner,
   ProvisionParams,
   ProvisionResult,
   ProvisioningStatus,
@@ -13,5 +13,5 @@ export type {
 } from "./interfaces";
 
 // Dev defaults (for testing and direct use)
-export { DevProvisioner } from "./defaults/provisioner";
-export { DevLifecycle } from "./defaults/lifecycle";
+export { DefaultSquadhubProvisioner } from "./defaults/squadhub-provisioner";
+export { DefaultSquadhubLifecycle } from "./defaults/squadhub-lifecycle";
