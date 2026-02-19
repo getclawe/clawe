@@ -6,6 +6,8 @@
 
 <div align="center">
 
+<p><em>Watch a demo</em></p>
+
 https://github.com/user-attachments/assets/d2f892d9-4c32-4c31-95e5-222d4ea87592
 
 </div>
