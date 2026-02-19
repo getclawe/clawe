@@ -1,5 +1,6 @@
 services:
   clawe:
+    image: ghcr.io/getclawe/clawe/web:latest
     build:
       context: .
       dockerfile: apps/web/Dockerfile
@@ -20,6 +21,7 @@ services:
     restart: unless-stopped
 
   squadhub:
+    image: ghcr.io/getclawe/clawe/squadhub:latest
     build:
       context: .
       dockerfile: docker/squadhub/Dockerfile
@@ -37,6 +39,7 @@ services:
     restart: unless-stopped
 
   watcher:
+    image: ghcr.io/getclawe/clawe/watcher:latest
     build:
       context: .
       dockerfile: apps/watcher/Dockerfile
