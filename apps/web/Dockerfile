@@ -6,7 +6,7 @@ WORKDIR /app
 FROM base AS pruner
 RUN npm install -g turbo@2
 COPY . .
-RUN turbo prune web --docker
+RUN turbo prune @clawe/web --docker
 
 # Install dependencies (cached unless package.json/lockfile changes)
 FROM base AS deps
