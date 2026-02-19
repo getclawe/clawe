@@ -19,7 +19,10 @@ export default function WelcomePage() {
   const router = useRouter();
   const { status, isLoading } = useSquadhubStatus();
 
-  const isOffline = !config.isCloud && !isLoading && status === "down";
+  const isOffline =
+    !config.isCloud &&
+    !isLoading &&
+    (status === "down" || status === "restarting");
 
   return (
     <div className="flex flex-1 flex-col">

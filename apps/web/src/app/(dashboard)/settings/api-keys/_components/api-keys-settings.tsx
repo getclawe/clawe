@@ -10,6 +10,7 @@ import { Label } from "@clawe/ui/components/label";
 import { Spinner } from "@clawe/ui/components/spinner";
 import { Skeleton } from "@clawe/ui/components/skeleton";
 import { CheckCircle2, Eye, EyeOff, Pencil } from "lucide-react";
+import { toast } from "sonner";
 import { loadPlugins, hasPlugin } from "@clawe/plugins";
 import { patchApiKeys } from "@/lib/squadhub/actions";
 import { useApiClient } from "@/hooks/use-api-client";
@@ -31,9 +32,6 @@ interface KeyRowProps {
   onValidate: () => void;
   onSave: () => void;
   isSaving: boolean;
-  saveSuccess: boolean;
-  saveError?: string;
-  isCloud: boolean;
 }
 
 const KeyRow = ({
@@ -52,9 +50,6 @@ const KeyRow = ({
   onValidate,
   onSave,
   isSaving,
-  saveSuccess,
-  saveError,
-  isCloud,
 }: KeyRowProps) => {
   const [showKey, setShowKey] = useState(false);
 
@@ -171,12 +166,6 @@ const KeyRow = ({
         >
           Cancel
         </Button>
-        {saveSuccess && (
-          <p className="text-sm text-green-600 dark:text-green-400">
-            {isCloud ? "Saved and applied" : "Saved and applied"}
-          </p>
-        )}
-        {saveError && <p className="text-destructive text-sm">{saveError}</p>}
       </div>
     </div>
   );
@@ -240,6 +229,10 @@ export const ApiKeysSettings = () => {
       setAnthropicKey("");
       setAnthropicValid(null);
       anthropicValidation.reset();
+      toast.success("Anthropic API key saved and applied");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to save Anthropic API key");
     },
   });
 
@@ -256,6 +249,10 @@ export const ApiKeysSettings = () => {
       setOpenaiKey("");
       setOpenaiValid(null);
       openaiValidation.reset();
+      toast.success("OpenAI API key saved and applied");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to save OpenAI API key");
     },
   });
 
@@ -302,11 +299,6 @@ export const ApiKeysSettings = () => {
           onValidate={() => anthropicValidation.mutate(anthropicKey)}
           onSave={() => anthropicSave.mutate(anthropicKey)}
           isSaving={anthropicSave.isPending}
-          saveSuccess={anthropicSave.isSuccess}
-          saveError={
-            anthropicSave.isError ? anthropicSave.error.message : undefined
-          }
-          isCloud={isCloud}
         />
 
         <KeyRow
@@ -337,9 +329,6 @@ export const ApiKeysSettings = () => {
           onValidate={() => openaiValidation.mutate(openaiKey)}
           onSave={() => openaiSave.mutate(openaiKey)}
           isSaving={openaiSave.isPending}
-          saveSuccess={openaiSave.isSuccess}
-          saveError={openaiSave.isError ? openaiSave.error.message : undefined}
-          isCloud={isCloud}
         />
       </div>
     </div>

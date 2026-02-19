@@ -8,6 +8,7 @@ import { Input } from "@clawe/ui/components/input";
 import { Label } from "@clawe/ui/components/label";
 import { Textarea } from "@clawe/ui/components/textarea";
 import { Spinner } from "@clawe/ui/components/spinner";
+import { toast } from "sonner";
 import { Globe, Building2, Users, Palette } from "lucide-react";
 
 export const BusinessSettingsForm = () => {
@@ -62,6 +63,9 @@ export const BusinessSettingsForm = () => {
         },
       });
       setIsDirty(false);
+      toast.success("Business settings saved");
+    } catch {
+      toast.error("Failed to save business settings");
     } finally {
       setIsSaving(false);
     }

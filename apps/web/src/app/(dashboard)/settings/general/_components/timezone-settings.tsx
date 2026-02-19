@@ -16,6 +16,7 @@ import {
   ComboboxEmpty,
 } from "@clawe/ui/components/combobox";
 import { Skeleton } from "@clawe/ui/components/skeleton";
+import { toast } from "sonner";
 
 export const TimezoneSettings = () => {
   const timezone = useQuery(api.tenants.getTimezone, {});
@@ -60,10 +61,15 @@ export const TimezoneSettings = () => {
     return <TimezoneSettingsSkeleton />;
   }
 
-  const handleTimezoneChange = (value: string | null) => {
+  const handleTimezoneChange = async (value: string | null) => {
     if (value) {
-      setTimezone({ timezone: value });
-      setSearch("");
+      try {
+        await setTimezone({ timezone: value });
+        setSearch("");
+        toast.success("Timezone updated");
+      } catch {
+        toast.error("Failed to update timezone");
+      }
     }
   };
 

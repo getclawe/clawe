@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
 import { useMutation as useConvexMutation } from "convex/react";
-import { toast } from "@clawe/ui/components/sonner";
+import { toast } from "sonner";
 import { Copy, Check, AlertTriangle } from "lucide-react";
 import { api } from "@clawe/backend";
 import { Button } from "@clawe/ui/components/button";
@@ -38,7 +38,8 @@ export const TelegramSetupDialog = ({
   onOpenChange,
 }: TelegramSetupDialogProps) => {
   const { status, isLoading: isSquadhubLoading } = useSquadhubStatus();
-  const isOffline = !isSquadhubLoading && status === "down";
+  const isOffline =
+    !isSquadhubLoading && (status === "down" || status === "restarting");
 
   const [step, setStep] = useState<Step>("token");
   const [botToken, setBotToken] = useState("");

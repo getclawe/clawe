@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation as useConvexMutation } from "convex/react";
-import { toast } from "@clawe/ui/components/sonner";
+import { toast } from "sonner";
 import { api } from "@clawe/backend";
 import { Button } from "@clawe/ui/components/button";
 import { Spinner } from "@clawe/ui/components/spinner";

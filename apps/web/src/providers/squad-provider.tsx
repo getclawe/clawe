@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, type ReactNode } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@clawe/backend";
 
 export type Squad = {
   id: string;
@@ -23,34 +19,24 @@ type SquadContextType = {
 
 const SquadContext = createContext<SquadContextType | null>(null);
 
-const STORAGE_KEY = "clawe:selectedSquadId";
-
-// Mock data for now
-const mockSquads: Squad[] = [
-  { id: "1", name: "Default Squad", description: "Your default agent squad" },
-];
-
 export const SquadProvider = ({ children }: { children: ReactNode }) => {
-  const [squads] = useState<Squad[]>(mockSquads);
-  const [selectedSquad, setSelectedSquadState] = useState<Squad | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const tenant = useQuery(api.tenants.getGeneral);
+  const isLoading = tenant === undefined;
 
-  useEffect(() => {
-    // Load selected squad from localStorage
-    const storedId = localStorage.getItem(STORAGE_KEY);
-    const squad = squads.find((s) => s.id === storedId) ?? squads[0] ?? null;
-    setSelectedSquadState(squad);
-    setIsLoading(false);
-  }, [squads]);
+  const squad: Squad | null = tenant
+    ? { id: tenant._id, name: tenant.name, description: tenant.description }
+    : null;
 
-  const setSelectedSquad = (squad: Squad) => {
-    setSelectedSquadState(squad);
-    localStorage.setItem(STORAGE_KEY, squad.id);
-  };
+  const squads = squad ? [squad] : [];
 
   return (
     <SquadContext.Provider
-      value={{ squads, selectedSquad, setSelectedSquad, isLoading }}
+      value={{
+        squads,
+        selectedSquad: squad,
+        setSelectedSquad: () => {},
+        isLoading,
+      }}
     >
       {children}
     </SquadContext.Provider>

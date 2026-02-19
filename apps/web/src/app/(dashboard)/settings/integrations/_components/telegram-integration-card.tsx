@@ -23,7 +23,9 @@ export const TelegramIntegrationCard = () => {
 
   const isLoading = channel === undefined;
   const isConnected = channel?.status === "connected";
-  const isOffline = !isSquadhubLoading && squadhubStatus === "down";
+  const isOffline =
+    !isSquadhubLoading &&
+    (squadhubStatus === "down" || squadhubStatus === "restarting");
 
   if (isLoading) {
     return <TelegramCardSkeleton />;

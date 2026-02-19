@@ -1,17 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@clawe/backend";
 import { Button } from "@clawe/ui/components/button";
 import { Input } from "@clawe/ui/components/input";
 import { Label } from "@clawe/ui/components/label";
+import { Spinner } from "@clawe/ui/components/spinner";
+import { toast } from "sonner";
 import { useSquad } from "@/providers/squad-provider";
 
 export const GeneralSettingsForm = () => {
   const { selectedSquad } = useSquad();
+  const updateGeneral = useMutation(api.tenants.updateGeneral);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (selectedSquad) {
@@ -31,11 +37,23 @@ export const GeneralSettingsForm = () => {
     setIsDirty(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSquad || !isDirty) return;
-    // TODO: Implement squad update
-    setIsDirty(false);
+    if (!selectedSquad || !isDirty || !name.trim()) return;
+
+    setIsSaving(true);
+    try {
+      await updateGeneral({
+        name: name.trim(),
+        description: description.trim() || undefined,
+      });
+      setIsDirty(false);
+      toast.success("Settings saved");
+    } catch {
+      toast.error("Failed to save settings");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!selectedSquad) {
@@ -70,8 +88,19 @@ export const GeneralSettingsForm = () => {
         </p>
       </div>
 
-      <Button type="submit" variant="brand" disabled={!isDirty}>
-        Save changes
+      <Button
+        type="submit"
+        variant="brand"
+        disabled={!isDirty || !name.trim() || isSaving}
+      >
+        {isSaving ? (
+          <>
+            <Spinner />
+            Saving...
+          </>
+        ) : (
+          "Save changes"
+        )}
       </Button>
     </form>
   );

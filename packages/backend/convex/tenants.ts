@@ -67,6 +67,59 @@ export const create = mutation({
   },
 });
 
+// Get general info (name, description) for the current tenant
+export const getGeneral = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getUser(ctx);
+    const membership = await ctx.db
+      .query("accountMembers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
+    if (!membership) return null;
+
+    const tenant = await ctx.db
+      .query("tenants")
+      .withIndex("by_account", (q) => q.eq("accountId", membership.accountId))
+      .first();
+    if (!tenant) return null;
+
+    return {
+      _id: tenant._id,
+      name: tenant.name ?? "Default Squad",
+      description: tenant.description ?? "",
+    };
+  },
+});
+
+// Update general info (name, description) for the current tenant
+export const updateGeneral = mutation({
+  args: {
+    name: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUser(ctx);
+    const membership = await ctx.db
+      .query("accountMembers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
+    if (!membership) throw new Error("No account found");
+
+    const tenant = await ctx.db
+      .query("tenants")
+      .withIndex("by_account", (q) => q.eq("accountId", membership.accountId))
+      .first();
+    if (!tenant) throw new Error("Tenant not found");
+
+    await ctx.db.patch(tenant._id, {
+      name: args.name,
+      description: args.description ?? "",
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 // Get tenant for the current authenticated user
 // Resolves: user → accountMembers → account → tenants
 export const getForCurrentUser = query({
