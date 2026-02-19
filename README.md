@@ -5,12 +5,9 @@
 </div>
 
 <div align="center">
-  <video src="https://github.com/user-attachments/assets/d2f892d9-4c32-4c31-95e5-222d4ea87592" width="600" controls>
-    <a href="https://github.com/user-attachments/assets/d2f892d9-4c32-4c31-95e5-222d4ea87592">
-      <img src="./docs/images/board.png" alt="Clawe" width="600" />
-      <br>▶ Watch demo
-    </a>
-  </video>
+
+https://github.com/user-attachments/assets/d2f892d9-4c32-4c31-95e5-222d4ea87592
+
 </div>
 
 ## Features
