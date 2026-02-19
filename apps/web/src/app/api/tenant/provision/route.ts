@@ -4,6 +4,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "@clawe/backend";
 import { loadPlugins, getPlugin } from "@clawe/plugins";
 import { setupTenant } from "@/lib/squadhub/setup";
+import { patchApiKeys } from "@/lib/squadhub/actions";
 
 /**
  * POST /api/tenant/provision
@@ -111,15 +112,24 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    // 5. Run app-level setup (agents, crons, routines)
+    // 5. Patch API keys into squadhub config
     const connection = {
       squadhubUrl: tenant.squadhubUrl,
       squadhubToken: tenant.squadhubToken,
     };
 
+    if (tenant.anthropicApiKey) {
+      await patchApiKeys(
+        tenant.anthropicApiKey,
+        tenant.openaiApiKey ?? undefined,
+        connection,
+      );
+    }
+
+    // 6. Run app-level setup (agents, crons, routines)
     const result = await setupTenant(connection, convexUrl, authToken);
 
-    // 6. Return result
+    // 7. Return result
     return NextResponse.json({
       ok: result.errors.length === 0,
       tenantId: tenant._id,

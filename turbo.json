@@ -4,12 +4,11 @@
   "globalEnv": ["ENVIRONMENT", "CLAWE_EDITION"],
   "globalPassThroughEnv": [
     "CONVEX_URL",
-    "ANTHROPIC_API_KEY",
-    "OPENAI_API_KEY",
     "SQUADHUB_URL",
     "SQUADHUB_TOKEN",
     "CLAWE_DATA_DIR",
     "SQUADHUB_STATE_DIR",
+    "CLAWE_EDITION",
     "AUTH_PROVIDER",
     "NEXTAUTH_SECRET",
     "NEXTAUTH_URL",

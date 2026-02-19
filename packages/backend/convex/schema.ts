@@ -43,6 +43,7 @@ export default defineSchema({
     squadhubServiceArn: v.optional(v.string()),
     efsAccessPointId: v.optional(v.string()),
     anthropicApiKey: v.optional(v.string()),
+    openaiApiKey: v.optional(v.string()),
     settings: v.optional(
       v.object({
         timezone: v.optional(v.string()),

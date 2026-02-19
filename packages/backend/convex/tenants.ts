@@ -130,11 +130,12 @@ export const updateStatus = mutation({
   },
 });
 
-// Store Anthropic API key in tenant record
-export const setAnthropicKey = mutation({
+// Store API keys in tenant record
+export const setApiKeys = mutation({
   args: {
     machineToken: v.optional(v.string()),
-    apiKey: v.string(),
+    anthropicApiKey: v.optional(v.string()),
+    openaiApiKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const tenantId = await resolveTenantId(ctx, args);
@@ -143,10 +144,49 @@ export const setAnthropicKey = mutation({
       throw new Error("Tenant not found");
     }
 
-    await ctx.db.patch(tenantId, {
-      anthropicApiKey: args.apiKey,
-      updatedAt: Date.now(),
-    });
+    const patch: Record<string, unknown> = { updatedAt: Date.now() };
+    if (args.anthropicApiKey !== undefined) {
+      patch.anthropicApiKey = args.anthropicApiKey;
+    }
+    if (args.openaiApiKey !== undefined) {
+      patch.openaiApiKey = args.openaiApiKey;
+    }
+
+    await ctx.db.patch(tenantId, patch);
+  },
+});
+
+// Get masked API keys for display (last 4 chars only)
+export const getApiKeys = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getUser(ctx);
+
+    const membership = await ctx.db
+      .query("accountMembers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
+
+    if (!membership)
+      return { anthropicApiKey: undefined, openaiApiKey: undefined };
+
+    const tenant = await ctx.db
+      .query("tenants")
+      .withIndex("by_account", (q) => q.eq("accountId", membership.accountId))
+      .first();
+
+    if (!tenant) return { anthropicApiKey: undefined, openaiApiKey: undefined };
+
+    const mask = (key: string | undefined) => {
+      if (!key) return undefined;
+      const last4 = key.slice(-4);
+      return `${"*".repeat(Math.max(0, key.length - 4))}${last4}`;
+    };
+
+    return {
+      anthropicApiKey: mask(tenant.anthropicApiKey),
+      openaiApiKey: mask(tenant.openaiApiKey),
+    };
   },
 });
 

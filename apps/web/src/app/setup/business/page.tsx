@@ -8,8 +8,8 @@ import { Progress } from "@clawe/ui/components/progress";
 import { Chat } from "@/components/chat";
 import { useAuth } from "@/providers/auth-provider";
 
-const TOTAL_STEPS = 4;
-const CURRENT_STEP = 2;
+const TOTAL_STEPS = 5;
+const CURRENT_STEP = 3;
 
 // Session key for Clawe agent
 const CLAWE_SESSION_KEY = "agent:main:main";

@@ -9,8 +9,8 @@ import { Spinner } from "@clawe/ui/components/spinner";
 import { CheckCircle2 } from "lucide-react";
 import { api } from "@clawe/backend";
 
-const TOTAL_STEPS = 4;
-const CURRENT_STEP = 4;
+const TOTAL_STEPS = 5;
+const CURRENT_STEP = 5;
 
 export default function CompletePage() {
   const router = useRouter();

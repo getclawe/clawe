@@ -32,8 +32,8 @@ import {
 import { SetupRightPanelContent } from "../_components/setup-right-panel";
 import { DemoVideo } from "./_components/demo-video";
 
-const TOTAL_STEPS = 4;
-const CURRENT_STEP = 3;
+const TOTAL_STEPS = 5;
+const CURRENT_STEP = 4;
 
 type Step = "token" | "pairing" | "success";
 
