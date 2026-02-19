@@ -1,0 +1,10 @@
+.git
+node_modules
+**/node_modules
+.next
+**/.next
+.turbo
+**/.turbo
+**/*.spec.ts
+**/*.spec.tsx
+.github

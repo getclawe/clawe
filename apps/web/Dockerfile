@@ -2,25 +2,21 @@ FROM node:22-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 WORKDIR /app
 
-# Install dependencies
+# Prune monorepo to only web's dependencies
+FROM base AS pruner
+RUN npm install -g turbo@2
+COPY . .
+RUN turbo prune web --docker
+
+# Install dependencies (cached unless package.json/lockfile changes)
 FROM base AS deps
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/web/package.json ./apps/web/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/backend/package.json ./packages/backend/
-COPY packages/shared/package.json ./packages/shared/
-COPY packages/typescript-config/package.json ./packages/typescript-config/
-COPY packages/eslint-config/package.json ./packages/eslint-config/
+COPY --from=pruner /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 
 # Build the app
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
-COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
-COPY --from=deps /app/packages/backend/node_modules ./packages/backend/node_modules
-COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
-COPY . .
+COPY --from=deps /app/ .
+COPY --from=pruner /app/out/full/ .
 
 # No build-time env vars needed - Convex URL is configured at runtime
 RUN pnpm build --filter=web
