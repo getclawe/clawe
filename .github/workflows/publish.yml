@@ -25,11 +25,11 @@ jobs:
           - image: watcher
             dockerfile: apps/watcher/Dockerfile
             pre-build: true
-            build-filter: --filter=watcher
+            build-filter: --filter=@clawe/watcher
           - image: squadhub
             dockerfile: docker/squadhub/Dockerfile
             pre-build: true
-            build-filter: --filter=cli --filter=squadhub-extensions
+            build-filter: --filter=@clawe/cli --filter=@clawe/squadhub-extensions
 
     steps:
       - name: Checkout repository

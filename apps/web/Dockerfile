@@ -19,7 +19,7 @@ COPY --from=deps /app/ .
 COPY --from=pruner /app/out/full/ .
 
 # No build-time env vars needed - Convex URL is configured at runtime
-RUN pnpm build --filter=web
+RUN pnpm build --filter=@clawe/web
 
 # Production runner
 FROM base AS runner
