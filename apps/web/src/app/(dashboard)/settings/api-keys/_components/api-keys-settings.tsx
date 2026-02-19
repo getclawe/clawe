@@ -176,9 +176,7 @@ const KeyRow = ({
             {isCloud ? "Saved and applied" : "Saved and applied"}
           </p>
         )}
-        {saveError && (
-          <p className="text-destructive text-sm">{saveError}</p>
-        )}
+        {saveError && <p className="text-destructive text-sm">{saveError}</p>}
       </div>
     </div>
   );
@@ -340,9 +338,7 @@ export const ApiKeysSettings = () => {
           onSave={() => openaiSave.mutate(openaiKey)}
           isSaving={openaiSave.isPending}
           saveSuccess={openaiSave.isSuccess}
-          saveError={
-            openaiSave.isError ? openaiSave.error.message : undefined
-          }
+          saveError={openaiSave.isError ? openaiSave.error.message : undefined}
           isCloud={isCloud}
         />
       </div>
