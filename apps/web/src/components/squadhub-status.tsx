@@ -6,17 +6,28 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@clawe/ui/components/tooltip";
-import { useSquadhubStatus } from "@/hooks/use-squadhub-status";
+import {
+  useSquadhubStatus,
+  type SquadhubStatus as SquadhubStatusType,
+} from "@/hooks/use-squadhub-status";
 
 type SquadhubStatusProps = {
   className?: string;
 };
 
-const statusConfig = {
+const statusConfig: Record<
+  SquadhubStatusType,
+  { label: string; dot: string; ping: string }
+> = {
   active: {
     label: "Connected",
     dot: "bg-green-500",
     ping: "bg-green-400",
+  },
+  restarting: {
+    label: "Restarting",
+    dot: "bg-yellow-500",
+    ping: "bg-yellow-400",
   },
   down: {
     label: "Offline",
@@ -41,9 +52,12 @@ export const SquadhubStatus = ({ className }: SquadhubStatusProps) => {
     ? "Checking connection..."
     : status === "active"
       ? "Squadhub service is online and ready"
-      : "Unable to connect to squadhub service";
+      : status === "restarting"
+        ? "Squadhub service is restarting..."
+        : "Unable to connect to squadhub service";
 
-  const shouldAnimate = isLoading || status === "active";
+  const shouldAnimate =
+    isLoading || status === "active" || status === "restarting";
 
   return (
     <Tooltip>

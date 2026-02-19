@@ -3,35 +3,44 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApiClient } from "@/hooks/use-api-client";
 
-type SquadhubStatus = "active" | "down" | "idle";
+export type SquadhubStatus = "active" | "down" | "restarting" | "idle";
 
 export const useSquadhubStatus = () => {
   const apiClient = useApiClient();
 
-  const { data: isHealthy, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["squadhub-health"],
-    queryFn: async (): Promise<boolean> => {
+    queryFn: async (): Promise<{ ok: boolean; restarting: boolean }> => {
       try {
         const { data } = await apiClient.post(
           "/api/squadhub/health",
           {},
-          { timeout: 5000 },
+          { timeout: 8000 },
         );
-        return data.ok === true;
+        return {
+          ok: data.ok === true,
+          restarting: data.restarting === true,
+        };
       } catch {
-        return false;
+        return { ok: false, restarting: false };
       }
     },
-    refetchInterval: 10000, // Check every 10 seconds
+    refetchInterval: (query) => {
+      const status = query.state.data;
+      if (status && !status.ok && status.restarting) return 3000;
+      return 10000;
+    },
     staleTime: 5000,
     retry: false,
   });
 
   const status: SquadhubStatus = isLoading
     ? "idle"
-    : isHealthy
+    : data?.ok
       ? "active"
-      : "down";
+      : data?.restarting
+        ? "restarting"
+        : "down";
 
-  return { status, isHealthy, isLoading };
+  return { status, isHealthy: data?.ok ?? false, isLoading };
 };

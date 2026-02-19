@@ -32,6 +32,8 @@ export default defineSchema({
   // Tenants - One per account, owns a squadhub instance
   tenants: defineTable({
     accountId: v.id("accounts"),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
     status: v.union(
       v.literal("provisioning"),
       v.literal("active"),

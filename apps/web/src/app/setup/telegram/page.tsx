@@ -58,7 +58,8 @@ const DemoVideoPanel = () => {
 export default function TelegramPage() {
   const router = useRouter();
   const { status, isLoading } = useSquadhubStatus();
-  const isOffline = !isLoading && status === "down";
+  const isOffline =
+    !isLoading && (status === "down" || status === "restarting");
   const [step, setStep] = useState<Step>("token");
   const [botToken, setBotToken] = useState("");
   const [botUsername, setBotUsername] = useState<string | null>(null);
