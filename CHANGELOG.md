@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/getclawe/clawe/compare/v1.0.1...v1.0.2) (2026-02-19)
+
+
+### Bug Fixes
+
+* web image name ([#65](https://github.com/getclawe/clawe/issues/65)) ([37222f6](https://github.com/getclawe/clawe/commit/37222f69a9847cfff99d84af1a14f6a68e8405bd))
+
 ## [1.0.1](https://github.com/getclawe/clawe/compare/v1.0.0...v1.0.1) (2026-02-19)
 
 
