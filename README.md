@@ -44,12 +44,10 @@ Edit `.env`:
 
 ```bash
 # Required
-ANTHROPIC_API_KEY=sk-ant-...
 SQUADHUB_TOKEN=your-secure-token
 CONVEX_URL=https://your-deployment.convex.cloud
 
-# Optional
-OPENAI_API_KEY=sk-...  # For image generation
+# API keys (Anthropic, OpenAI) are configured via the UI during onboarding
 ```
 
 ### 3. Deploy Convex Backend
@@ -281,9 +279,9 @@ pnpm convex:deploy
 
 ## Environment Variables
 
-| Variable            | Required | Description                       |
-| ------------------- | -------- | --------------------------------- |
-| `ANTHROPIC_API_KEY` | Yes      | Anthropic API key for Claude      |
-| `SQUADHUB_TOKEN`    | Yes      | Auth token for squadhub gateway   |
-| `CONVEX_URL`        | Yes      | Convex deployment URL             |
-| `OPENAI_API_KEY`    | No       | OpenAI key (for image generation) |
+| Variable         | Required | Description                     |
+| ---------------- | -------- | ------------------------------- |
+| `SQUADHUB_TOKEN` | Yes      | Auth token for squadhub gateway |
+| `CONVEX_URL`     | Yes      | Convex deployment URL           |
+
+API keys (Anthropic, OpenAI) are managed via the UI during onboarding and in Settings > General > API Keys.

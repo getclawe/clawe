@@ -74,7 +74,7 @@ import type { Agent, Tenant } from "@clawe/backend/types";
 **Environment variables:**
 
 - `NEXT_PUBLIC_CONVEX_URL` → Convex deployment URL (required)
-- `ANTHROPIC_API_KEY` → Anthropic API key (passed to squadhub container)
+- API keys (Anthropic, OpenAI) → managed via the UI, stored in Convex tenant record
 - `SQUADHUB_URL` → SquadHub gateway URL
 - `SQUADHUB_TOKEN` → SquadHub authentication token (from root `.env`)
 

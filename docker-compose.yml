@@ -8,6 +8,7 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_CONVEX_URL=${CONVEX_URL}
+      - NEXT_PUBLIC_CLAWE_EDITION=${CLAWE_EDITION:-oss}
       - SQUADHUB_URL=http://squadhub:18789
       - SQUADHUB_TOKEN=${SQUADHUB_TOKEN}
       - SQUADHUB_STATE_DIR=/squadhub-data/config
@@ -25,8 +26,6 @@ services:
     user: "${UID:-1000}:${GID:-1000}"
     environment:
       - SQUADHUB_TOKEN=${SQUADHUB_TOKEN}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - CONVEX_URL=${CONVEX_URL}
     volumes:
       - squadhub-data:/data

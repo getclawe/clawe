@@ -31,6 +31,7 @@ const RightPanel = () => {
             height={450}
             className="h-auto max-h-full w-auto max-w-full object-contain"
             priority
+            unoptimized
           />
         </div>
       )}

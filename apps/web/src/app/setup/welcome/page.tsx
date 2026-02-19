@@ -3,22 +3,23 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@clawe/ui/components/button";
 import { Progress } from "@clawe/ui/components/progress";
-import { Globe, MessageCircle, AlertTriangle } from "lucide-react";
+import { Globe, Key, MessageCircle, AlertTriangle } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@clawe/ui/components/tooltip";
 import { useSquadhubStatus } from "@/hooks/use-squadhub-status";
+import { config } from "@/lib/config";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 const CURRENT_STEP = 1;
 
 export default function WelcomePage() {
   const router = useRouter();
   const { status, isLoading } = useSquadhubStatus();
 
-  const isOffline = !isLoading && status === "down";
+  const isOffline = !config.isCloud && !isLoading && status === "down";
 
   return (
     <div className="flex flex-1 flex-col">
@@ -45,6 +46,22 @@ export default function WelcomePage() {
         <div className="space-y-4">
           <p className="text-sm font-medium">You&apos;ll need:</p>
           <ul className="space-y-3">
+            <li className="flex items-center gap-3">
+              <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-lg">
+                <Key className="text-muted-foreground h-4 w-4" />
+              </div>
+              <span className="text-muted-foreground text-sm">
+                Your Anthropic API key from{" "}
+                <a
+                  href="https://console.anthropic.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground underline underline-offset-2"
+                >
+                  console.anthropic.com
+                </a>
+              </span>
+            </li>
             <li className="flex items-center gap-3">
               <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-lg">
                 <Globe className="text-muted-foreground h-4 w-4" />
@@ -99,7 +116,7 @@ export default function WelcomePage() {
                 variant="brand"
                 className="w-full sm:w-auto"
                 disabled={isOffline}
-                onClick={() => router.push("/setup/business")}
+                onClick={() => router.push("/setup/api-keys")}
               >
                 Get Started
               </Button>

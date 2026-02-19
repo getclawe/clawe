@@ -3,12 +3,14 @@
 import {
   checkHealth,
   getConfig,
+  patchConfig,
   saveTelegramBotToken as saveTelegramBotTokenClient,
   removeTelegramBotToken as removeTelegramBotTokenClient,
   probeTelegramToken,
   approvePairingCode as approvePairingCodeClient,
   parseToolText,
 } from "@clawe/shared/squadhub";
+import type { SquadhubConnection } from "@clawe/shared/squadhub";
 import { getConnection } from "./connection";
 
 export async function checkSquadhubHealth() {
@@ -75,4 +77,28 @@ export async function approvePairingCode(
 
 export async function removeTelegramBot() {
   return removeTelegramBotTokenClient(getConnection());
+}
+
+/**
+ * Patch API keys into squadhub gateway config via patchConfig.
+ * Sets keys as env vars in the config — the gateway resolves these
+ * as fallback credentials for each provider.
+ */
+export async function patchApiKeys(
+  anthropicApiKey?: string,
+  openaiApiKey?: string,
+  connection?: SquadhubConnection,
+) {
+  const env: Record<string, string> = {};
+
+  if (anthropicApiKey) {
+    env.ANTHROPIC_API_KEY = anthropicApiKey;
+  }
+  if (openaiApiKey) {
+    env.OPENAI_API_KEY = openaiApiKey;
+  }
+
+  if (Object.keys(env).length === 0) return;
+
+  return patchConfig(connection ?? getConnection(), { env });
 }

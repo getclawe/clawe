@@ -32,7 +32,7 @@ if [ ! -f .env ]; then
     fi
 
     echo_info "Generated SQUADHUB_TOKEN: ${TOKEN:0:8}..."
-    echo_warn "Please edit .env and set your ANTHROPIC_API_KEY and CONVEX_URL"
+    echo_warn "Please edit .env and set your CONVEX_URL"
 fi
 
 # Load .env
@@ -42,10 +42,6 @@ set +a
 
 # Validate required environment variables
 MISSING_VARS=()
-
-if [ -z "$ANTHROPIC_API_KEY" ] || [ "$ANTHROPIC_API_KEY" = "sk-ant-..." ]; then
-    MISSING_VARS+=("ANTHROPIC_API_KEY")
-fi
 
 if [ -z "$CONVEX_URL" ] || [ "$CONVEX_URL" = "https://your-deployment.convex.cloud" ]; then
     MISSING_VARS+=("CONVEX_URL")
@@ -63,11 +59,6 @@ if [ ${#MISSING_VARS[@]} -gt 0 ]; then
     echo ""
     echo "Please edit .env and set these values before running."
     exit 1
-fi
-
-# Warn about optional variables
-if [ -z "$OPENAI_API_KEY" ]; then
-    echo_warn "OPENAI_API_KEY not set - image generation will be disabled"
 fi
 
 # Build packages needed for Docker images
