@@ -71,17 +71,8 @@ export const create = mutation({
 export const getGeneral = query({
   args: {},
   handler: async (ctx) => {
-    const user = await getUser(ctx);
-    const membership = await ctx.db
-      .query("accountMembers")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .first();
-    if (!membership) return null;
-
-    const tenant = await ctx.db
-      .query("tenants")
-      .withIndex("by_account", (q) => q.eq("accountId", membership.accountId))
-      .first();
+    const tenantId = await getTenantIdFromJwt(ctx);
+    const tenant = await ctx.db.get(tenantId);
     if (!tenant) return null;
 
     return {
@@ -99,20 +90,9 @@ export const updateGeneral = mutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await getUser(ctx);
-    const membership = await ctx.db
-      .query("accountMembers")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .first();
-    if (!membership) throw new Error("No account found");
+    const tenantId = await getTenantIdFromJwt(ctx);
 
-    const tenant = await ctx.db
-      .query("tenants")
-      .withIndex("by_account", (q) => q.eq("accountId", membership.accountId))
-      .first();
-    if (!tenant) throw new Error("Tenant not found");
-
-    await ctx.db.patch(tenant._id, {
+    await ctx.db.patch(tenantId, {
       name: args.name,
       description: args.description ?? "",
       updatedAt: Date.now(),
