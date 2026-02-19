@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/getclawe/clawe/compare/v1.0.0...v1.0.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* publish ([#63](https://github.com/getclawe/clawe/issues/63)) ([93c3a66](https://github.com/getclawe/clawe/commit/93c3a66e91cfbc4ca5ad24b287ab05ac80d9689b))
+
 ## 1.0.0 (2026-02-19)
 
 
