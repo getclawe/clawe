@@ -1,35 +1,31 @@
-FROM node:22-slim AS build
-
+FROM node:22-slim AS base
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 WORKDIR /app
 
-# Copy monorepo root files
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc* ./
+# Prune monorepo to only watcher's dependencies
+FROM base AS pruner
+COPY . .
+RUN pnpm dlx turbo prune @clawe/watcher --docker
 
-# Copy workspace package manifests
-COPY apps/watcher/package.json ./apps/watcher/
-COPY packages/shared/package.json ./packages/shared/
-COPY packages/backend/package.json ./packages/backend/
-
-# Install pnpm and fetch dependencies
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install dependencies (cached unless package.json/lockfile changes)
+FROM base AS deps
+COPY --from=pruner /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 
-# Copy source and build
-COPY packages/shared/ ./packages/shared/
-COPY packages/backend/ ./packages/backend/
-COPY apps/watcher/ ./apps/watcher/
+# Build the app
+FROM base AS builder
+COPY --from=deps /app/ .
+COPY --from=pruner /app/out/full/ .
 RUN pnpm build --filter=@clawe/watcher
 
-# Deploy: extract watcher with all production deps into /app/deploy
+# Extract watcher with production deps only
 RUN pnpm --filter=@clawe/watcher --prod deploy deploy
 
-# --- Production image ---
+# Production runner
 FROM node:22-slim
-
 WORKDIR /app
-
-COPY --from=build /app/deploy .
-
 ENV NODE_ENV=production
+
+COPY --from=builder /app/deploy .
 
 CMD ["node", "dist/index.js"]
