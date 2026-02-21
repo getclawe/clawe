@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.3](https://github.com/getclawe/clawe/compare/v1.0.2...v1.0.3) (2026-02-21)
+
+
+### Bug Fixes
+
+* watcher and web dockerfiles ([#68](https://github.com/getclawe/clawe/issues/68)) ([c958e1d](https://github.com/getclawe/clawe/commit/c958e1dbba4e1b5ceac4b6a347ac73881acdc3d1))
+* watcher image ([#70](https://github.com/getclawe/clawe/issues/70)) ([326ea42](https://github.com/getclawe/clawe/commit/326ea4213d1ee0265dab941fae33749bf1dc0e52))
+
 ## [1.0.2](https://github.com/getclawe/clawe/compare/v1.0.1...v1.0.2) (2026-02-19)
 
 
