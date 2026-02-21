@@ -5,7 +5,7 @@ import type {
   ConnectParams,
   HelloOkResponse,
   ChatEvent,
-} from "./gateway-types";
+} from "./gateway-types.js";
 
 type PendingRequest = {
   resolve: (value: unknown) => void;

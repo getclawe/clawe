@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "files": ["dist"],
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "build": "tsc",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix --max-warnings 0",
     "check-types": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -17,7 +20,9 @@
     "convex": "^1.21.0"
   },
   "devDependencies": {
+    "@clawe/eslint-config": "workspace:*",
     "@clawe/typescript-config": "workspace:*",
+    "eslint": "^9.39.1",
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
     "typescript": "5.9.2",

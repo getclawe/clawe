@@ -14,7 +14,7 @@ export {
   listPairingRequests,
   approvePairingCode,
   parseToolText,
-} from "./client";
+} from "./client.js";
 export type {
   SquadhubConnection,
   CronJob,
@@ -27,12 +27,12 @@ export type {
   CronDelivery,
   CronPayload,
   CronJobState,
-} from "./client";
+} from "./client.js";
 
 // Gateway Client
-export { GatewayClient, createGatewayClient } from "./gateway-client";
-export type { GatewayClientOptions } from "./gateway-client";
-export { getSharedClient } from "./shared-client";
+export { GatewayClient, createGatewayClient } from "./gateway-client.js";
+export type { GatewayClientOptions } from "./gateway-client.js";
+export { getSharedClient } from "./shared-client.js";
 
 // Types
 export type {
@@ -46,7 +46,7 @@ export type {
   GatewayHealthResult,
   TelegramProbeResult,
   PairingRequest,
-} from "./types";
+} from "./types.js";
 
 // Gateway Types
 export type {
@@ -75,4 +75,4 @@ export type {
   ChatHistoryResponse,
   SSEEventType,
   SSEEvent,
-} from "./gateway-types";
+} from "./gateway-types.js";

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "files": ["convex"],
   "exports": {
     ".": {
       "types": "./convex/_generated/api.d.ts",

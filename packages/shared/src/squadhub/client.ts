@@ -7,7 +7,7 @@ import type {
   GatewayHealthResult,
   TelegramProbeResult,
   PairingRequest,
-} from "./types";
+} from "./types.js";
 
 export type SquadhubConnection = {
   squadhubUrl: string;

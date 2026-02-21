@@ -1,6 +1,6 @@
-import { GatewayClient, createGatewayClient } from "./gateway-client";
-import type { GatewayClientOptions } from "./gateway-client";
-import type { SquadhubConnection } from "./client";
+import { GatewayClient, createGatewayClient } from "./gateway-client.js";
+import type { GatewayClientOptions } from "./gateway-client.js";
+import type { SquadhubConnection } from "./client.js";
 
 let sharedClient: GatewayClient | null = null;
 let connectingPromise: Promise<void> | null = null;
