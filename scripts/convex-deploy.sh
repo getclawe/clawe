@@ -41,6 +41,6 @@ if [ -n "$WATCHER_TOKEN" ]; then
 fi
 
 # Deploy Convex functions and schema
-pnpm --filter @clawe/backend deploy
+pnpm --filter @clawe/backend run deploy
 
 echo "==> Convex deployment complete"

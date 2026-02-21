@@ -4,9 +4,8 @@ WORKDIR /app
 
 # Prune monorepo to only web's dependencies
 FROM base AS pruner
-RUN npm install -g turbo@2
 COPY . .
-RUN turbo prune web --docker
+RUN pnpm dlx turbo prune @clawe/web --docker
 
 # Install dependencies (cached unless package.json/lockfile changes)
 FROM base AS deps

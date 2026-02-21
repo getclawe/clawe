@@ -1,27 +1,34 @@
+FROM node:22-slim AS build
+
+WORKDIR /app
+
+# Copy monorepo root files
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc* ./
+
+# Copy workspace package manifests
+COPY apps/watcher/package.json ./apps/watcher/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/backend/package.json ./packages/backend/
+
+# Install pnpm and fetch dependencies
+RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN pnpm install --frozen-lockfile
+
+# Copy source and build
+COPY packages/shared/ ./packages/shared/
+COPY packages/backend/ ./packages/backend/
+COPY apps/watcher/ ./apps/watcher/
+RUN pnpm build --filter=@clawe/watcher
+
+# Deploy: extract watcher with all production deps into /app/deploy
+RUN pnpm --filter=@clawe/watcher --prod deploy deploy
+
+# --- Production image ---
 FROM node:22-slim
 
 WORKDIR /app
 
-# Copy built artifacts from monorepo build
-# These should be built before docker build with: pnpm build
-
-# Watcher
-COPY apps/watcher/dist/ ./dist/
-
-# Shared package (squadhub client)
-COPY packages/shared/package.json ./node_modules/@clawe/shared/package.json
-COPY packages/shared/dist/ ./node_modules/@clawe/shared/dist/
-
-# Backend (Convex API types)
-COPY packages/backend/package.json ./node_modules/@clawe/backend/package.json
-COPY packages/backend/convex/_generated/ ./node_modules/@clawe/backend/convex/_generated/
-COPY packages/backend/convex/*.ts ./node_modules/@clawe/backend/convex/
-
-# Create a clean package.json without workspace:* references (npm doesn't support them)
-RUN echo '{"name":"@clawe/watcher","private":true,"type":"module"}' > package.json
-
-# Install production dependencies
-RUN npm install convex axios ws moment-timezone --omit=dev
+COPY --from=build /app/deploy .
 
 ENV NODE_ENV=production
 
