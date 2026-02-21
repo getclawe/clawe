@@ -22,6 +22,7 @@ jobs:
           - image: web
             dockerfile: apps/web/Dockerfile
             pre-build: false
+            build-args: NEXT_PUBLIC_AUTH_PROVIDER=nextauth
           - image: watcher
             dockerfile: apps/watcher/Dockerfile
             pre-build: true
@@ -86,5 +87,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ matrix.build-args || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

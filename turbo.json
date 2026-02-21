@@ -15,7 +15,9 @@
     "AUTO_LOGIN_EMAIL",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
-    "WATCHER_TOKEN"
+    "WATCHER_TOKEN",
+    "LOG_LEVEL",
+    "NEXT_RUNTIME"
   ],
   "tasks": {
     "build": {

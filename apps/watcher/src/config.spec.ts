@@ -1,10 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+const mockFatal = vi.fn();
+vi.mock("./logger.js", () => ({
+  logger: { fatal: mockFatal },
+}));
+
 describe("config", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
     vi.resetModules();
+    mockFatal.mockClear();
     process.env = { ...originalEnv };
   });
 
@@ -20,18 +26,19 @@ describe("config", () => {
       const mockExit = vi
         .spyOn(process, "exit")
         .mockImplementation(() => undefined as never);
-      const mockError = vi.spyOn(console, "error").mockImplementation(() => {});
 
       const { validateEnv } = await import("./config.js");
       validateEnv();
 
-      expect(mockError).toHaveBeenCalledWith(
-        expect.stringContaining("CONVEX_URL"),
+      expect(mockFatal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          missing: expect.arrayContaining(["CONVEX_URL"]),
+        }),
+        expect.any(String),
       );
       expect(mockExit).toHaveBeenCalledWith(1);
 
       mockExit.mockRestore();
-      mockError.mockRestore();
     });
 
     it("exits when WATCHER_TOKEN is missing", async () => {
@@ -41,18 +48,19 @@ describe("config", () => {
       const mockExit = vi
         .spyOn(process, "exit")
         .mockImplementation(() => undefined as never);
-      const mockError = vi.spyOn(console, "error").mockImplementation(() => {});
 
       const { validateEnv } = await import("./config.js");
       validateEnv();
 
-      expect(mockError).toHaveBeenCalledWith(
-        expect.stringContaining("WATCHER_TOKEN"),
+      expect(mockFatal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          missing: expect.arrayContaining(["WATCHER_TOKEN"]),
+        }),
+        expect.any(String),
       );
       expect(mockExit).toHaveBeenCalledWith(1);
 
       mockExit.mockRestore();
-      mockError.mockRestore();
     });
 
     it("does not exit when all required vars are set", async () => {

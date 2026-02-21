@@ -20,6 +20,7 @@ import { api } from "@clawe/backend";
 import { sessionsSend, type SquadhubConnection } from "@clawe/shared/squadhub";
 import { getTimeInZone, DEFAULT_TIMEZONE } from "@clawe/shared/timezone";
 import { validateEnv, config, POLL_INTERVAL_MS } from "./config.js";
+import { logger } from "./logger.js";
 
 // Validate environment on startup
 validateEnv();
@@ -98,13 +99,11 @@ async function checkRoutinesForTenant(machineToken: string): Promise<void> {
         machineToken,
         routineId: routine._id,
       });
-      console.log(
-        `[watcher] ✓ Triggered routine "${routine.title}" → task ${taskId}`,
-      );
+      logger.info({ routine: routine.title, taskId }, "Triggered routine");
     } catch (err) {
-      console.error(
-        `[watcher] Failed to trigger routine "${routine.title}":`,
-        err instanceof Error ? err.message : err,
+      logger.error(
+        { routine: routine.title, err },
+        "Failed to trigger routine",
       );
     }
   }
@@ -120,9 +119,9 @@ async function checkRoutines(): Promise<void> {
     try {
       await checkRoutinesForTenant(tenant.connection.squadhubToken);
     } catch (err) {
-      console.error(
-        `[watcher] Error checking routines for tenant ${tenant.id}:`,
-        err instanceof Error ? err.message : err,
+      logger.error(
+        { tenantId: tenant.id, err },
+        "Error checking routines for tenant",
       );
     }
   }
@@ -175,8 +174,9 @@ async function deliverToAgent(
       return;
     }
 
-    console.log(
-      `[watcher] 📬 ${sessionKey} has ${notifications.length} pending notification(s)`,
+    logger.info(
+      { sessionKey, count: notifications.length },
+      "Pending notifications",
     );
 
     for (const notification of notifications) {
@@ -194,27 +194,24 @@ async function deliverToAgent(
             notificationIds: [notification._id],
           });
 
-          console.log(
-            `[watcher] ✅ Delivered to ${sessionKey}: ${notification.content.slice(0, 50)}...`,
+          logger.info(
+            { sessionKey, preview: notification.content.slice(0, 50) },
+            "Delivered notification",
           );
         } else {
           // Agent might be asleep or session unavailable
-          console.log(
-            `[watcher] 💤 ${sessionKey} unavailable: ${result.error?.message ?? "unknown error"}`,
+          logger.warn(
+            { sessionKey, error: result.error?.message ?? "unknown error" },
+            "Agent unavailable",
           );
         }
       } catch (err) {
         // Network error or agent asleep
-        console.log(
-          `[watcher] 💤 ${sessionKey} error: ${err instanceof Error ? err.message : "unknown"}`,
-        );
+        logger.warn({ sessionKey, err }, "Agent delivery error");
       }
     }
   } catch (err) {
-    console.error(
-      `[watcher] Error checking ${sessionKey}:`,
-      err instanceof Error ? err.message : err,
-    );
+    logger.error({ sessionKey, err }, "Error checking agent notifications");
   }
 }
 
@@ -246,10 +243,7 @@ function startRoutineCheckLoop(): void {
     try {
       await checkRoutines();
     } catch (err) {
-      console.error(
-        "[watcher] Routine check error:",
-        err instanceof Error ? err.message : err,
-      );
+      logger.error({ err }, "Routine check error");
     }
   };
 
@@ -266,10 +260,7 @@ async function startDeliveryLoop(): Promise<void> {
     try {
       await deliveryLoop();
     } catch (err) {
-      console.error(
-        "[watcher] Delivery loop error:",
-        err instanceof Error ? err.message : err,
-      );
+      logger.error({ err }, "Delivery loop error");
     }
 
     await sleep(POLL_INTERVAL_MS);
@@ -280,14 +271,16 @@ async function startDeliveryLoop(): Promise<void> {
  * Main entry point
  */
 async function main(): Promise<void> {
-  console.log("[watcher] 🦞 Clawe Watcher starting...");
-  console.log(`[watcher] Convex: ${config.convexUrl}`);
-  console.log(`[watcher] Notification poll interval: ${POLL_INTERVAL_MS}ms`);
-  console.log(
-    `[watcher] Routine check interval: ${ROUTINE_CHECK_INTERVAL_MS}ms\n`,
+  logger.info("Clawe Watcher starting...");
+  logger.info({ convexUrl: config.convexUrl }, "Convex connected");
+  logger.info(
+    {
+      pollIntervalMs: POLL_INTERVAL_MS,
+      routineCheckIntervalMs: ROUTINE_CHECK_INTERVAL_MS,
+    },
+    "Intervals configured",
   );
-
-  console.log("[watcher] Starting loops...\n");
+  logger.info("Starting loops...");
 
   // Start routine check loop (every 10 seconds)
   startRoutineCheckLoop();
@@ -298,6 +291,6 @@ async function main(): Promise<void> {
 
 // Start the watcher
 main().catch((err) => {
-  console.error("[watcher] Fatal error:", err);
+  logger.fatal({ err }, "Fatal error");
   process.exit(1);
 });

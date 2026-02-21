@@ -54,6 +54,7 @@ if (process.env.AUTO_LOGIN_EMAIL) {
 }
 
 const nextAuth = NextAuth({
+  trustHost: true,
   providers,
   session: { strategy: "jwt" },
   jwt: {

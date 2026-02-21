@@ -19,7 +19,8 @@
   "dependencies": {
     "@clawe/backend": "workspace:*",
     "@clawe/shared": "workspace:*",
-    "convex": "^1.21.0"
+    "convex": "^1.21.0",
+    "pino": "^10.3.1"
   },
   "devDependencies": {
     "@clawe/eslint-config": "workspace:*",

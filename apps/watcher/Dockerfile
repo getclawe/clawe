@@ -24,8 +24,13 @@ RUN pnpm --filter=@clawe/watcher --prod deploy deploy
 # Production runner
 FROM node:22-slim
 WORKDIR /app
-ENV NODE_ENV=production
 
-COPY --from=builder /app/deploy .
+ENV NODE_ENV=production
+ENV NO_COLOR=1
+ENV FORCE_COLOR=0
+
+COPY --from=builder --chown=node:node /app/deploy .
+
+USER node
 
 CMD ["node", "dist/index.js"]

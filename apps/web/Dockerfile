@@ -14,31 +14,35 @@ RUN pnpm install --frozen-lockfile
 
 # Build the app
 FROM base AS builder
+ENV NEXT_TELEMETRY_DISABLED=1
+
+ARG NEXT_PUBLIC_AUTH_PROVIDER
+ENV NEXT_PUBLIC_AUTH_PROVIDER=${NEXT_PUBLIC_AUTH_PROVIDER}
+
 COPY --from=deps /app/ .
 COPY --from=pruner /app/out/full/ .
-
-# No build-time env vars needed - Convex URL is configured at runtime
 RUN pnpm build --filter=@clawe/web
 
 # Production runner
-FROM base AS runner
+FROM node:22-alpine AS runner
+WORKDIR /app
+
 ENV NODE_ENV=production
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Create data directory for config storage
-RUN mkdir -p /data/clawe && chown nextjs:nodejs /data/clawe
-
-COPY --from=builder /app/apps/web/.next/standalone ./
-COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/public ./apps/web/public
-
-USER nextjs
-
-EXPOSE 3000
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NO_COLOR=1
+ENV FORCE_COLOR=0
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV CLAWE_DATA_DIR=/data/clawe
 
+# Create data directory with built-in node user (UID 1000)
+RUN mkdir -p /data/clawe && chown node:node /data/clawe
+
+COPY --from=builder --chown=node:node /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=node:node /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=node:node /app/apps/web/public ./apps/web/public
+
+USER node
+
+EXPOSE 3000
 CMD ["node", "apps/web/server.js"]
