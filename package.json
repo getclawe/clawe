@@ -4,8 +4,8 @@
   "scripts": {
     "build": "dotenv -e .env -- turbo run build",
     "dev": "dotenv -e .env -- turbo run dev",
-    "dev:docker": "pnpm --filter @clawe/cli build && pnpm --filter @clawe/squadhub-extensions build && docker compose up --build squadhub",
-    "build:docker": "pnpm --filter @clawe/cli build && docker compose build --no-cache squadhub",
+    "dev:docker": "pnpm --filter @clawe/cli... build && pnpm --filter @clawe/squadhub-extensions... build && docker compose up --build squadhub",
+    "build:docker": "pnpm --filter @clawe/cli... build && docker compose build --no-cache squadhub",
     "debug": "dotenv -e .env -- turbo run debug",
     "dev:web": "dotenv -e .env -- turbo run dev --filter=@clawe/web",
     "convex:dev": "dotenv -e .env -- turbo run dev --filter=@clawe/backend",

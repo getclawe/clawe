@@ -1,7 +1,7 @@
 {
   "$schema": "https://v2-7-6.turborepo.dev/schema.json",
   "ui": "tui",
-  "globalEnv": ["ENVIRONMENT", "CLAWE_EDITION"],
+  "globalEnv": ["ENVIRONMENT", "CLAWE_EDITION", "NODE_ENV"],
   "globalPassThroughEnv": [
     "CONVEX_URL",
     "SQUADHUB_URL",
