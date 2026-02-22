@@ -12,7 +12,7 @@ import type { ReactNode } from "react";
 import { Amplify } from "aws-amplify";
 import {
   getCurrentUser,
-  fetchUserAttributes,
+  fetchAuthSession,
   signInWithRedirect,
   signOut as amplifySignOut,
 } from "aws-amplify/auth";
@@ -125,10 +125,11 @@ const CognitoProvider = ({ children }: { children: ReactNode }) => {
   const checkAuthState = useCallback(async () => {
     try {
       await getCurrentUser();
-      const attributes = await fetchUserAttributes();
+      const session = await fetchAuthSession();
+      const idToken = session.tokens?.idToken;
       setUser({
-        email: attributes.email ?? "",
-        name: attributes.name,
+        email: (idToken?.payload?.email as string) ?? "",
+        name: idToken?.payload?.name as string | undefined,
       });
       setIsAuthenticated(true);
     } catch {

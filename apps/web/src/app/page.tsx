@@ -8,9 +8,16 @@ import { useAuth } from "@/providers/auth-provider";
 
 export default function Home() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const getOrCreateUser = useMutation(api.users.getOrCreateFromAuth);
   const [userReady, setUserReady] = useState(false);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.replace("/auth/login");
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   // Ensure user record exists before querying tenant data
   useEffect(() => {
