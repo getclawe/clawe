@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.4](https://github.com/getclawe/clawe/compare/v1.0.3...v1.0.4) (2026-02-22)
+
+
+### Bug Fixes
+
+* auth ([#74](https://github.com/getclawe/clawe/issues/74)) ([66a069a](https://github.com/getclawe/clawe/commit/66a069a808ed9391d94bcf73da05814056e10660))
+* convex url ([#76](https://github.com/getclawe/clawe/issues/76)) ([5748f2f](https://github.com/getclawe/clawe/commit/5748f2f4575813753a2fc033fb215faf5dce4bd8))
+* dockerfile cognito params ([#75](https://github.com/getclawe/clawe/issues/75)) ([6b55db4](https://github.com/getclawe/clawe/commit/6b55db43e94dc59595385a29f05392517b8d69c7))
+* json logs for prod ([#71](https://github.com/getclawe/clawe/issues/71)) ([b4fa6c7](https://github.com/getclawe/clawe/commit/b4fa6c72896a67846dfa20ad07cac27786fe1559))
+* proxying images, pino-pretty logger in dev ([#73](https://github.com/getclawe/clawe/issues/73)) ([0ba115e](https://github.com/getclawe/clawe/commit/0ba115e7d2262efe1a1b1443da9b942f53dfe8cb))
+
 ## [1.0.3](https://github.com/getclawe/clawe/compare/v1.0.2...v1.0.3) (2026-02-21)
 
 
