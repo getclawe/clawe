@@ -9,6 +9,7 @@ import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { ApiClientProvider } from "@/providers/api-client-provider";
 import { Toaster } from "@clawe/ui/components/sonner";
+import { RuntimeConfig } from "@/components/runtime-config";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -42,6 +43,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${spaceGrotesk.variable}`}
       >
+        <RuntimeConfig />
         <QueryProvider>
           <AuthProvider>
             <ApiClientProvider>

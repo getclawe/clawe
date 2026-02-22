@@ -1,16 +1,19 @@
 "use client";
 
 import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { useConvexAuth } from "@/providers/auth-provider";
+import { getConvexUrl } from "@/lib/runtime-config";
 
-// Fallback URL for build time - won't be called during static generation
-const convex = new ConvexReactClient(
-  process.env.NEXT_PUBLIC_CONVEX_URL || "http://localhost:0",
-);
+export const ConvexClientProvider = ({ children }: { children: ReactNode }) => {
+  const client = useMemo(
+    () => new ConvexReactClient(getConvexUrl() || "http://localhost:0"),
+    [],
+  );
 
-export const ConvexClientProvider = ({ children }: { children: ReactNode }) => (
-  <ConvexProviderWithAuth client={convex} useAuth={useConvexAuth}>
-    {children}
-  </ConvexProviderWithAuth>
-);
+  return (
+    <ConvexProviderWithAuth client={client} useAuth={useConvexAuth}>
+      {children}
+    </ConvexProviderWithAuth>
+  );
+};
