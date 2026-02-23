@@ -1,3 +1,5 @@
+export type { PluginLogger } from "./logger";
+
 export type {
   SquadhubProvisioner,
   ProvisionParams,

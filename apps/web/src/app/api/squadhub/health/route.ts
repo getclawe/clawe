@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { checkHealth } from "@clawe/shared/squadhub";
-import { loadPlugins, getPlugin } from "@clawe/plugins";
+import { resolvePlugin } from "@/lib/plugins";
 import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
 import { getConnection } from "@/lib/squadhub/connection";
 import { config } from "@/lib/config";
@@ -19,8 +19,7 @@ async function isInfraRunning(
 ): Promise<boolean> {
   try {
     if (config.isCloud) {
-      await loadPlugins();
-      const lifecycle = getPlugin("squadhub-lifecycle");
+      const lifecycle = await resolvePlugin("squadhub-lifecycle");
       const status = await lifecycle.getStatus(tenantId);
       return status.running;
     }

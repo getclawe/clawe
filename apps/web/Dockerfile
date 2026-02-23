@@ -33,6 +33,11 @@ COPY --from=deps /app/ .
 COPY --from=pruner /app/out/full/ .
 RUN pnpm build --filter=@clawe/web
 
+# Deploy cloud-plugins with resolved deps (cloud edition only)
+RUN if [ "$NEXT_PUBLIC_CLAWE_EDITION" = "cloud" ]; then \
+      pnpm --filter=@clawe/cloud-plugins deploy /app/cloud-plugins-deploy --prod; \
+    fi
+
 # Production runner
 FROM node:22-alpine AS runner
 WORKDIR /app
@@ -51,6 +56,16 @@ RUN mkdir -p /data/clawe && chown node:node /data/clawe
 COPY --from=builder --chown=node:node /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=node:node /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=node:node /app/apps/web/public ./apps/web/public
+
+# Cloud-plugins runtime deps (cloud edition only)
+ARG NEXT_PUBLIC_CLAWE_EDITION
+RUN --mount=from=builder,source=/app,target=/tmp/builder \
+    if [ "$NEXT_PUBLIC_CLAWE_EDITION" = "cloud" ]; then \
+      mkdir -p ./node_modules/@clawe/cloud-plugins && \
+      cp /tmp/builder/cloud-plugins-deploy/package.json ./node_modules/@clawe/cloud-plugins/ && \
+      cp -r /tmp/builder/cloud-plugins-deploy/dist ./node_modules/@clawe/cloud-plugins/ && \
+      cp -r /tmp/builder/cloud-plugins-deploy/node_modules/. ./node_modules/; \
+    fi
 
 USER node
 

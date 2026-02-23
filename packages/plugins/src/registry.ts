@@ -1,3 +1,4 @@
+import type { PluginLogger } from "./interfaces/logger";
 import type { SquadhubProvisioner } from "./interfaces/squadhub-provisioner";
 import type { SquadhubLifecycle } from "./interfaces/squadhub-lifecycle";
 import { DefaultSquadhubProvisioner } from "./defaults/squadhub-provisioner";
@@ -13,33 +14,24 @@ let plugins: PluginMap = {
   "squadhub-lifecycle": new DefaultSquadhubLifecycle(),
 };
 
-let pluginsLoaded = false;
+let registered = false;
 
 /**
- * Initialize plugins. Call once at app startup.
- * Attempts to load an external plugin package.
- * If not available, keeps the dev defaults.
+ * Register plugin implementations. Call once at app startup.
+ * If never called, dev defaults are used.
  */
-export async function loadPlugins(): Promise<void> {
-  if (pluginsLoaded) return;
-
-  try {
-    const external = await import(
-      /* webpackIgnore: true */ "@clawe/cloud-plugins"
-    );
-    plugins = external.register();
-    pluginsLoaded = true;
-  } catch {
-    // No external plugins installed — using dev defaults.
-  }
+export function registerPlugins(map: PluginMap, logger?: PluginLogger): void {
+  plugins = map;
+  registered = true;
+  logger?.info({ plugins: Object.keys(map) }, "Cloud plugins registered");
 }
 
-/** Returns true if external plugins are loaded (vs dev defaults). */
+/** Returns true if external plugins were registered (vs dev defaults). */
 export function hasPlugin(): boolean {
-  return pluginsLoaded;
+  return registered;
 }
 
-/** Get a plugin implementation. Always returns something (external or dev default). */
+/** Get a plugin implementation. Always returns something (registered or dev default). */
 export function getPlugin<K extends keyof PluginMap>(name: K): PluginMap[K] {
   return plugins[name];
 }

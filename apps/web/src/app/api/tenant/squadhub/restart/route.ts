@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { loadPlugins, getPlugin } from "@clawe/plugins";
+import { resolvePlugin } from "@/lib/plugins";
 import { getAuthenticatedTenant } from "@/lib/api/tenant-auth";
 
 /**
@@ -14,8 +14,7 @@ export const POST = async (request: NextRequest) => {
   if (error) return error;
 
   try {
-    await loadPlugins();
-    const lifecycle = getPlugin("squadhub-lifecycle");
+    const lifecycle = await resolvePlugin("squadhub-lifecycle");
     await lifecycle.restart(tenant._id);
 
     return NextResponse.json({ ok: true });

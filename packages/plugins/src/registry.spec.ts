@@ -1,15 +1,20 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { loadPlugins, hasPlugin, getPlugin } from "./registry";
+import { registerPlugins, hasPlugin, getPlugin } from "./registry";
+import type { PluginMap } from "./registry";
 import type { SquadhubProvisioner } from "./interfaces/squadhub-provisioner";
 import type { SquadhubLifecycle } from "./interfaces/squadhub-lifecycle";
 import { DefaultSquadhubProvisioner } from "./defaults/squadhub-provisioner";
 import { DefaultSquadhubLifecycle } from "./defaults/squadhub-lifecycle";
 
 describe("registry", () => {
-  describe("loadPlugins", () => {
-    it("falls back to dev defaults when cloud-plugins is not installed", async () => {
-      await loadPlugins();
-      expect(hasPlugin()).toBe(false);
+  describe("registerPlugins", () => {
+    it("marks plugins as registered after calling registerPlugins", () => {
+      const map: PluginMap = {
+        "squadhub-provisioner": new DefaultSquadhubProvisioner(),
+        "squadhub-lifecycle": new DefaultSquadhubLifecycle(),
+      };
+      registerPlugins(map);
+      expect(hasPlugin()).toBe(true);
     });
   });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation as useConvexMutation } from "convex/react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@clawe/backend";
@@ -11,7 +11,6 @@ import { Spinner } from "@clawe/ui/components/spinner";
 import { Skeleton } from "@clawe/ui/components/skeleton";
 import { CheckCircle2, Eye, EyeOff, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { loadPlugins, hasPlugin } from "@clawe/plugins";
 import { patchApiKeys } from "@/lib/squadhub/actions";
 import { useApiClient } from "@/hooks/use-api-client";
 import { config } from "@/lib/config";
@@ -182,13 +181,7 @@ export const ApiKeysSettings = () => {
   const [openaiKey, setOpenaiKey] = useState("");
   const [anthropicValid, setAnthropicValid] = useState<boolean | null>(null);
   const [openaiValid, setOpenaiValid] = useState<boolean | null>(null);
-  const [isCloud, setIsCloud] = useState(config.isCloud);
-
-  useEffect(() => {
-    loadPlugins().then(() => {
-      setIsCloud(hasPlugin());
-    });
-  }, []);
+  const isCloud = config.isCloud;
 
   const anthropicValidation = useMutation({
     mutationFn: async (apiKey: string) => {
