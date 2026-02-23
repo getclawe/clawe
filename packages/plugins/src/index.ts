@@ -1,8 +1,6 @@
-import "./cloud-plugins";
-
 // Registry
 export { registerPlugins, hasPlugin, getPlugin } from "./registry";
-export type { PluginMap } from "./registry";
+export type { PluginMap, CloudPluginRegister } from "./registry";
 
 // Interfaces
 export type {

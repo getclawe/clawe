@@ -35,3 +35,6 @@ export function hasPlugin(): boolean {
 export function getPlugin<K extends keyof PluginMap>(name: K): PluginMap[K] {
   return plugins[name];
 }
+
+/** Function signature that cloud-plugins must export as `register`. */
+export type CloudPluginRegister = (logger?: PluginLogger) => PluginMap;
