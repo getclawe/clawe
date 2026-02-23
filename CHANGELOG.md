@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/getclawe/clawe/compare/v1.0.4...v1.0.5) (2026-02-23)
+
+
+### Bug Fixes
+
+* lazy plugin loading + pino logger ([#79](https://github.com/getclawe/clawe/issues/79)) ([3214fed](https://github.com/getclawe/clawe/commit/3214feda034b8a4924b4fb11c17c5129f099658c))
+
 ## [1.0.4](https://github.com/getclawe/clawe/compare/v1.0.3...v1.0.4) (2026-02-22)
 
 
